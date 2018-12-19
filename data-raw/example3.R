@@ -1,0 +1,107 @@
+library(stratbuilder2pub)
+library(TTR)
+session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
+
+# Example of usage for multiple asset and rebalancing of portfolio
+{
+  this <- modelStrategy() 
+  setLookback(this, 100) # how many timeframes to look back
+  setLookForward(this, 50) # this amount of timeframes coeffincients will be unchanged
+  setIgnorePosition(this, TRUE) # If it is TRUE, then after lookforward timeframes open positions will be closed and betas will be recalculated
+  setBeta(this, function(data, ...){ # dots are requared arguments, data is a matrix, that include lookback rows
+    # Here we define how we will calculate coefficients
+    # We will do that with help of linear regression
+    colnames(data) <-  c('x', 'y')
+    # define model
+    model <- lm(y~x, data.frame(data))
+    # get coefs
+    beta <- c(1, -coefficients(model)[2])
+    # return coefs, program automatically round them, you can cancel this behavior with function setBetasInt(this, FALSE),
+    # but you have to round them by youself, if you don't do that, program will work uncorrectly
+    return(beta)
+  }) 
+  setWaitAfterClose(this, TRUE) 
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
+               lookback = 101) 
+  addRule(this, as = 'short', 
+          condition = spread > ema, 
+          type = 'enter',
+          side = -1,
+          oco = 'short', 
+          osFun = stratbuilder2pub:::sameMoneyOs, 
+          osFun_args = alist(amount = getMoney(this))
+  )
+  
+  addRule(this, as = 'long', 
+          condition = spread < ema,
+          type = 'enter',
+          side = 1,
+          oco = 'long',
+          osFun = stratbuilder2pub:::sameMoneyOs,
+          osFun_args = alist(amount = getMoney(this))
+  )
+  addRule(this, as = 'short_exit',
+          condition = spread < ema, 
+          type = 'exit',
+          oco = 'short'
+  )
+  addRule(this, as = 'long_exit', 
+          condition = spread > ema,
+          type = 'exit',
+          oco = 'long'
+  )
+}
+
+setUserData(this, list(dataset = 'Russia', 
+                       assets = c('GAZP', 'LKOH'), 
+                       period = 'day', 
+                       time = 13)) 
+
+
+performServer(this, session)
+
+#backtesting params
+{
+  paramset <- "TEST"
+  deleteParamset(this, paramset)
+  #distributions
+  {
+    addDistribution(this,
+                    paramset.label = paramset,
+                    component.type = 'lookback', # here also can be lookforward, beta (functions)
+                    variable = list(n = c(50, 100, 150, 200, 250, 300, 500)),
+                    label = 'lookback'
+    )
+    
+    # This distribution for arguments of rules
+    # addDistribution(this,
+    #                 paramset.label = paramset,
+    #                 component.type = 'rule',
+    #                 component.label = 'short',
+    #                 variable = list(k = seq(30, 200, 10)),
+    #                 label = 'var1'
+    # )
+    
+    addDistribution(this,
+                    paramset.label = paramset,
+                    component.type = 'lookforward', 
+                    variable = list(n = seq(30, 200, 10)),
+                    label = 'lookforward'
+    )
+    
+    
+    addDistributionConstraint(this,
+                              paramset.label = paramset,
+                              expr = lookforward * 2 < lookback,
+                              label = 'cond1'
+    )
+  }
+}
+
+x <- applyParamsetServer(list(this, this), 
+                    session = session,
+                    paramset.label = paramset,
+                    nsamples = 10)
+
+performServer(this, session, paramset.label = paramset, paramset.index = 18)
+
