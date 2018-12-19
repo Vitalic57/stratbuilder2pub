@@ -125,7 +125,16 @@ addDistribution.modelStrategy <- function(this,
     ee <- new.env()
     q <- substitute(variable)[[-1]]
     #print(q)
-    nms <- sapply(q[-1], deparse)
+    if (is.symbol(q)) {
+      if (!is.null(names(variable[[1]]))) {
+          nms <- names(variable[[1]]) 
+          nms[nms == ""] <- paste(q, which(nms == ""), sep = '')
+      } else {
+        nms <- paste(q, 1:length(variable[[1]]), sep = '')
+      }    
+    } else {
+        nms <- sapply(q[-1], deparse)
+    }
     for(i in 1:length(nms)){
       assign(nms[i], variable[[1]][[i]], envir = ee)
     }
@@ -146,8 +155,8 @@ addDistribution.modelStrategy <- function(this,
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
 }
 
-
-
+      
+    
 #' Add distribution to list of models
 #' 
 #' This method add the same distribution to each model in list
