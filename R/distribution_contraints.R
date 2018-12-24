@@ -53,32 +53,32 @@ addDistribution.modelStrategy <- function(this,
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
-                             if(!(component.label %in% names(getRules(this, recalc = TRUE)))){
+                             if(!all(component.label %in% names(getRules(this, recalc = TRUE)))){
                                return()
                              }
                              'rules'
                            },
-                           var = ,
-                           vars ={
-                             if(!(component.label %in% names(getVariables(this)))){
-                               return()
-                             }
-                             'vars'
-                           },
+                           # var = ,
+                           # vars ={
+                           #   if(!all(component.label %in% names(getVariables(this)))){
+                           #     return()
+                           #   }
+                           #   'vars'
+                           # },
                            indicator =,
                            indicators = {
-                             if(!(component.label %in% names(getIndicators(this)))){
+                             if(!all(component.label %in% names(getIndicators(this)))){
                                return()
                              }
                              'indicators'
                            },
-                           stop =,
-                           stops={
-                             if(!(component.label %in% names(getStops(this)))){
-                               return()
-                             }
-                             'stops'
-                           },
+                           # stop =,
+                           # stops={
+                           #   if(!(component.label %in% names(getStops(this)))){
+                           #     return()
+                           #   }
+                           #   'stops'
+                           # },
                            pm =,
                            pms = {
                              if(!(component.label %in% names(getPM(this)))){
