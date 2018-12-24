@@ -148,7 +148,7 @@ addDistribution.modelStrategy <- function(this,
     ee <- new.env()
     l <- list(component.type = component.type, 
               component.label = component.label, 
-              env = env, 
+              env = ee, 
               variable = deparse(substitute(variable[[1]])))
     
     } else {
