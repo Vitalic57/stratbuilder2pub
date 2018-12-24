@@ -97,42 +97,25 @@ addRule.modelStrategy <- function(this, #object
                                   type, #enter or exit
                                   side, #1 for buy and -1 for sell
                                   oco = 'base',  #environment of rule
-                                  osFun = proportionOs, # how much money you want to use in rule
-                                  osFun_args = alist(proportion = 1),
+                                  osFun = sameMoneyOs, # how much money you want to use in rule
+                                  osFun_args = alist(amount = getMoney(this)),
                                   pathwise = FALSE
 ){
-  # if(type == 'var'){
-  #   e <- this$thisEnv
-  #   as <- gsub('\\.','_',as)
-  #   e$rules[[as]] <- list(condition = substitute(condition),
-  #                         as = as,
-  #                         args = args,
-  #                         type = type,
-  #                         side = 0,
-  #                         oco = NULL,
-  #                         osFun = NULL,
-  #                         osFun_args = NULL,
-  #                         pathwise = pathwise
-  #   )
-  # }else{
-    if(all(c('enter','exit') != type)){
-      stop('wrong type! It must be enter or exit')
+  if(all(c('enter','exit') != type)){
+    stop('wrong type! It must be enter or exit')
+  }
+  if(missing(side)){
+    if(type != 'exit'){
+      stop("please provide side of rule, it must be 1 or -1")
+    }else{
+      side <- 0
     }
-    if(missing(side)){
-      if(type != 'exit'){
-        stop("please provide side of rule, it must be 1 or -1")
-      }else{
-        side <- 0
-      }
-    }else if(all(c(1,-1) != side)){
-      stop('wrong type! It must be 1 or -1')
-    }
-    e <- this$thisEnv
-    as <- gsub('\\.','_',as)
-    if(any(sapply(e$rules,function(x) x$as) == as)){
-      warning('"as" must be unique for diffrent rules. Previous rule with the same name will be deleted.')
-    }
-    #formals(osFun) <- modify.args(formals(osFun), osFun_args)
+  }else if(all(c(1,-1) != side)){
+    stop('wrong type! It must be 1 or -1')
+  }
+  e <- this$thisEnv
+  as <- gsub('\\.','_',as)
+  if(type == 'enter'){
     e$rules[[as]] <- list(condition = substitute(condition),
                           as = as,
                           args = args,
@@ -143,7 +126,16 @@ addRule.modelStrategy <- function(this, #object
                           osFun_args = osFun_args,
                           pathwise = pathwise
     )
-  # }
+  }else if(type == 'exit'){
+    e$rules[[as]] <- list(condition = substitute(condition),
+                          as = as,
+                          args = args,
+                          type = type,
+                          side = side,
+                          oco = oco,
+                          pathwise = pathwise
+    )
+  }
   
 }
 
