@@ -60,6 +60,9 @@ setUserData(this, list(dataset = 'Russia',
 
 performServer(this, session)
 
+f1 <- function(){}
+f2 <- function(){}
+
 #backtesting params
 {
   paramset <- "TEST"
@@ -86,6 +89,13 @@ performServer(this, session)
                     paramset.label = paramset,
                     component.type = 'lookforward', 
                     variable = list(n = seq(30, 200, 10)),
+                    label = 'lookforward'
+    )
+    
+    addDistribution(this,
+                    paramset.label = paramset,
+                    component.type = 'beta_fun', 
+                    variable = list(x = c(f1, f2)),
                     label = 'lookforward'
     )
     

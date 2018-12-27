@@ -41,7 +41,3 @@ plotReturns <- function(report, type = 'MAE'){
 }
 
 
-
-
-
-

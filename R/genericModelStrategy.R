@@ -1,344 +1,344 @@
 
 
 #' @export
-setUserData <- function(model,...){
-  UseMethod('setUserData', model)
+setUserData <- function(this,...){
+  UseMethod('setUserData', this)
 }
 
 #' @export
-setBetaTable <- function(model,...){
-  UseMethod('setBetaTable', model)
+setBetaTable <- function(this,...){
+  UseMethod('setBetaTable', this)
 }
 
 #' @export
-applyParamsetServer <- function(model,...){
-  UseMethod('applyParamsetServer', model)
+applyParamsetServer <- function(this,...){
+  UseMethod('applyParamsetServer', this)
 }
 
 
 #' @export
-performServer <- function(model,...){
-  UseMethod('performServer', model)
+performServer <- function(this,...){
+  UseMethod('performServer', this)
 }
 
 
 #' @export
-getIgnorePosition <- function(model,...){
-  UseMethod('getIgnorePosition', model)
+getIgnorePosition <- function(this,...){
+  UseMethod('getIgnorePosition', this)
 }
 
 #' @export
-setIgnorePosition <- function(model,...){
-  UseMethod('setIgnorePosition', model)
+setIgnorePosition <- function(this,...){
+  UseMethod('setIgnorePosition', this)
 }
 
 
 #' @export
-getRules <- function(model,...){
-  UseMethod('getRules', model)
+getRules <- function(this,...){
+  UseMethod('getRules', this)
 }
 
 
 #' @export
-setBeta <- function(model,...){
-  UseMethod('setBeta', model)
+setBeta <- function(this,...){
+  UseMethod('setBeta', this)
 }
 
 #' @export
-setMoney <- function(model,...){
-  UseMethod('setMoney', model)
+setMoney <- function(this,...){
+  UseMethod('setMoney', this)
 }
 
 #' @export
-getMoney <- function(model,...){
-  UseMethod('getMoney', model)
+getMoney <- function(this,...){
+  UseMethod('getMoney', this)
 }
 
 #' @export
-setLookback <- function(model,...){
-  UseMethod('setLookback', model)
+setLookback <- function(this,...){
+  UseMethod('setLookback', this)
 }
 
 #' @export
-getLookback <- function(model,...){
-  UseMethod('getLookback', model)
+getLookback <- function(this,...){
+  UseMethod('getLookback', this)
 }
 
 #' @export
-setLookForward <- function(model,...){
-  UseMethod('setLookForward', model)
+setLookForward <- function(this,...){
+  UseMethod('setLookForward', this)
 }
 
 #' @export
-getLookForward <- function(model,...){
-  UseMethod('getLookForward', model)
+getLookForward <- function(this,...){
+  UseMethod('getLookForward', this)
 }
 
 #' @export
-setToleranceBeta <- function(model,...){
-  UseMethod('setToleranceBeta', model)
+setToleranceBeta <- function(this,...){
+  UseMethod('setToleranceBeta', this)
 }
 
 #' @export
-getToleranceBeta <- function(model,...){
-  UseMethod('getToleranceBeta', model)
+getToleranceBeta <- function(this,...){
+  UseMethod('getToleranceBeta', this)
 }
 
 #' @export
-getMaxLookback <- function(model){
-  UseMethod('getMaxLookback', model)
+getMaxLookback <- function(this){
+  UseMethod('getMaxLookback', this)
 }
 
 #' @export
-setMaxLookback <- function(model,...){
-  UseMethod('setMaxLookback', model)
+setMaxLookback <- function(this,...){
+  UseMethod('setMaxLookback', this)
 }
 
 #' @export
-removeRule <- function(model,...){
-  UseMethod('removeRule', model)
+removeRule <- function(this,...){
+  UseMethod('removeRule', this)
 }
 
 #' @export
-removeIndicator <- function(model,...){
-  UseMethod('removeIndicator', model)
+removeIndicator <- function(this,...){
+  UseMethod('removeIndicator', this)
 }
 
 #' @export
-getSpreadPrice <- function(model,...){
-  UseMethod('getSpreadPrice', model)
+getSpreadPrice <- function(this,...){
+  UseMethod('getSpreadPrice', this)
 }
 
 #' @export
-setCommission <- function(model,...){
-  UseMethod('setCommission', model)
+setCommission <- function(this,...){
+  UseMethod('setCommission', this)
 }
 
 #' @export
-getCommission <- function(model,...){
-  UseMethod('getCommission', model)
+getCommission <- function(this,...){
+  UseMethod('getCommission', this)
 }
 
 
 #' @export
-addDistribution <- function(model,...){
-  UseMethod('addDistribution', model)
+addDistribution <- function(this,...){
+  UseMethod('addDistribution', this)
 }
 
 #' @export
-addDistributionConstraint <- function(model,...){
-  UseMethod('addDistributionConstraint', model)
+addDistributionConstraint <- function(this,...){
+  UseMethod('addDistributionConstraint', this)
 }
 
 #' @export
-deleteParamset <- function(model,...){
-  UseMethod('deleteParamset', model)
+deleteParamset <- function(this,...){
+  UseMethod('deleteParamset', this)
 }
 
 #' @export
-getTradingData <- function(model,...){
-  UseMethod('getTradingData', model)
+getTradingData <- function(this,...){
+  UseMethod('getTradingData', this)
 }
 
 #' @export
-setTradingData <- function(model,...){
-  UseMethod('setTradingData', model)
+setTradingData <- function(this,...){
+  UseMethod('setTradingData', this)
 }
 
 
 
 
 #' @export
-addTradeTime <- function(model,...){
-  UseMethod('addTradeTime', model)
+addTradeTime <- function(this,...){
+  UseMethod('addTradeTime', this)
 }
 
 
 #' @export
-getTradeTime <- function(model,...){
-  UseMethod('getTradeTime', model)
+getTradeTime <- function(this,...){
+  UseMethod('getTradeTime', this)
 }
 
 #' @export
-clearTradeTime <- function(model,...){
-  UseMethod('clearTradeTime', model)
+clearTradeTime <- function(this,...){
+  UseMethod('clearTradeTime', this)
 }
 
 #' @export
-printTradeTime <- function(model,...){
-  UseMethod('printTradeTime', model)
+printTradeTime <- function(this,...){
+  UseMethod('printTradeTime', this)
 }
 
 
 #' @export
-addRule <- function(model,...){
-  UseMethod('addRule', model)
+addRule <- function(this,...){
+  UseMethod('addRule', this)
 }
 
 #' @export
-addIndicator <- function(model,...){
-  UseMethod('addIndicator', model)
+addIndicator <- function(this,...){
+  UseMethod('addIndicator', this)
 }
 
 #' @export
-getIndicators <- function(model,...){
-  UseMethod('getIndicators', model)
+getIndicators <- function(this,...){
+  UseMethod('getIndicators', this)
 }
 
 #' @export
-getDistributions <- function(model, ...){
-  UseMethod('getDistributions', model)
+getDistributions <- function(this, ...){
+  UseMethod('getDistributions', this)
 }
 
 
 
 
 #' @export
-getVariables <- function(model){
-  UseMethod('getVariables', model)
+getVariables <- function(this){
+  UseMethod('getVariables', this)
 }
 
 #' @export
-getProgramParts <- function(model){
-  UseMethod('getProgramParts', model)
+getProgramParts <- function(this){
+  UseMethod('getProgramParts', this)
 }
 
 
 #' @export
-getClearWeakBetasOn <- function(model){
-  UseMethod('getClearWeakBetasOn', model)
+getClearWeakBetasOn <- function(this){
+  UseMethod('getClearWeakBetasOn', this)
 }
 
 #' @export
-setClearWeakBetasOn <- function(model, ...){
-  UseMethod('setClearWeakBetasOn', model)
+setClearWeakBetasOn <- function(this, ...){
+  UseMethod('setClearWeakBetasOn', this)
 }
 
 
 #' @export
-getRemoveLonely <- function(model){
-  UseMethod('getRemoveLonely', model)
+getRemoveLonely <- function(this){
+  UseMethod('getRemoveLonely', this)
 }
 
 #' @export
-setRemoveLonely <- function(model, ...){
-  UseMethod('setRemoveLonely', model)
+setRemoveLonely <- function(this, ...){
+  UseMethod('setRemoveLonely', this)
 }
 
 #' @export
-getPM <- function(model){
-  UseMethod('getPM', model)
+getPM <- function(this){
+  UseMethod('getPM', this)
 }
 
 #' @export
-addPM <- function(model, ...){
-  UseMethod('addPM', model)
+addPM <- function(this, ...){
+  UseMethod('addPM', this)
 }
 
 #' @export
-getWaitAfterClose <- function(model){
-  UseMethod('getWaitAfterClose', model)
+getWaitAfterClose <- function(this){
+  UseMethod('getWaitAfterClose', this)
 }
 
 #' @export
-setWaitAfterClose <- function(model, ...){
-  UseMethod('setWaitAfterClose', model)
+setWaitAfterClose <- function(this, ...){
+  UseMethod('setWaitAfterClose', this)
 }
 
 #' @export
-getPmAfterOpen <- function(model){
-  UseMethod('getPmAfterOpen', model)
+getPmAfterOpen <- function(this){
+  UseMethod('getPmAfterOpen', this)
 }
 
 #' @export
-setPmAfterOpen <- function(model, ...){
-  UseMethod('setPmAfterOpen', model)
+setPmAfterOpen <- function(this, ...){
+  UseMethod('setPmAfterOpen', this)
 }
 
 #' @export
-getParams <- function(model, ...){
-  UseMethod('getParams', model)
+getParams <- function(this, ...){
+  UseMethod('getParams', this)
 }
 
 #' @export
-setParams <- function(model, ...){
-  UseMethod('setParams', model)
+setParams <- function(this, ...){
+  UseMethod('setParams', this)
 }
 
 #' @export
-removeVariable <- function(model, ...){
-  UseMethod('removeVariable', model)
+removeVariable <- function(this, ...){
+  UseMethod('removeVariable', this)
 }
 
 #' @export
-addVariable <- function(model, ...){
-  UseMethod('addVariable', model)
+addVariable <- function(this, ...){
+  UseMethod('addVariable', this)
 }
 
 #' @export
-getVariablesTable <- function(model, ...){
-  UseMethod('getVariablesTable', model)
+getVariablesTable <- function(this, ...){
+  UseMethod('getVariablesTable', this)
 }
 
 #' @export
-addProgramPart <- function(model, ...){
-  UseMethod('addProgramPart', model)
+addProgramPart <- function(this, ...){
+  UseMethod('addProgramPart', this)
 }
 
 #' @export
-getRulesCall <- function(model, ...){
-  UseMethod('getRulesCall', model)
+getRulesCall <- function(this, ...){
+  UseMethod('getRulesCall', this)
 }
 
 
 #' @export
-saveData <- function(model, ...){
-  UseMethod('saveData', model)
+saveData <- function(this, ...){
+  UseMethod('saveData', this)
 }
 
 #' @export
-getBetasInt <- function(model){
-  UseMethod('getBetasInt', model)
+getBetasInt <- function(this){
+  UseMethod('getBetasInt', this)
 }
 
 #' @export
-setBetasInt <- function(model, ...){
-  UseMethod('setBetasInt', model)
+setBetasInt <- function(this, ...){
+  UseMethod('setBetasInt', this)
 }
 
 #' @export
-addStat <- function(model, ...){
-  UseMethod('addStat', model)
+addStat <- function(this, ...){
+  UseMethod('addStat', this)
 }
 
 #' @export
-removeStat <- function(model, ...){
-  UseMethod('removeStat', model)
+removeStat <- function(this, ...){
+  UseMethod('removeStat', this)
 }
 
 #' @export
-reinitStat <- function(model, ...){
-  UseMethod('reinitStat', model)
+reinitStat <- function(this, ...){
+  UseMethod('reinitStat', this)
 }
 
 #' @export
-updateStat <- function(model, ...){
-  UseMethod('updateStat', model)
+updateStat <- function(this, ...){
+  UseMethod('updateStat', this)
 }
 
 #' @export
-extractStat <- function(model, ...){
-  UseMethod('extractStat', model)
+extractStat <- function(this, ...){
+  UseMethod('extractStat', this)
 }
 
 #' @export
-addData <- function(model, ...){
-  UseMethod('addData', model)
+addData <- function(this, ...){
+  UseMethod('addData', this)
 }
 
 #' @export
-clearData <- function(model, ...){
-  UseMethod('clearData', model)
+clearData <- function(this, ...){
+  UseMethod('clearData', this)
 }
 
 
