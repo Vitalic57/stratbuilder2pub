@@ -53,32 +53,32 @@ addDistribution.modelStrategy <- function(this,
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
-                             if(!(component.label %in% names(getRules(this, recalc = TRUE)))){
+                             if(!all(component.label %in% names(getRules(this, recalc = TRUE)))){
                                return()
                              }
                              'rules'
                            },
-                           var = ,
-                           vars ={
-                             if(!(component.label %in% names(getVariables(this)))){
-                               return()
-                             }
-                             'vars'
-                           },
+                           # var = ,
+                           # vars ={
+                           #   if(!all(component.label %in% names(getVariables(this)))){
+                           #     return()
+                           #   }
+                           #   'vars'
+                           # },
                            indicator =,
                            indicators = {
-                             if(!(component.label %in% names(getIndicators(this)))){
+                             if(!all(component.label %in% names(getIndicators(this)))){
                                return()
                              }
                              'indicators'
                            },
-                           stop =,
-                           stops={
-                             if(!(component.label %in% names(getStops(this)))){
-                               return()
-                             }
-                             'stops'
-                           },
+                           # stop =,
+                           # stops={
+                           #   if(!(component.label %in% names(getStops(this)))){
+                           #     return()
+                           #   }
+                           #   'stops'
+                           # },
                            pm =,
                            pms = {
                              if(!(component.label %in% names(getPM(this)))){
@@ -124,7 +124,7 @@ addDistribution.modelStrategy <- function(this,
   if(is.list(variable[[1]]) && any(sapply(variable[[1]], is.function))){
     ee <- new.env()
     q <- substitute(variable)[[-1]]
-    print(q)
+    #print(q)
     if (is.symbol(q)) {
       if (!is.null(names(variable[[1]]))) {
           nms <- names(variable[[1]]) 
@@ -146,14 +146,16 @@ addDistribution.modelStrategy <- function(this,
               variable = nms)
   } else  if (is.function(variable[[1]])) {
     ee <- new.env()
-    func_name <- deparse(substitute(variable[[1]]))
+    func_name <- list(deparse(substitute(variable[[1]])[[2]][[2]]))
+    names(func_name) <- names(variable)
     assign(func_name, variable[[1]], envir = ee)
+    
     l <- list(component.type = component.type, 
               component.label = component.label, 
               env = ee, 
-              variable = func_name)
+              variable = list(func_name))
     
-    } else {
+  } else {
     l <- list(component.type = component.type,
               component.label = component.label,
               variable = variable)
