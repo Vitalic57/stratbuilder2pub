@@ -124,7 +124,7 @@ addDistribution.modelStrategy <- function(this,
   if(is.list(variable[[1]]) && any(sapply(variable[[1]], is.function))){
     ee <- new.env()
     q <- substitute(variable)[[-1]]
-    print(q)
+    #print(q)
     if (is.symbol(q)) {
       if (!is.null(names(variable[[1]]))) {
           nms <- names(variable[[1]]) 
@@ -153,7 +153,7 @@ addDistribution.modelStrategy <- function(this,
               env = ee, 
               variable = func_name)
     
-    } else {
+  } else {
     l <- list(component.type = component.type,
               component.label = component.label,
               variable = variable)

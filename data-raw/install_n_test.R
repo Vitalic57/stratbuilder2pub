@@ -12,6 +12,7 @@ lines[ind] <- paste0('Version: ', '0.1.13')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
+devtools::test('.')
 devtools::document()
 
 setwd('..')
