@@ -146,8 +146,10 @@ addDistribution.modelStrategy <- function(this,
               variable = nms)
   } else  if (is.function(variable[[1]])) {
     ee <- new.env()
-    func_name <- deparse(substitute(variable[[1]]))
+    func_name <- deparse(substitute(variable)[[-1]])
     assign(func_name, variable[[1]], envir = ee)
+    func_name <- list(func_name)
+    names(func_name) <- names(variable)
     l <- list(component.type = component.type, 
               component.label = component.label, 
               env = ee, 
