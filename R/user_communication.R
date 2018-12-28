@@ -334,8 +334,11 @@ get_results <- function(session, reports, verbose=FALSE){
 #' setUserData(this, x)
 setUserData.modelStrategy <- function(this, l){
   if(is.list(l) && !xts::is.xts(l[[1]])){
-    if(!all(c('dataset', 'period', 'assets') %in% names(l))){
-      stop('l must contain dataset, period and assets fields')
+    if(!all(c('dataset') %in% names(l))){
+      stop('l must contain dataset field')
+    }
+    if(!'period' %in% names(l)){
+      l[['period']] <- 'day'
     }
     if(l[['period']] == 'day'){
       if(!('time' %in% names(l))){
@@ -351,8 +354,10 @@ setUserData.modelStrategy <- function(this, l){
     if(tolower(l[['dataset']]) %in% names(datasets)){
       stop(paste0('Available datasets: ', paste(names(datasets), collapse = ', ')))
     }
-    if(!all(l[['assets']] %in% datasets[[l[['dataset']]]])){
-      stop('Names of assets must be from your selected dataset. Please check names in stratbuilder2pub:::datasets.')
+    if('assets' %in% names(l)){
+      if(!all(l[['assets']] %in% datasets[[l[['dataset']]]])){
+        stop('Names of assets must be from your selected dataset. Please check names in stratbuilder2pub:::datasets.')
+      }
     }
     this$thisEnv$data_from_user <- l
   }else if(is.list(l) && xts::is.xts(l[[1]])){
