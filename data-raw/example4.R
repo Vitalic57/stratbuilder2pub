@@ -20,25 +20,20 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
     return(beta)
   }) 
   setBetasInt(this, FALSE)
-  setWaitAfterClose(this, TRUE) 
   addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
                lookback = 101) 
   addRule(this, as = 'short', 
           condition = spread > ema, 
           type = 'enter',
           side = -1,
-          oco = 'short', 
-          osFun = stratbuilder2pub:::sameMoneyOs, 
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'short'
   )
   
   addRule(this, as = 'long', 
           condition = spread < ema,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit',
           condition = spread < ema, 
@@ -137,9 +132,13 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
           type = 'exit',
           oco = 'short'
   )
+  # Here we define what data we will use for calculating betas and spread
+  # spread will be equal to linear combination of columns from table with name this$thisEnv$spreadData with
+  # coefficients that will return function from setBeta
+  this$thisEnv$betaData <- 'log'
   this$thisEnv$spreadData <- 'log' 
   
-  this$thisEnv$betaData <- 'log'
+  
 }
 
 setUserData(this, list(dataset = 'Russia', 
@@ -147,35 +146,9 @@ setUserData(this, list(dataset = 'Russia',
                        period = 'day', 
                        time = 13)) 
 
-performServer(this, session)
+x <- performServer(this, session)
 
 
 # From report we could see that days.in.pos.max == 38, in our program 
 # was 20 days, but it was business days. In the report -- all days. Such a diffrence is probably from new year's holidays
 
-# trades                  138.0000 # number of trades
-# trades.year              18.0000 # mean number of trades yearly
-# long.trades              79.0000 # number of long trades
-# short.trades             59.0000 # number of short trades
-# long.acc                  0.6456 # percent of winning long trades 
-# short.acc                 0.6949 # percent of winning short trades
-# total.acc                 0.6667 # percent of winning trades
-# max.loose                 4.0000 # maximum number of loosing trades in a row
-# max.win                  11.0000 # maximum number of winning trades in a row
-# return.ann                0.1434 # annual return = annual profit / getMoney(this), getMoney(this) is always the same numeric
-# return.avg                0.1835 # annual return on average capital
-# return.pos.drawdown       0.1048 # annual return on maximum capital plus maximum drawdown
-# return.pos.drawdown.95    0.1101 # annual return on 95 quantile of capital plus maximum drawdown
-# return.pos.drawdown.c95   0.1074 # annual return on capital exceeding 95 quantile of capital plus maximum drawdown
-# drawdown.money            0.3199 # maximum drawdown / getMoney(this)
-# median                    0.0141 # median of pnl from trades
-# in.pos                    0.8714 # percent time in position
-# in.pos.positive           0.4326 # percent time in profit while it is in position
-# days.in.pos.max          38.0000 # maximum number of calendar days in position
-# days.in.pos.mean         17.5217 # mean number of calendar days in position
-# sharpe.ann                0.6699 # annual Sharpe ratio
-# sortino.ann               1.3714 # annual Sortino ratio
-# straight.m                0.1221 # deviation of pnl money from straight line
-# straight.t                0.1065 # deviation of pnl trades from straight line
-# maxMAE                    0.0000 # not working now
-# profit.drawdown.year      0.4324 # annual profit /maximum drawdown

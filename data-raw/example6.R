@@ -5,9 +5,8 @@ library(quantmod)
 
 session <- ssh_connect('ADDRESS', keyfile = 'path to key')
 
-
-
-# Now we redefine function from DSTrading package. Now this package are available in backtester. 
+# Now we redefine function from DSTrading package. 
+# Now this package are available in backtester. 
 # If you need some package for your backtest, please contact us and we make it available too.
 # quantmod, xts and TTR functions can be without package::, but with package::: if needed. 
 FRAMA <- function (HLC, n = 20, FC = 1, SC = 200) 
@@ -69,17 +68,6 @@ FRAMA <- function (HLC, n = 20, FC = 1, SC = 200)
 }
 
 
-
-
-# how FRAMA works in a picture
-s <- cumsum(rnorm(300))
-m <- FRAMA(s, n = 20)
-std <- runSD(s - m , n = 20)
-plot(s, type = 'l')
-lines(m - std, col = 'red')
-lines(m + std, col = 'red')
-lines(m, col = 'blue')
-
 # Now we try strategy with deviation from mean .
 # We will open position if spread was outside small range and it returns inside
 # We will increase (double) position if spread was outside big range and now inside big range but outside small
@@ -93,7 +81,6 @@ lines(m, col = 'blue')
   this <- modelStrategy() 
   setLookback(this, 250) 
   setLookForward(this, 125)
-  setWaitAfterClose(this, TRUE) 
   setPmAfterOpen(this, FALSE) # If TRUE, then block of position managing will be evaluated after open in the same time,
   # if FALSE, then it will be evaluated in the next time
   setBeta(this, function(data, ...){ 
@@ -127,8 +114,6 @@ lines(m, col = 'blue')
   )
   addIndicator(this, args = list(name = FRAMA, HLC = quote(spread), n = 20), as = 'ma',
                lookback = 25) 
-  # addIndicator(this, args = list(name = FRAMA, HLC = quote(ma), n = 20), as = 'ma',
-  #              lookback = 25) 
   # x = quote(spread - ma), ma is the indicator above, if you define it below, it will not work! Order of additing of indicators plays an important role.
   addIndicator(this, args = list(name = runSD, x = quote(spread - ma), n = 20, sample = FALSE), as = 'std',
                lookback = 50) 
@@ -265,9 +250,6 @@ lines(m, col = 'blue')
           )
         )
   )
-  this$thisEnv$spreadData <- 'data_raw' 
-  
-  this$thisEnv$betaData <- 'data_raw'
 }
 
 

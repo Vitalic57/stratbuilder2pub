@@ -43,10 +43,6 @@ data <- read_excel('/home/vitaly/Documents/models/Sentiment/Data/sber_result_tab
             args = list(
               max_time = 1
             ))
-  setBeta(this, function(...) 1)
-  setLookback(this, 0)
-  setLookForward(this, 10000000)
-  setWaitAfterClose(this, TRUE)
   setCommission(this, quote({
     abs(pos_change) * data_raw[i,] * 0.00025
   }))

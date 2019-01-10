@@ -6,10 +6,6 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 # Strategy from the first example with using python talib library
 {
   this <- modelStrategy()
-  setBeta(this, function(data, ...) 1)
-  setLookback(this, 0) 
-  setLookForward(this, 1000000) 
-  setWaitAfterClose(this, TRUE) 
   addProgramPart(this, as = 'part1',
                  evolution = list(
                    init = quote({
@@ -56,9 +52,6 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
           type = 'exit',
           oco = 'long'
   )
-  this$thisEnv$spreadData <- 'data_raw'
-  
-  this$thisEnv$betaData <- 'data_raw' 
   setMoney(this, 1000)
 }
 
@@ -77,10 +70,6 @@ rollapply(1:100, 10, mean, na.pad = TRUE, align = 'right')
 # Strategy from the first example with using python talib library
 {
   this <- modelStrategy()
-  setBeta(this, function(data, ...) 1)
-  setLookback(this, 0) 
-  setLookForward(this, 1000000) 
-  setWaitAfterClose(this, TRUE) 
   addProgramPart(this, as = 'part1',
                  evolution = list(
                    init = quote({
@@ -124,9 +113,6 @@ rollapply(1:100, 10, mean, na.pad = TRUE, align = 'right')
           type = 'exit',
           oco = 'long'
   )
-  this$thisEnv$spreadData <- 'data_raw'
-  
-  this$thisEnv$betaData <- 'data_raw' 
   setMoney(this, 1000)
 }
 

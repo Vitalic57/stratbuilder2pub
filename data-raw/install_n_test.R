@@ -56,4 +56,36 @@ stratbuilder2pub::update_package('test_backtest_user@142.93.143.142', '/home/vit
 
 #devtools::install_local('/home/vitaly/Documents/stratbuilder2pub (2)', force = TRUE)
 
+# y <- getDatasets()[['SPX']] %>% 
+#   gsub('\\.', ' ', .) %>%
+#   {
+#     tmp <- grepl('^X[0-9]', .); 
+#     .[tmp] <- gsub('X', '', .[tmp]); .
+#   } %>% 
+#   { 
+#     tmp <- strsplit(., ' ') %>% sapply(length)== 4
+#     .[tmp] <- .[tmp] %>% sub(' ', '-', .)
+#     .
+#   }
+# 
+# write.csv(data.frame(y), 'companies.csv')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

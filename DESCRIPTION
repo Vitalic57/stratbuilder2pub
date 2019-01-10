@@ -1,6 +1,6 @@
 Package: stratbuilder2pub
 Title: It provides tools to create and backtest financial models.
-Version: 0.1.13
+Version: 0.1.14
 Authors@R: person("Vitaly", "Shishkov", email = "vitalic.s@financialracers.com", role = c("aut", "cre"))
 Description: It provides tools to create and backtest financial models.
 Depends: R (>= 3.2.3)

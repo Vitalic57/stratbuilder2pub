@@ -7,10 +7,6 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
 # this function creates our model.
 model <- function(){
   this <- modelStrategy() 
-  setBeta(this, function(data, ...) 1)
-  setLookback(this, 0)
-  setLookForward(this, 1000000) 
-  setWaitAfterClose(this, TRUE) 
   addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
                lookback = 101) 
   addRule(this, as = 'short',  
@@ -40,10 +36,6 @@ model <- function(){
           type = 'exit',
           oco = 'long'
   )
-  
-  this$thisEnv$spreadData <- 'data_raw' 
-  
-  this$thisEnv$betaData <- 'data_raw' 
   setMoney(this, 100000)
   return(this)
 }

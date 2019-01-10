@@ -13,18 +13,14 @@ model <- function(n){
           condition = spread > ema, 
           type = 'enter',
           side = -1,
-          oco = 'short', 
-          osFun = stratbuilder2pub:::sameMoneyOs, 
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'short'
   )
   
   addRule(this, as = 'long',
           condition = spread < ema,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit', 
           condition = spread < ema, 
