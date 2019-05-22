@@ -20,6 +20,7 @@ modelStrategy <- function(){
   maxLookback <- 0
   waitAfterClose <- FALSE
   pmAfterOpen <- TRUE
+  objects <- new.env()
   indicators <- list()
   rules <- list()
   rules_path_ind <- numeric()
@@ -352,7 +353,21 @@ setBetasInt.modelStrategy <- function(model, x){
 
 
 
-
+#' Add user-defined objects to modelStrategy for future usage in backtest 
+#'
+#' @param this modelStrategy
+#' @param ... named args
+#'
+#' @export
+addObject.modelStrategy <- function(this, ...){
+  dots <- list(...)
+  if(is.null(names(dots)) || any(names(dots) == '')){
+    stop("object must have a name.")
+  }
+  for(name in names(dots)){
+    this$thisEnv[['objects']][[name]] <- dots[[name]]
+  } 
+}
 
 
 

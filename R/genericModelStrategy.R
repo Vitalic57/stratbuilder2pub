@@ -190,7 +190,10 @@ getDistributions <- function(this, ...){
   UseMethod('getDistributions', this)
 }
 
-
+#' @export
+getPnL <- function(this){
+  UseMethod('getPnL', this)
+}
 
 
 #' @export
@@ -339,6 +342,87 @@ addData <- function(this, ...){
 #' @export
 clearData <- function(this, ...){
   UseMethod('clearData', this)
+}
+
+#' @export
+getReportStrategy <- function(this){
+  UseMethod('getReportStrategy', this)
+}
+
+#' @export
+getReportTrades <- function(this){
+  UseMethod('getReportTrades', this)
+}
+
+#' @export
+getReportCalendar <- function(this){
+  UseMethod('getReportCalendar', this)
+}
+
+#' @export
+plotPnL <- function(this, ...){
+  UseMethod('plotPnL', this)
+}
+
+#' @export
+plotDrawdowns <- function(this, ...){
+  UseMethod('plotDrawdowns', this)
+}
+
+#' @export
+getDateByIndex <- function(this, ...){
+  UseMethod('getDateByIndex', this)
+}
+
+#' @export
+plotCalendar <- function(this, ...){
+  UseMethod('plotCalendar', this)
+}
+
+#' @export
+plotReturns <- function(this, ...){
+  UseMethod('plotReturns', this)
+}
+
+#' @export
+getBacktestResults <- function(this, ...){
+  UseMethod('getBacktestResults', this)
+}
+
+
+#' @export
+setModelD <- function(this,...){
+  UseMethod('setModelD', this)
+}
+
+#' @export
+getModelD <- function(this,...){
+  UseMethod('getModelD', this)
+}
+
+#' @export
+addObject <- function(this, ...){
+  UseMethod('addObject', this)
+}
+
+#' @export
+submit <- function(this, ...){
+  UseMethod('submit', this)
+}
+
+#' @export
+evaluate <- function(this, ...){
+  UseMethod('evaluate', this)
+}
+
+#' @export
+getPublicName <- function(this){
+  UseMethod('getPublicName', this)
+}
+
+#' @export
+getScores <- function(this, ...){
+  UseMethod('getScores', this)
 }
 
 

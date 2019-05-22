@@ -2,8 +2,6 @@ library(stratbuilder2pub)
 library(TTR)
 library(xts)
 
-session <- ssh_connect('ADDRESS', keyfile = 'path to key')
-
 # Example of usage for multiple asset and table of betas
 {
   this <- modelStrategy() 
@@ -45,6 +43,6 @@ setBetaTable(this, xts(data.frame(GAZP = c(1,2,3,4,5), LKOH = -c(5,4,3,2,1)), as
 # in 2011-06-01 GAZP = 1, LKOH = -5, everywhere after 2014-12-31 coefficients will be c(5, -1)
 # Before 2011-01-01 coefficients will be zeros
 
-x <- performServer(this, session)
+performServer(this)
 
 

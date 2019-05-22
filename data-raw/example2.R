@@ -9,11 +9,14 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 # we go short if fast ema is more then slow ema
 {
   this <- modelStrategy() # Create strategy  object
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'sma_fast',
-               lookback = 100) 
+  setBeta(this, function(...) 1) # create rule for rebalancing, here coefficient is always one
+  setLookback(this, 1) # how many periods you need for computing beta 
+  setLookForward(this, 1000000) # how many periods you don't need to rebalance
+  setWaitAfterClose(this, TRUE) # if TRUE, then algorithm don't do revert
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast') # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
+  # your function. spread is local name, it is name of process. 
   # as argument is responsible for name of your indicator, this name can be used in rules and other indicators
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'sma_slow',
-               lookback = 200)
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow')
   addRule(this, as = 'short',  # Here we create a rule for short
           condition = spread > sma_fast & sma_fast > sma_slow, # your trigger, spread is local name of process and ema name of moving average indicator
           type = 'enter', # There are only two types enter or exit.
@@ -47,8 +50,10 @@ setUserData(this, list(dataset = 'Russia', # There is only one dataset for now
                        period = 'day', # there are 2 available period hour and day
                        time = 13)) # if period equals to day, then you can specify time when you strategy will be traded
 
-x <- performServer(this, session)
-# It will return report and draw a pnl graph
+
+performServer(this)
+
+plotPnL(this)
 
 # Now if you want to fit you model you can define distributions and constraints on them and run 
 #  function applyParamsetServer to make search
@@ -86,69 +91,46 @@ x <- performServer(this, session)
 }
 
 
-xx <- applyParamsetServer(this, 
-                    session = session,
-                    paramset.label = paramset,
+applyParamsetServer(this, 
                     nsamples = 50 # how many example to get from paramset
 )
-# it will return data.frame of results
-print(xx)
 
-# pick some of them
-x6 <- performServer(this, session, paramset.label = paramset, paramset.index = 6)
+getBacktestResults(this) %>% View
+
+# pick one of them
+# paramset.label argument can be omitted
+performServer(this, paramset.label = paramset, paramset.index = 237)
 
 
-# Now about content of the first report
-# trades                     # number of trades 
-# trades.year                # mean number of trades yearly
-# long.trades                # number of long trades
-# short.trades               # number of short trades
-# long.acc                   # percent of winning long trades
-# short.acc                  # percent of winning short trades
-# total.acc                  # percent of winning trades
-# max.loose                  # max number of loosing trades in a row
-# max.win                    # max number of winning trades in a row
-# return.ann                 # yearly return on getMoney(this)
-# return.avg                 # yearly return on average capital
-# return.pos.drawdown        # return on (maximum capital in trades plus maximum drawdown)
-# return.pos.drawdown.95     # return on (95 quantile of capital in trades plus maximum drawdown)
-# return.pos.drawdown.c95    # return on (mean capital excedding 95 quantile of capital in trades plus maximum drawdown)
-# drawdown.money             # maximum drawdown divided by maximum amount of money in trade
-# median                     # median return from one trade
-# in.pos                     # percents of time in position
-# in.pos.positive            # percents of time in profit while in trade
-# days.in.pos.max            # maximum number of days in trade
-# days.in.pos.mean           # mean number of days in trade
-# days.out.pos.max           # maximum number of days out of trade
-# days.out.pos.mean          # mean number of days out of trade
-# sharpe.ann                 # annual Sharpe ratio
-# sortino.ann                # annual Sortino ratio
-# straight.m                 # deviation of money from straight line
-# straight.t                 # deviation of money from trades from straight line
-# maxMAE                     # this field is not working now
-# profit.drawdown.year       # profit divided by drawdown yearly
+# Now about content of report
+# trades                   48.0000 # number of trades 
+# trades.year               6.0000 # mean number of trades yearly
+# long.trades              26.0000 # number of long trades
+# short.trades             22.0000 # number of short trades
+# long.acc                  0.8077 # percent of winning long trades
+# short.acc                 0.9545 # percent of winning short trades
+# total.acc                 0.8750 # percent of winning trades
+# max.loose                 1.0000 # max number of loosing trades in a row
+# max.win                  14.0000 # max number of winning trades in a row
+# return.ann                0.1556 # yearly return on getMoney(this)
+# return.avg                0.3450 # yearly return on average capital
+# return.pos.drawdown       0.0977 # return on (maximum capital in trades plus maximum drawdown)
+# return.pos.drawdown.95    0.1130 # return on (95 quantile of capital in trades plus maximum drawdown)
+# return.pos.drawdown.c95   0.1097 # return on (mean capital excedding 95 quantile of capital in trades plus maximum drawdown)
+# drawdown.money            0.3009 # maximum drawdown divided by maximum amount of money in trade
+# median                    0.0175 # median return from one trade
+# in.pos                    0.4683 # percents of time in position
+# in.pos.positive           0.3026 # percents of time in profit while in trade
+# days.in.pos.max         301.0000 # maximum number of days in trade
+# days.in.pos.mean         27.0625 # mean number of days in trade
+# sharpe.ann                0.8727 # annual Sharpe ratio
+# sortino.ann               1.8969 # annual Sortino ratio
+# straight.m                0.0827 # deviation of money from straight line
+# straight.t                0.0652 # deviation of money from trades from straight line
+# maxMAE                    0.0000 # maximum drawdown in one trade divided by money
+# profit.drawdown.year      0.4644 # profit divided by drawdown yearly
 
-# the second report contains information for each year for subset of above statistics
 
-# the third report contains information for each trade of strategy we have created
-
-# ind.start                 # index when trade started               
-# ind.end                   # index when trade ended                
-# date.start                # date when trade started
-# date.end                  # date when trade ended 
-# side                      # side from rule                  
-# position.GAZP.Adjusted    # maximum position on that asset in trade                
-# price.start.GAZP.Adjusted # price when trade started          
-# price.end.GAZP.Adjusted   # price when trade ended             
-# pnl.asset.GAZP.Adjusted   # profit and loss for asset without commissions           
-# com.asset.GAZP.Adjusted   # commission for asset                 
-# com.sum                   # sum of commission for each asset                  
-# pnl.sum                   # sum of profit and loss for each asset            
-# pnl.sum.adj               # pnl.sum minus com.sum            
-# spread.price              # max margin in trade          
-# MAE.with.com              # Maximum Adverse Excursion minus com.sum             
-# MFE.with.com              # Maximum Favorable Excursion minus com.sum            
-# return.from.money         # pnl.sum.adj / money in model  
 
 
 

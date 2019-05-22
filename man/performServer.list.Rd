@@ -4,17 +4,16 @@
 \alias{performServer.list}
 \title{Simulate list of strategies}
 \usage{
-\method{performServer}{list}(l, session, reports = c("strategy", "calendar",
-  "trades", "plot"), verbose = FALSE, ...)
+\method{performServer}{list}(l, session, verbose = FALSE, ...)
 }
 \arguments{
 \item{l}{list, list of strategies}
 
 \item{session}{ssh_session}
 
-\item{reports}{character vector, it can include c('strategy', 'calendar', 'trades', 'plot')}
-
 \item{...}{additional params}
+
+\item{reports}{character vector, it can include c('strategy', 'calendar', 'trades', 'plot')}
 }
 \value{
 list

@@ -4,7 +4,6 @@ library(xts)
 library(magrittr)
 library(TTR)
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
 
 # In this example we will download series from xlsx and put it in our backtest
 
@@ -119,9 +118,7 @@ data <- read_excel('/home/vitaly/Documents/models/Sentiment/Data/sber_result_tab
 
 
 setMoney(this, 1000)
-x <- performServer(this, session)
-x[[1]]
-x[[3]] %>% View
+performServer(this)
 #backtesting params price
 {
   paramset <- "TEST"
@@ -167,20 +164,18 @@ x[[3]] %>% View
 start_date <- '2010-01-01'
 end_date <- '2017-01-01'
 
-res <- applyParamsetServer(this, 
-                    session = session,
-                    paramset.label = paramset,
+applyParamsetServer(this, 
                     start_date = start_date,
                     end_date = end_date,
                     nsamples = 10)
 
-# 
-res %>% 
+
+getBacktestResults(this) %>% 
   dplyr::arrange(dplyr::desc(sharpe.ann)) %>%
   dplyr::filter(trades.year > 5) %>% 
   head(5)
 
-xx <- performServer(this, session, paramset.label = paramset, paramset.index = 8657, start_date= start_date, end_date=end_date)
-xx[[1]]
+performServer(this, paramset.index = 8657, start_date= start_date, end_date=end_date)
+plotPnL(this)
 
 

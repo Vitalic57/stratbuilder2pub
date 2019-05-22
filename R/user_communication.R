@@ -10,11 +10,17 @@
 #' @return data.frame, reports of simulations
 #' @export
 applyParamsetServer.modelStrategy <- function(this, 
-                                              session,
                                               paramset.label, 
+                                              session,
                                               nsamples = 100,
                                               verbose=FALSE, 
                                               ...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  if(missing(paramset.label)){
+    paramset.label <- names(this$thisEnv$paramsets)[1]
+  }
   this$thisEnv$user_args <- c(list(action = 'applyParamset',
                                  nsamples = nsamples, 
                                  paramset.label = paramset.label),
@@ -28,7 +34,7 @@ applyParamsetServer.modelStrategy <- function(this,
     this$thisEnv$user_beta_table_changed <- FALSE
   }
   Sys.sleep(3)
-  get_results(session, 'strategy', verbose)[[1]]
+  get_results(this, session, 'strategy', verbose)
 }
 
 
@@ -47,11 +53,17 @@ applyParamsetServer.modelStrategy <- function(this,
 #' @return list, list of data.frames (reports of simulations)
 #' @export
 applyParamsetServer.list <- function(l, 
+                                    paramset.label,
                                     session,
-                                    paramset.label, 
                                     nsamples = 100,
                                     verbose=FALSE,
                                     ...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  if(missing(paramset.label)){
+    paramset.label <- names(this$thisEnv$paramsets)[1]
+  }
   l <- set_names_list(l)
   e <- new.env()
   e[['strategies']] <- l
@@ -69,7 +81,7 @@ applyParamsetServer.list <- function(l,
   # }
   
   Sys.sleep(3)
-  return(get_results(session, 'strategy', verbose)[[1]])
+  get_results(l, session, 'strategy', verbose)
 }
 
 
@@ -98,10 +110,15 @@ applyParamsetServer.list <- function(l,
 #' @export
 performServer.modelStrategy <- function(this, 
                                         session,
-                                        reports = c('strategy', 'calendar', 'trades', 'plot'),
                                         verbose=FALSE,
                                         ...){
-  this$thisEnv$user_args <- c(list(...), list(action = 'perform', reports = reports))
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  this$thisEnv$user_args <- c(list(...), list(action = 'perform'))
+  if('paramset.index' %in% names(this$thisEnv$user_args) && !'paramset.label' %in% names(this$thisEnv$user_args)){
+    this$thisEnv$user_args[['paramset.label']] <- names(this$thisEnv$paramsets)[1]
+  }
   this[['settings']] <- stratbuilder2pub:::.settings
   this[['version']] <- packageVersion('stratbuilder2pub')
   if(verbose){
@@ -119,7 +136,7 @@ performServer.modelStrategy <- function(this,
   if(verbose){
     cat('Before getting results\n')
   }
-  get_results(session, reports, verbose)
+  get_results(this, session, reports, verbose)
 
 }
 
@@ -132,11 +149,24 @@ performServer.modelStrategy <- function(this,
 #'
 #' @return list
 #' @export
-performServer.list <- function(l, session, reports =  c('strategy', 'calendar', 'trades', 'plot'), verbose=FALSE, ...){
+performServer.list <- function(l, session, verbose=FALSE, ...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
   l <- set_names_list(l)
   e <- new.env()
   e[['strategies']] <- l
-  e[['user_args']] <- c(list(...), list(action = 'perform', reports = reports))
+  e[['user_args']] <- c(list(...), list(action = 'perform'))
+  if('paramset.index' %in% names(e[['user_args']]) && !'paramset.label' %in% names(e[['user_args']])){
+    tryCatch({
+      e[['user_args']][['paramset.label']] <- names(l[[1]]$thisEnv$paramsets)[1]
+    }, error = function(e){
+      stop('Please, define paramset.label argument')
+    })
+    if(is.null(names(l[[1]]$thisEnv$paramsets)[1])){
+      stop('Please, define paramset.label argument')
+    }
+  }
   # e[['user_args']] <- c(list(action = 'perform', reports = reports))
   e[['settings']] <- stratbuilder2pub:::.settings
   e[['data_changed']] <- TRUE#any(sapply(l, function(x) x$thisEnv$data_changed)) 
@@ -147,15 +177,17 @@ performServer.list <- function(l, session, reports =  c('strategy', 'calendar', 
   #   this$thisEnv$user_beta_table_changed <- FALSE
   # }
   Sys.sleep(0.5)
-  get_results(session, reports, verbose)
+  get_results(l, session, reports, verbose)
 }
 
 send_rdata <- function(session, obj, verbose=FALSE){
   file_path <- file.path(tempdir(), 'file.RData')
-  saveRDS(obj, file_path)
+  saveRDS(obj, file_path, version = rds_version)
   tryCatch({
     capture.output(ssh::scp_upload(session, file_path))
-  }, error = function(e){})
+  }, error = function(e){
+    print(e)
+  })
   if(verbose){
     cat('data uploaded\n')
   }
@@ -187,6 +219,23 @@ scp_download <- function(session, file, to = '.', ...){
 }
 
 #' @export
+scp_upload <- function(session, file, to = '.', ...){
+  info <- ssh_info(session)
+  pwd <- capture.output(ssh::ssh_exec_wait(session, 'pwd'))[1]
+  if(!is.null(info$keyfile)){
+    s <- paste0('scp ', ' -i ', info$keyfile, ' -l 8192 ', file, ' ', info$user, '@', info$host, ':', pwd, '/', to)
+  }else{
+    s <- paste0('scp ', ' -l 8192 ',  info$user, '@', info$host, ':', pwd, '/', file, ' ', to)
+  }
+  if(Sys.info()['sysname'] == 'Windows'){
+    shell(s)
+  }else{
+    system(s)
+  }
+}
+
+
+#' @export
 ssh_info <- function(session){
   info <- ssh::ssh_info(session)
   info$keyfile <- .env[['keyfile']]
@@ -197,25 +246,123 @@ ssh_info <- function(session){
 .env <- new.env()
 
 #' @export
-ssh_connect <- function(host, keyfile = NULL, passwd = ssh:::askpass, verbose = FALSE){
+ssh_connect <- function(host, keyfile = NULL, passwd = askpass::askpass, verbose = FALSE){
   .env[['keyfile']] <- keyfile
-  session <- ssh::ssh_connect(host=host, keyfile = keyfile, passwd = passwd, verbose = verbose)
+  .env[['session']] <- ssh::ssh_connect(host=host, keyfile = keyfile, passwd = passwd, verbose = verbose)
   return(session)
 }
 
 
 
-get_results <- function(session, reports, verbose=FALSE){
+# get_results <- function(session, reports, verbose=FALSE){
+# 
+#   # wait for results--------------------------
+#   files_path <- file.path(tempdir())
+#   
+#   vec_cond <- logical(0)
+#   vec_names <- c(pnl = 'pnl.png', strategy = 'report.RDS', calendar = 'report2.RDS', trades = 'trades.RDS')
+#   vec_cond['pnl'] <- 'plot' %in% reports
+#   vec_cond['strategy'] <-  'strategy' %in% reports
+#   vec_cond['calendar'] <-  'calendar' %in% reports
+#   vec_cond['trades'] <-  'trades' %in% reports
+#   t <- Sys.time()
+#   if(verbose){
+#     cat('Before cycle of getting results\n')
+#   }
+#   while(TRUE){
+#     x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+#     res <- any(vec_names[vec_cond] %in% x)
+#     Sys.sleep(1)
+#     if(verbose && Sys.time() - t > 10){
+#       cat('simulation in progress\n')
+#       cat('current data in last results:')
+#       cat(capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results')))
+#       cat('\n')
+#       t <- Sys.time()
+#     }
+#     if(res){
+#       break
+#     }
+#   }
+#   if(verbose){
+#     cat('Results got\n')
+#   }
+#   # available results
+#   x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+#   vec_avail <- vec_names[vec_cond] %in% x
+#   names(vec_avail) <- names(vec_names[vec_cond])
+#   
+#   if(verbose){
+#     cat('Before downloading results\n')
+#   }
+#   # download results -------------------
+#   if(verbose){
+#     print('vec_names:')
+#     print(vec_names)
+#     print('vec_cond:')
+#     print(vec_cond)
+#     print('vec_avail:')
+#     print(vec_avail)
+#     print('files_path:')
+#     print(files_path)
+#     
+#   }
+#   
+#   x <- sapply(seq_along(vec_names), function(i){
+#     x <- names(vec_names)[i]
+#     if(vec_cond[x] && vec_avail[x]){
+#       if(verbose){
+#         print(paste0('try to download: ', paste0('last_results/', vec_names[x])))
+#       }
+#       scp_download(session, paste0('last_results/', vec_names[x]), files_path, verbose = TRUE)
+#       if(verbose){
+#         print('downloaded')
+#       }
+#     }
+#   })
+#   if(verbose){
+#     cat('Files of results downloaded\n')
+#   }
+#   
+#   # show results ----------------------------------------
+#   results <- list()
+#   x <- sapply(2:4, function(i){
+#     x <- names(vec_names)[i]
+#     if(vec_cond[x] && vec_avail[x]){
+#       txt_path <- file.path(files_path, vec_names[x])
+#       results[[length(results) + 1]] <<- readRDS(txt_path)
+#       file.remove(txt_path)
+#     }
+#   })
+#   if(verbose){
+#     cat('Reports downloaded\n')
+#   }
+#   
+#   if(vec_cond['pnl'] && vec_avail['pnl']){
+#     png_path <- file.path(files_path, 'pnl.png')
+#     # image <- imager::load.image(png_path)
+#     # imager:::plot.cimg(image, axes = FALSE)
+#     img <- png::readPNG(png_path)
+#     grid::grid.raster(img)
+#     file.remove(png_path)
+#     Sys.sleep(1)
+#     if(verbose){
+#       cat('Image downloaded')
+#     }
+#   }
+#   
+#   return(results)
+# }
 
+
+get_results <- function(last_model, session, reports, verbose=FALSE){
+  reports <- 'strategy'
   # wait for results--------------------------
   files_path <- file.path(tempdir())
   
   vec_cond <- logical(0)
-  vec_names <- c(pnl = 'pnl.png', strategy = 'report.RDS', calendar = 'report2.RDS', trades = 'trades.RDS')
-  vec_cond['pnl'] <- 'plot' %in% reports
-  vec_cond['strategy'] <-  'strategy' %in% reports
-  vec_cond['calendar'] <-  'calendar' %in% reports
-  vec_cond['trades'] <-  'trades' %in% reports
+  vec_names <- c(strategy = 'report.RDS')
+  vec_cond['strategy'] <-  TRUE
   t <- Sys.time()
   if(verbose){
     cat('Before cycle of getting results\n')
@@ -236,7 +383,7 @@ get_results <- function(session, reports, verbose=FALSE){
     }
   }
   if(verbose){
-    cat('Results got\n')
+    cat('Results have been gotten\n')
   }
   # available results
   x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
@@ -256,7 +403,6 @@ get_results <- function(session, reports, verbose=FALSE){
     print(vec_avail)
     print('files_path:')
     print(files_path)
-    
   }
   
   x <- sapply(seq_along(vec_names), function(i){
@@ -265,7 +411,7 @@ get_results <- function(session, reports, verbose=FALSE){
       if(verbose){
         print(paste0('try to download: ', paste0('last_results/', vec_names[x])))
       }
-      scp_download(session, paste0('last_results/', vec_names[x]), files_path, verbose = TRUE)
+      ssh::scp_download(session, paste0('~/last_results/', vec_names[x]), files_path, verbose = FALSE)
       if(verbose){
         print('downloaded')
       }
@@ -276,34 +422,48 @@ get_results <- function(session, reports, verbose=FALSE){
   }
   
   # show results ----------------------------------------
-  results <- list()
-  x <- sapply(2:4, function(i){
-    x <- names(vec_names)[i]
-    if(vec_cond[x] && vec_avail[x]){
-      txt_path <- file.path(files_path, vec_names[x])
-      results[[length(results) + 1]] <<- readRDS(txt_path)
-      file.remove(txt_path)
-    }
-  })
+  txt_path <- file.path(files_path, 'report.RDS')
+  res <- readRDS(txt_path)
+  file.remove(txt_path)
   if(verbose){
     cat('Reports downloaded\n')
   }
   
-  if(vec_cond['pnl'] && vec_avail['pnl']){
-    png_path <- file.path(files_path, 'pnl.png')
-    # image <- imager::load.image(png_path)
-    # imager:::plot.cimg(image, axes = FALSE)
-    img <- png::readPNG(png_path)
-    grid::grid.raster(img)
-    file.remove(png_path)
+  if(res == 'OK'){
+    ssh::scp_download(session, paste0('~/last_results/model.RData'), files_path, verbose = FALSE)
     Sys.sleep(1)
-    if(verbose){
-      cat('Image downloaded')
+    model <- suppressWarnings(readRDS(file.path(files_path, 'model.RData')))
+    if(class(last_model)[1] == 'modelStrategy' && class(model)[1] == 'list'){
+      return(model)
+    }else{
+      installModel(last_model, model)
+      invisible(NULL)
     }
+  }else{
+    return(res)
   }
-  
-  return(results)
 }
+
+
+
+installModel <- function(this, target){
+  if(class(this)[1] == 'modelStrategy'){
+    for(n in setdiff(ls(target$thisEnv, all.names=TRUE), c('me', 'thisEnv'))) assign(n, get(n, target$thisEnv), this$thisEnv)
+  }else if(class(this)[1] == 'list'){
+    for(i in seq_along(this)){
+      for(n in setdiff(ls(target[[i]]$thisEnv, all.names=TRUE), c('me', 'thisEnv'))) assign(n, get(n, target[[i]]$thisEnv), this[[i]]$thisEnv)
+    }
+  }else if(class(this)[1] == 'modelPortfolio'){
+    for(i in seq_along(this$thisEnv$models)){
+      for(n in setdiff(ls(target$thisEnv$models[[i]]$thisEnv, all.names=TRUE), c('me', 'thisEnv'))) 
+        assign(n, get(n, target$thisEnv$models[[i]]$thisEnv), this$thisEnv$models[[i]]$thisEnv)
+    }
+    for(n in setdiff(ls(target$thisEnv, all.names=TRUE), c('me', 'thisEnv', 'models'))) assign(n, get(n, target$thisEnv), this$thisEnv)
+  }
+}
+
+
+
 
 
 
@@ -332,6 +492,14 @@ get_results <- function(session, reports, verbose=FALSE){
 #' 
 #' x <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
 #' setUserData(this, x)
+#' 
+#' x <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
+#' y <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
+#' setUserData(this, cbind(x, y))
+#' 
+#' x <- quantmod::getSymbols("AAPL", from = Sys.Date() - 365)
+#' x <- quantmod::getSymbols("MSFT", from = Sys.Date() - 365)
+#' setUserData(this, cbind(x, y))
 setUserData.modelStrategy <- function(this, l){
   if(is.list(l) && !xts::is.xts(l[[1]])){
     if(!all(c('dataset') %in% names(l))){
@@ -436,6 +604,58 @@ addData.modelStrategy <- function(this, ...){
 clearData.modelStrategy <- function(this){
   this$thisEnv$user_add_data <- list()
 }
+
+
+#' Submit strategy to contest
+#'
+#' @param this modelStrategy
+#' @param contest character, name of contest
+#' @param verbose logical
+#'
+#' @export
+submit.modelStrategy <- function(this, contest, session, verbose=FALSE){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  this$thisEnv$user_args <- list(action = 'submit', contest = contest)
+  this[['settings']] <- stratbuilder2pub:::.settings
+  this[['version']] <- packageVersion('stratbuilder2pub')
+  if(verbose){
+    cat('Before sending rdata\n')
+  }
+  send_rdata(session, this)
+  if(verbose){
+    cat('After sending rdata\n')
+  }
+  get_results(this, session, reports, verbose)
+}
+
+#' Evaluate strategy in contest
+#'
+#' @param this modelStrategy
+#' @param contest character, name of contest
+#' @param verbose logical
+#'
+#' @export
+evaluate.modelStrategy <- function(this, contest, session, verbose=FALSE){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  this$thisEnv$user_args <- list(action = 'evaluate', contest = contest)
+  this[['settings']] <- stratbuilder2pub:::.settings
+  this[['version']] <- packageVersion('stratbuilder2pub')
+  if(verbose){
+    cat('Before sending rdata\n')
+  }
+  send_rdata(session, this)
+  if(verbose){
+    cat('After sending rdata\n')
+  }
+  get_results(this, session, reports, verbose)
+}
+
+
+
 
 
 

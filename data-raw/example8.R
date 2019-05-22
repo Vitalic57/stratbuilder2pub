@@ -1,7 +1,6 @@
 library(stratbuilder2pub)
 library(TTR)
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 
 # Strategy from the first example with using python talib library
 {
@@ -61,7 +60,7 @@ setUserData(this, list(dataset = 'Russia',
                        time = 13))
 
 
-x <- performServer(this, session) 
+performServer(this) 
 
 library(xts)
 rollapply(1:100, 10, mean, na.pad = TRUE, align = 'right')
@@ -121,4 +120,4 @@ setUserData(this, list(dataset = 'Russia',
                        period = 'day', 
                        time = 13))
 
-x <- performServer(this, session) 
+performServer(this) 

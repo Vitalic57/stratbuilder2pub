@@ -3,7 +3,6 @@ library(TTR)
 library(xts)
 library(quantmod)
 
-session <- ssh_connect('ADDRESS', keyfile = 'path to key')
 
 # Now we redefine function from DSTrading package. 
 # Now this package are available in backtester. 
@@ -261,7 +260,7 @@ setUserData(this, list(dataset = 'Russia',
                        time = 13))
 
 
-x <- performServer(this, session)
+performServer(this)
 
 
 
