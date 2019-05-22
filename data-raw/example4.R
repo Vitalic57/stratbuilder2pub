@@ -1,8 +1,6 @@
 library(stratbuilder2pub)
 library(TTR)
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
-
 # Now we consider another feature. It makes backtesting system highly customizable.
 # For example, let's take the previous strategy and add a such rule: it closes all positions after 20 days in position.
 # And we want to use logarithm of data_raw to create process and compute betas
@@ -147,7 +145,7 @@ setUserData(this, list(dataset = 'Russia',
                        period = 'day', 
                        time = 13)) 
 
-performServer(this, session)
+performServer(this)
 
 
 # From report we could see that days.in.pos.max == 38, in our program 

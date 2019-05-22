@@ -15,10 +15,18 @@ proportionOs <- function(beta, money, proportion, price, ...){
   return(floor(money_proportion/price_position))
 }
 
-#amount - how much money we can use in rule
+
+#' How many sum(price * abs(beta)) in amount
+#'
+#' @param beta numeric, number of assets
+#' @param amount numeric, amount of money
+#' @param price numeric, vector of prices
+#' @param ... args
+#'
+#' @return numeric
+#' @export
 sameMoneyOs <- function(beta, amount, price, ...){
-  money_proportion <- amount
   price_position <- sum(price * abs(beta))
-  return(floor(money_proportion/price_position))
+  return(floor(amount/price_position))
 }
 

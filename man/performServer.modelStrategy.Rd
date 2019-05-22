@@ -4,23 +4,22 @@
 \alias{performServer.modelStrategy}
 \title{Send your strategy to server for backtesting.}
 \usage{
-\method{performServer}{modelStrategy}(this, session, reports = c("strategy",
-  "calendar", "trades", "plot"), verbose = FALSE, ...)
+\method{performServer}{modelStrategy}(this, session, verbose = FALSE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
 
 \item{session}{ssh_session}
 
-\item{reports}{character vector, if 'strategy' exists inside this vector, then report of whole period will be given
-if 'calendar' specified, then report about each year will be given
-if 'trades', then report about trades will be sent}
-
 \item{...}{additional arguments:
 start_date -- from this date backtest will be started
 end_date -- at this date backtest will be ended. Max end_date is Sys.Date() - 365
 paramset.label -- character, name of paramset
 paramset.index -- numeric, index of combination of params to backtest, by defualt current strategy will be backtested}
+
+\item{reports}{character vector, if 'strategy' exists inside this vector, then report of whole period will be given
+if 'calendar' specified, then report about each year will be given
+if 'trades', then report about trades will be sent}
 }
 \value{
 data.frame, report of strategy

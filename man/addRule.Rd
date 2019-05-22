@@ -19,7 +19,7 @@
 
 \item{type}{character, type must be enter or exit}
 
-\item{side}{numeric, 1 or -1}
+\item{side}{numeric, 1 or -1, this parameter should be specified only for enter type rules}
 
 \item{oco}{character, environment of rule}
 
@@ -27,8 +27,9 @@
 
 \item{osFun_args}{alist of args of osFun function}
 
-\item{pathwise}{logical, if it is FALSE, then calculation of rules and variables will be performed on the tables once per 
-computation of coefficients, otherwise calculation of rules and variables will be performed on the scalars on each iteration}
+\item{pathwise}{logical, if it is FALSE, then calculation of rules  will be performed on the tables once per 
+computation of coefficients and condition should return logical vector, 
+otherwise calculation of rules will be performed on each iteration and condition should return logical scalar}
 }
 \description{
 Conditions will be calculated and then action will be done according to type. osFun arg is needed for definition of 

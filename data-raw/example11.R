@@ -25,10 +25,6 @@ data <- lapply(sheets, function(x){
 
 length(data)
 
-
-
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
-
 # Example of usage for multiple asset and rebalancing of portfolio
 {
   this <- modelStrategy() 
@@ -47,9 +43,7 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
           condition = TRUE,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addProgramPart(this, as = 'sdf',
                  evolution = list(
@@ -69,7 +63,7 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
 setUserData(this, data) 
 
 
-performServer(this, session, reports = c('strategy', 'plot'))
+performServer(this)
 
 
 

@@ -4,15 +4,15 @@
 \alias{applyParamsetServer.modelStrategy}
 \title{Do backtest of combinations from paramset}
 \usage{
-\method{applyParamsetServer}{modelStrategy}(this, session, paramset.label,
+\method{applyParamsetServer}{modelStrategy}(this, paramset.label, session,
   nsamples = 100, verbose = FALSE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
 
-\item{session}{ssh_session}
-
 \item{paramset.label}{charater, name of paramset}
+
+\item{session}{ssh_session}
 
 \item{nsamples}{numeric, how many backtests to do}
 

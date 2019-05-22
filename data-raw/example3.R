@@ -1,6 +1,5 @@
 library(stratbuilder2pub)
 library(TTR)
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
 
 # Example of usage for multiple asset and rebalancing of portfolio
 {
@@ -27,18 +26,14 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
           condition = spread > ema, 
           type = 'enter',
           side = -1,
-          oco = 'short', 
-          osFun = stratbuilder2pub:::sameMoneyOs, 
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'short'
   )
   
   addRule(this, as = 'long', 
           condition = spread < ema,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit',
           condition = spread < ema, 
@@ -58,7 +53,7 @@ setUserData(this, list(dataset = 'Russia',
                        time = 13)) 
 
 
-performServer(this, session)
+performServer(this)
 
 #backtesting params
 {
@@ -98,10 +93,10 @@ performServer(this, session)
   }
 }
 
-x <- applyParamsetServer(list(this, this), 
-                    session = session,
-                    paramset.label = paramset,
+applyParamsetServer(this, 
                     nsamples = 10)
 
-performServer(this, session, paramset.label = paramset, paramset.index = 18)
+performServer(this, paramset.index = 18)
+
+
 

@@ -12,28 +12,22 @@ library(TTR)
   setLookback(this, 1) # how many periods you need for computing beta 
   setLookForward(this, 1000000) # how many periods you don't need to rebalance
   setWaitAfterClose(this, TRUE) # if TRUE, then algorithm don't do revert
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast',
-               lookback = 201) # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast') # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
   # your function. spread is local name, it is name of process. 
   # as argument is responsible for name of your indicator, this name can be used in rules and other indicators
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow',
-               lookback = 201)
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow')
   addRule(this, as = 'short',  # Here we create a rule for short
           condition = spread > ema_fast & ema_fast > ema_slow, # your trigger, spread is local name of process and ema name of moving average indicator
           type = 'enter', # There are only two types enter or exit.
           side = -1, # There are 2 directions 1(long) or -1(short)
-          oco = 'short', # This is namespace for rule, we will need it later
-          osFun = stratbuilder2pub:::sameMoneyOs, # This function defines how much money will be put in position
-          osFun_args = alist(amount = getMoney(this)) # you can set arguments of this function here
+          oco = 'short' # This is namespace for rule, we will need it later
   )
   
   addRule(this, as = 'long', # This is another rule, now it is for going long
           condition = spread < ema_fast & ema_fast < ema_slow,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit', # This rule for exiting from position
           condition = spread < ema_fast, # trigger when to exit
@@ -62,10 +56,10 @@ setUserData(this, list(dataset = 'Russia', # There is only one dataset for now
                        period = 'day', # there are 2 available period hour and day
                        time = 13)) # if period equals to day, then you can specify time when you strategy will be traded
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 
-performServer(this, session)
-# It will return report and draw a pnl graph
+performServer(this)
+
+plotPnL(this)
 
 # Now if you want to fit you model you can define distributions and constraints on them and run 
 # run function applyParamsetServer to make search
@@ -104,14 +98,14 @@ performServer(this, session)
 
 
 applyParamsetServer(this, 
-                    session = session,
-                    paramset.label = paramset,
                     nsamples = 50 # how many example to get from paramset
 )
-# it will return data.frame of results
 
-# pick some of them
-performServer(this, session, paramset.label = paramset, paramset.index = 6)
+getBacktestResults(this) %>% View
+
+# pick one of them
+# paramset.label argument can be omitted
+performServer(this, paramset.label = paramset, paramset.index = 237)
 
 
 # Now about content of report
@@ -139,7 +133,7 @@ performServer(this, session, paramset.label = paramset, paramset.index = 6)
 # sortino.ann               1.8969 # annual Sortino ratio
 # straight.m                0.0827 # deviation of money from straight line
 # straight.t                0.0652 # deviation of money from trades from straight line
-# maxMAE                    0.0000 # this field is not working now
+# maxMAE                    0.0000 # maximum drawdown in one trade divided by money
 # profit.drawdown.year      0.4644 # profit divided by drawdown yearly
 
 

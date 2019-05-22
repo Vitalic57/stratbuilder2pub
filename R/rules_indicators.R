@@ -19,19 +19,19 @@
 #' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
 #'     lookback = 100)
 addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
-  #in dots:
-  # plot -- main or new tab for graphic
-  # columns -- which columns should be plotted
-  # col -- colour of lines
   e <- this$thisEnv
-  #len <- length(e$indicators)
+  if(missing(lookback)){
+    for(name in names(args)){
+      lookback <- 0
+      if(is.numeric(args[[name]])[1] && length(args[[name]]) == 1){
+        lookback <- max(lookback, args[[name]])
+      }
+    }
+  }
   if(getMaxLookback(this) < lookback){
     setMaxLookback(this, lookback)
   }
   as <- gsub('\\.','_',as)
-  # if(any(sapply(e$indicators,function(x) x$as) == as)){
-  #   stop('"as" must be unique')
-  # }
   e$indicators[[as]] <- c(list(args = args,
                                as = as,
                                lookback = lookback),list(...))

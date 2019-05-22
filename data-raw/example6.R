@@ -3,7 +3,6 @@ library(TTR)
 library(xts)
 library(quantmod)
 
-session <- ssh_connect('ADDRESS', keyfile = 'path to key')
 
 
 
@@ -279,7 +278,7 @@ setUserData(this, list(dataset = 'Russia',
                        time = 13))
 
 
-x <- performServer(this, session)
+performServer(this)
 
 
 
