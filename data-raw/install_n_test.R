@@ -3,15 +3,15 @@ usethis::use_package('magrittr', type = 'Imports')
 
 packageVersion('stratbuilder2pub')
 
+setwd('/home/vitaly/Documents/stratbuilder2pub')
 lines <- readLines('DESCRIPTION') 
 ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.2.3')
+lines[ind] <- paste0('Version: ', '1.2.11')
 writeLines(lines, 'DESCRIPTION')
 
-setwd('/home/dkazanchyan/Desktop/drastamat/stratbuilder2pub')
 setwd('/home/vitaly/Documents/stratbuilder2pub')
 devtools::test('.')
 devtools::document()
@@ -83,8 +83,17 @@ stratbuilder2pub::update_package('test_backtest_user@142.93.143.142', '/home/vit
 
 
 
+create_contest <- function(contestName, endDate, method='public'){
+  endDate <- endDate %>% as.Date %>% {paste0(., 'T23:59:59.999')}
+  resp <- httr::POST(url = paste0("http://", address[[method]], "/contest"), httr::add_headers('Content-Type'='application/json;charset=UTF-8',
+                                                                                               "Authorization"=token),
+                     body = paste0('{"contestName":"', contestName,'","endDate":"', endDate,'"}')) 
+  
+  httr::content(resp)
+}
 
 
+create_contest('Mean reversion', '2019-05-31')
 
 
 

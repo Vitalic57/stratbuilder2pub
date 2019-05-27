@@ -249,7 +249,7 @@ ssh_info <- function(session){
 ssh_connect <- function(host, keyfile = NULL, passwd = askpass::askpass, verbose = FALSE){
   .env[['keyfile']] <- keyfile
   .env[['session']] <- ssh::ssh_connect(host=host, keyfile = keyfile, passwd = passwd, verbose = verbose)
-  return(session)
+  return(.env[['session']])
 }
 
 
@@ -355,7 +355,8 @@ ssh_connect <- function(host, keyfile = NULL, passwd = askpass::askpass, verbose
 # }
 
 
-get_results <- function(last_model, session, reports, verbose=FALSE){
+get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
+  Sys.sleep(0.5)
   reports <- 'strategy'
   # wait for results--------------------------
   files_path <- file.path(tempdir())
@@ -611,13 +612,46 @@ clearData.modelStrategy <- function(this){
 #' @param this modelStrategy
 #' @param contest character, name of contest
 #' @param verbose logical
+#' @param session ssh_session
+#' @param pymodel list, should contain names dockername, pyfile and might contain modelpath.
 #'
 #' @export
-submit.modelStrategy <- function(this, contest, session, verbose=FALSE){
+submit.modelStrategy <- function(this, contest, session, pymodel = list(), verbose=FALSE){
+  competeInContest(this, contest, session, method='submit', pymodel, verbose)
+}
+
+
+competeInContest <- function(this, contest, session, method, pymodel, verbose){
   if(missing(session)){
     session <- .env[['session']]
   }
-  this$thisEnv$user_args <- list(action = 'submit', contest = contest)
+  if(length(pymodel) > 0){
+    if(!all(c('pyfile', 'dockername') %in% names(pymodel))){
+      stop('Please, define following arguments in pymodel: pyfile, dockername. And you can define modelpath argument
+           for path to pretrained model')
+    }
+    temp <- tempdir()
+    file_path <- file.path(temp, 'archive.zip')
+    files <- character()
+    if(file.exists(pymodel[['pyfile']])){
+      file.copy(pymodel[['pyfile']], file.path(temp, 'model.py'))
+      files <- c(files, file.path(temp, 'model.py'))
+    }else{
+      stop('pyfile should be existing file')
+    }
+    if('modelpath' %in% names(pymodel)){
+      if(file.exists(pymodel[['modelpath']])){
+        files <- c(files, pymodel[['modelpath']])
+      }else{
+        stop('modelpath should be existing file')
+      }
+    }
+    utils::zip(file_path, files = files, flags = '-j9Xq')
+    capture.output(ssh::scp_upload(session, file_path))
+    this$thisEnv$user_args <- list(action = method, contest = contest, pymodel = pymodel)
+  }else{
+    this$thisEnv$user_args <- list(action = method, contest = contest)
+  }
   this[['settings']] <- stratbuilder2pub:::.settings
   this[['version']] <- packageVersion('stratbuilder2pub')
   if(verbose){
@@ -629,33 +663,50 @@ submit.modelStrategy <- function(this, contest, session, verbose=FALSE){
   }
   get_results(this, session, reports, verbose)
 }
+
 
 #' Evaluate strategy in contest
 #'
 #' @param this modelStrategy
 #' @param contest character, name of contest
 #' @param verbose logical
+#' @param session ssh_session
+#' @param pymodel list, should contain names dockername, pyfile and might contain modelpath.
 #'
 #' @export
-evaluate.modelStrategy <- function(this, contest, session, verbose=FALSE){
-  if(missing(session)){
-    session <- .env[['session']]
-  }
-  this$thisEnv$user_args <- list(action = 'evaluate', contest = contest)
-  this[['settings']] <- stratbuilder2pub:::.settings
-  this[['version']] <- packageVersion('stratbuilder2pub')
-  if(verbose){
-    cat('Before sending rdata\n')
-  }
-  send_rdata(session, this)
-  if(verbose){
-    cat('After sending rdata\n')
-  }
-  get_results(this, session, reports, verbose)
+evaluate.modelStrategy <- function(this, contest, session,  pymodel = list(), verbose=FALSE){
+  competeInContest(this, contest, session, method='evaluate', pymodel, verbose)
 }
 
 
-
+#' Add dockerfile and create docker container on the server
+#' 
+#' Your dockerfile should be with installed python and pip
+#'
+#' @param path character, path to dockerfile
+#' @param dockername character, name of docker container
+#' @param verbose logical
+#' @param session ssh session
+#'
+#' @return character, an answer from the server
+#' @export
+addDocker <- function(path, dockername, session, verbose=FALSE){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  if(file.exists(path)){
+    if(basename(path) != 'Dockerfile'){
+      stop('name of file should be Dockerfile')
+    }
+    lines <- readLines(path) 
+    temp <- file.path(tempdir(), 'Dockerfile')
+    writeLines(c(paste0('###', dockername), lines, paste0('RUN pip install flask')), temp)
+    capture.output(ssh::scp_upload(session, temp))
+    return(get_results(NULL, session, reports=NULL, verbose))
+  }else{
+    stop('path argument should be a path to existing file')
+  }
+}
 
 
 
