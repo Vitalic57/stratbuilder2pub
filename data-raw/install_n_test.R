@@ -3,21 +3,24 @@ usethis::use_package('magrittr', type = 'Imports')
 
 packageVersion('stratbuilder2pub')
 
+setwd('/home/vitaly/Documents/stratbuilder2pub')
 lines <- readLines('DESCRIPTION') 
 ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '0.1.13')
+lines[ind] <- paste0('Version: ', '1.3.1')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
+devtools::test('.')
 devtools::document()
 
 setwd('..')
 devtools::install('stratbuilder2pub')
 
- # download new version of package to users
+
+# download new version of package to users
 setwd('/home/vitaly/Documents/stratbuilder2pub')
 x <- devtools::build(binary = TRUE, args = c('--preclean'))
 xx <- "/home/vitaly/Documents/stratbuilder2pub.tar.gz"
@@ -25,21 +28,31 @@ file.rename(x, "/home/vitaly/Documents/stratbuilder2pub.tar.gz")
 tryCatch(ssh::ssh_disconnect(session), error=function(e){})
 session <- ssh::ssh_connect('vshishkov@142.93.143.142')
 ssh::scp_upload(session, xx, '/usr/local/lib/backtest/')
+# s <- paste0('scp -l 8192 ', xx,' vshishkov@142.93.143.142:/usr/local/lib/backtest/')
+# system(s)
 
 # download to server
-ssh::scp_upload(session, '/home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbuilder2pub', 
+ssh::scp_upload(session, '/home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbuilder2pub',
                 '/home/vshishkov/backtestit/packrat/lib/x86_64-pc-linux-gnu/3.4.2')
-
+# s <- paste0('scp -r /home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbuilder2pub
+#             vshishkov@142.93.143.142:/home/vshishkov/backtestit/packrat/lib/x86_64-pc-linux-gnu/3.4.2')
+# system(s)
 
 
 #download examples
 session <- ssh::ssh_connect('vshishkov@142.93.143.142')
 ssh::scp_upload(session, '/home/vitaly/Documents/stratbuilder2pub/data-raw/example10.R', '/usr/share/backtest/main')
+
 ssh::scp_upload(session, '/home/vitaly/Documents/models/Sentiment/Data/sber_result_table_1.xlsx', '/usr/share/backtest/main')
 
 
 session <- ssh_connect('test_backtest_user@142.93.143.142', keyfile = '/home/vitaly/Documents/ilia')
 session <- ssh_connect('svetlana@142.93.143.142', keyfile = '/home/vitaly/Documents/models/Sentiment/sveta')
+
+
+
+session <- ssh_connect('agurevich@142.93.143.142', keyfile = '/home/vitaly/Documents/id_rsa')
+
 
 
 peek_examples(session)
@@ -53,5 +66,51 @@ stratbuilder2pub::update_package('test_backtest_user@142.93.143.142', '/home/vit
 
 
 #devtools::install_local('/home/vitaly/Documents/stratbuilder2pub (2)', force = TRUE)
+
+# y <- getDatasets()[['SPX']] %>% 
+#   gsub('\\.', ' ', .) %>%
+#   {
+#     tmp <- grepl('^X[0-9]', .); 
+#     .[tmp] <- gsub('X', '', .[tmp]); .
+#   } %>% 
+#   { 
+#     tmp <- strsplit(., ' ') %>% sapply(length)== 4
+#     .[tmp] <- .[tmp] %>% sub(' ', '-', .)
+#     .
+#   }
+# 
+# write.csv(data.frame(y), 'companies.csv')
+
+
+
+create_contest <- function(contestName, endDate, method='public'){
+  endDate <- endDate %>% as.Date %>% {paste0(., 'T23:59:59.999')}
+  resp <- httr::POST(url = paste0("http://", address[[method]], "/contest"), httr::add_headers('Content-Type'='application/json;charset=UTF-8',
+                                                                                               "Authorization"=token),
+                     body = paste0('{"contestName":"', contestName,'","endDate":"', endDate,'"}')) 
+  
+  httr::content(resp)
+}
+
+
+create_contest('Mean reversion', '2019-05-31')
+
+
+
+
+
+setwd('/stratbuilder2pub')
+devtools::document()
+setwd('..')
+devtools::install('stratbuilder2pub')
+
+
+
+
+
+
+
+
+
 
 

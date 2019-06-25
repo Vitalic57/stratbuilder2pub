@@ -1,41 +1,7 @@
-datasets <- list(
-  Russia = c("USDRUB",
-             'LKOH',
-             'ROSN',
-             'NVTK',
-             'SNGS',
-             'GAZP',
-             'TATN',
-             'SBER',
-             'Si',
-             'BR',
-             'RI',
-             'RN',
-             'LK',
-             'SR',
-             'SP',
-             'ED',
-             'GZ',
-             'VB',
-             'Eu',
-             'GD',
-             'HY'
-             ),
-  Chen = c('CO', 
-           'PL',
-           'HG',
-           'TU',
-           'CL',
-           'C',
-           'W',
-           'NG',
-           'ES',
-           'GC',
-           'GDX',
-           'VIX',
-           'VXX',
-           'XLE',
-           'XME',
-           'SPY',
-           'GSPC')
-)
+#' Get available datasets
+#'
+#' @return list
+#' @export
+getDatasets <- function(){
+  return(datasets)
+}

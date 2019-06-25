@@ -1,6 +1,7 @@
 library(stratbuilder2pub)
 library(TTR)
 
+session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 
 # Example of usage for one asset
 # Strategy goes long if spread is less then moving average with 100 window and goes short else
@@ -12,46 +13,33 @@ library(TTR)
   setLookback(this, 1) # how many periods you need for computing beta 
   setLookForward(this, 1000000) # how many periods you don't need to rebalance
   setWaitAfterClose(this, TRUE) # if TRUE, then algorithm don't do revert
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast',
-               lookback = 201) # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast') # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
   # your function. spread is local name, it is name of process. 
   # as argument is responsible for name of your indicator, this name can be used in rules and other indicators
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow',
-               lookback = 201)
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow')
   addRule(this, as = 'short',  # Here we create a rule for short
-          condition = spread > ema_fast & ema_fast > ema_slow, # your trigger, spread is local name of process and ema name of moving average indicator
+          condition = spread > sma_fast & sma_fast > sma_slow, # your trigger, spread is local name of process and ema name of moving average indicator
           type = 'enter', # There are only two types enter or exit.
           side = -1, # There are 2 directions 1(long) or -1(short)
-          oco = 'short', # This is namespace for rule, we will need it later
-          osFun = stratbuilder2pub:::sameMoneyOs, # This function defines how much money will be put in position
-          osFun_args = alist(amount = getMoney(this)) # you can set arguments of this function here
+          oco = 'short' # This is namespace for rule, we will need it later
   )
   
   addRule(this, as = 'long', # This is another rule, now it is for going long
-          condition = spread < ema_fast & ema_fast < ema_slow,
+          condition = spread < sma_fast & sma_fast < sma_slow,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit', # This rule for exiting from position
-          condition = spread < ema_fast, # trigger when to exit
+          condition = spread < sma_fast, # trigger when to exit
           type = 'exit', # the second and the last type of rules
           oco = 'short' # and here namespace, after which entering rule we exit
   )
   addRule(this, as = 'long_exit', # This rule for exiting from long position
-          condition = spread > ema_fast,
+          condition = spread > sma_fast,
           type = 'exit',
           oco = 'long'
   )
-  # in our database there are several types of data
-  # data_raw -- close price multiplied by lot size, shifted for futures
-  # data_roll -- close price multiplied by lot size, no shift here
-  # data_margin -- for now it equals to data_raw, but later it will be responsible for margin
-  this$thisEnv$spreadData <- 'data_raw' # from what data spread will be built
-  
-  this$thisEnv$betaData <- 'data_raw' # what data will be passed to beta builder function
 }
 
 
@@ -62,13 +50,13 @@ setUserData(this, list(dataset = 'Russia', # There is only one dataset for now
                        period = 'day', # there are 2 available period hour and day
                        time = 13)) # if period equals to day, then you can specify time when you strategy will be traded
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
 
-performServer(this, session)
-# It will return report and draw a pnl graph
+performServer(this)
+
+plotPnL(this)
 
 # Now if you want to fit you model you can define distributions and constraints on them and run 
-# run function applyParamsetServer to make search
+#  function applyParamsetServer to make search
 
 
 
@@ -81,7 +69,7 @@ performServer(this, session)
     addDistribution(this,
                     paramset.label = paramset,          # label of paramset
                     component.type = 'indicators',      # here can be indicators, rules, params, pms(positionManager's args)
-                    component.label = 'ema_slow',            # name of component.type
+                    component.label = 'sma_slow',            # name of component.type
                     variable = list(n = seq(50, 200, 10)), # list, name of variable should be equal to array of values
                     label = 'n.slow' # name of distribution, you can pass it to distribution constraints
     )
@@ -89,7 +77,7 @@ performServer(this, session)
     addDistribution(this,
                     paramset.label = paramset,     
                     component.type = 'indicators',     
-                    component.label = 'ema_fast',            
+                    component.label = 'sma_fast',            
                     variable = list(n = seq(10, 150, 10)), 
                     label = 'n.fast' 
     )
@@ -104,14 +92,14 @@ performServer(this, session)
 
 
 applyParamsetServer(this, 
-                    session = session,
-                    paramset.label = paramset,
                     nsamples = 50 # how many example to get from paramset
 )
-# it will return data.frame of results
 
-# pick some of them
-performServer(this, session, paramset.label = paramset, paramset.index = 6)
+getBacktestResults(this) %>% View
+
+# pick one of them
+# paramset.label argument can be omitted
+performServer(this, paramset.label = paramset, paramset.index = 237)
 
 
 # Now about content of report
@@ -139,7 +127,7 @@ performServer(this, session, paramset.label = paramset, paramset.index = 6)
 # sortino.ann               1.8969 # annual Sortino ratio
 # straight.m                0.0827 # deviation of money from straight line
 # straight.t                0.0652 # deviation of money from trades from straight line
-# maxMAE                    0.0000 # this field is not working now
+# maxMAE                    0.0000 # maximum drawdown in one trade divided by money
 # profit.drawdown.year      0.4644 # profit divided by drawdown yearly
 
 

@@ -2,8 +2,6 @@
 library(stratbuilder2pub)
 library(TTR)
 
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
-
 # DEFINE MODEL
 model <- function(n){
   this <- modelStrategy() 
@@ -13,18 +11,14 @@ model <- function(n){
           condition = spread > ema, 
           type = 'enter',
           side = -1,
-          oco = 'short', 
-          osFun = stratbuilder2pub:::sameMoneyOs, 
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'short'
   )
   
   addRule(this, as = 'long',
           condition = spread < ema,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit', 
           condition = spread < ema, 
@@ -62,7 +56,7 @@ port <- modelPortfolio(models)
 # port <- modelPortfolio(GAZP = this1, LKOH = this2)
 
 # Other things with simulation is working as with modelStrategy object
-x <- performServer(port, session, verbose=TRUE, start_date='2016-01-01') 
+x <- performServer(port, start_date='2016-01-01') 
 
 #backtesting params
 {
@@ -93,12 +87,11 @@ x <- performServer(port, session, verbose=TRUE, start_date='2016-01-01')
   }
 }
 
-x <- applyParamsetServer(list(this, this), 
-                         session = session,
-                         paramset.label = paramset,
-                         nsamples = 10)
+applyParamsetServer(port, nsamples = 10)
 
-performServer(port, session, paramset.label = paramset, paramset.index = c(14, 18))
+getBacktestResults(port)
+
+performServer(port, paramset.index = c(14, 18))
 
 
 

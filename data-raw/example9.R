@@ -1,16 +1,11 @@
 library(stratbuilder2pub)
 library(TTR)
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
 
 # In this example we will create list of models. Rules and indicators will be the same, but data will be diffrent
 
 # this function creates our model.
 model <- function(){
   this <- modelStrategy() 
-  setBeta(this, function(data, ...) 1)
-  setLookback(this, 0)
-  setLookForward(this, 1000000) 
-  setWaitAfterClose(this, TRUE) 
   addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
                lookback = 101) 
   addRule(this, as = 'short',  
@@ -40,10 +35,6 @@ model <- function(){
           type = 'exit',
           oco = 'long'
   )
-  
-  this$thisEnv$spreadData <- 'data_raw' 
-  
-  this$thisEnv$betaData <- 'data_raw' 
   setMoney(this, 100000)
   return(this)
 }
@@ -62,7 +53,8 @@ for(x in assets){
 }
 
 # let's perform
-x <- performServer(list(models[[1]], a = models[[2]], models[[3]]), session)
+l <- list(models[[1]], a = models[[2]], models[[3]])
+performServer(l)
 
 # also we can define distribution for list of models
 {
@@ -95,15 +87,13 @@ x <- performServer(list(models[[1]], a = models[[2]], models[[3]]), session)
 
 
 # this function will be executed for each model in list on backend
-x <- applyParamsetServer(models[1], 
-                         session = session,
-                         paramset.label = paramset,
-                         nsamples = 30)
+applyParamsetServer(models, 
+                    nsamples = 30)
 
 
 # Now lets find the best model according to sharpe ratio
 library(magrittr)
-res <- sapply(x, function(it){
+res <- sapply(getBacktestResults(models), function(it){
   it %>%
     dplyr::arrange(dplyr::desc(sharpe.ann)) %>%
     head(1) %>%
@@ -111,7 +101,7 @@ res <- sapply(x, function(it){
 })
 
 # And now put results to perform 
-xx <- performServer(models, session, paramset.label = paramset, paramset.index = res)
+performServer(models, paramset.index = res)
 
 
 

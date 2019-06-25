@@ -55,12 +55,8 @@ performServer.modelPortfolio <- function(this, ...){
 #'
 #' @export
 applyParamsetServer.modelPortfolio <- function(this, ...){
-  this$thisEnv$data_changed <- TRUE # any(sapply(this$thisEnv$models, function(x) x$thisEnv$data_changed)) 
+  this$thisEnv$data_changed <- TRUE
   x <- applyParamsetServer.modelStrategy(this, ...)
-  # for(model in this$thisEnv$models){
-  #   model$thisEnv$data_changed <- FALSE
-  #   model$thisEnv$user_beta_table_changed <- FALSE
-  # }
   return(x)
 }
 

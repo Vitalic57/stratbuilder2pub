@@ -1,14 +1,12 @@
 library(stratbuilder2pub)
 library(TTR)
-session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') 
 
 # Example of usage for multiple asset and rebalancing of portfolio
 {
   this <- modelStrategy() 
   setLookback(this, 100) # how many timeframes to look back
   setLookForward(this, 50) # this amount of timeframes coeffincients will be unchanged
-  setIgnorePosition(this, TRUE) # If it is TRUE, then after lookforward timeframes open positions will be closed and betas will be recalculated
-  setBeta(this, function(data, ...){ # dots are requared arguments, data is a matrix, that include lookback rows
+  setBeta(this, function(data, ...){ # dots are requared arguments, data is a matrix, that includes lookback + 1 rows
     # Here we define how we will calculate coefficients
     # We will do that with help of linear regression
     colnames(data) <-  c('x', 'y')
@@ -17,28 +15,24 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY')
     # get coefs
     beta <- c(1, -coefficients(model)[2])
     # return coefs, program automatically round them, you can cancel this behavior with function setBetasInt(this, FALSE),
-    # but you have to round them by youself, if you don't do that, program will work uncorrectly
+    # but you have to round them by youself, if you don't do that, program will work incorrectly
     return(beta)
   }) 
-  setWaitAfterClose(this, TRUE) 
+  setIgnorePosition(this, TRUE) # If it is TRUE, then after lookforward timeframes open positions will be closed and betas will be recalculated
   addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
                lookback = 101) 
   addRule(this, as = 'short', 
           condition = spread > ema, 
           type = 'enter',
           side = -1,
-          oco = 'short', 
-          osFun = stratbuilder2pub:::sameMoneyOs, 
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'short'
   )
   
   addRule(this, as = 'long', 
           condition = spread < ema,
           type = 'enter',
           side = 1,
-          oco = 'long',
-          osFun = stratbuilder2pub:::sameMoneyOs,
-          osFun_args = alist(amount = getMoney(this))
+          oco = 'long'
   )
   addRule(this, as = 'short_exit',
           condition = spread < ema, 
@@ -58,7 +52,7 @@ setUserData(this, list(dataset = 'Russia',
                        time = 13)) 
 
 
-performServer(this, session)
+performServer(this)
 
 #backtesting params
 {
@@ -98,10 +92,10 @@ performServer(this, session)
   }
 }
 
-x <- applyParamsetServer(list(this, this), 
-                    session = session,
-                    paramset.label = paramset,
+applyParamsetServer(this, 
                     nsamples = 10)
 
-performServer(this, session, paramset.label = paramset, paramset.index = 18)
+performServer(this, paramset.index = 18)
+
+
 

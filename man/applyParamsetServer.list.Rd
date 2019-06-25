@@ -4,15 +4,15 @@
 \alias{applyParamsetServer.list}
 \title{Apply paramset to list of strategies}
 \usage{
-\method{applyParamsetServer}{list}(l, session, paramset.label, nsamples = 100,
+\method{applyParamsetServer}{list}(l, paramset.label, session, nsamples = 100,
   verbose = FALSE, ...)
 }
 \arguments{
 \item{l, }{list of modelStrategy}
 
-\item{session}{ssh_session}
-
 \item{paramset.label}{charater, name of paramset}
+
+\item{session}{ssh_session}
 
 \item{nsamples}{numeric, how many backtests to do}
 

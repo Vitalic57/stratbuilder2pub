@@ -32,4 +32,12 @@ setUserData(this, list(
 
 x <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
 setUserData(this, x)
+
+x <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
+y <- xts(cumsum(rnorm(1000)) + 300, Sys.Date()  + 1:1000)
+setUserData(this, cbind(x, y))
+
+x <- quantmod::getSymbols("AAPL", from = Sys.Date() - 365)
+x <- quantmod::getSymbols("MSFT", from = Sys.Date() - 365)
+setUserData(this, cbind(x, y))
 }

@@ -1,5 +1,8 @@
+# ENTER YOUR PARAMETERS !!!!!!!!!!!!!!!!!!!
 user <- 'YOUR ADDRESS'
 key <- 'YOUR PATH TO KEY'
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 update_package <- function(user, keyfile, session=NULL){
   f_inst <- function(x){
     list.of.packages <- x
@@ -8,10 +11,24 @@ update_package <- function(user, keyfile, session=NULL){
   }
   f_inst(c('ssh', 'devtools'))
   if(is.null(session)){
-    if(missing(keyfile)){
-      session <- ssh::ssh_connect(user)
+    if(missing(user)){
+      session <- .env[['session']]
     }else{
-      session <- ssh::ssh_connect(user, keyfile = keyfile)
+      if(missing(keyfile)){
+        session <- ssh::ssh_connect(user)
+      }else{
+        session <- ssh::ssh_connect(user, keyfile = keyfile)
+      }
+    }
+  }
+  if(missing(user)){
+    user <- paste0(ssh::ssh_info(.env$session)[['user']], '@', ssh::ssh_info(.env$session)[['host']])
+  }
+  if(missing(keyfile)){
+    if('keyfile' %in% names(.env)){
+      keyfile <- .env$keyfile
+    }else{
+      stop('Enter keyfile')
     }
   }
   x <- capture.output(ssh::scp_download(session, '/usr/local/lib/backtest/stratbuilder2pub.tar.gz', tempdir()))
@@ -39,15 +56,35 @@ update_package <- function(user, keyfile, session=NULL){
     file.remove(file.path(tempdir(), 'stratbuilder2pub.tar.gz'))
     invisible()
   }
+  hook <- paste0('setHook(packageEvent("stratbuilder2pub", "onLoad"), function(...) stratbuilder2pub::ssh_connect("', user, '", keyfile = "', keyfile, '"))')
+  if(!file.exists('~/.Rprofile')){
+    writeLines(hook, '~/.Rprofile')
+  }else{
+    lines <- readLines('~/.Rprofile') 
+    ind <- which(grepl('stratbuilder2pub', lines) & grepl('onLoad', lines))[1]
+    if(is.na(ind)){
+      lines[length(lines) + 1] <- hook
+    }else{
+      lines[ind] <- hook
+    }
+    writeLines(lines, '~/.Rprofile')
+  }
   library(stratbuilder2pub)
 }
 update_package(user, key)
 
-library(stratbuilder2pub)
-
-
-session <- ssh::ssh_connect(user, keyfile = key)
-download_examples(session)
+download_examples()
 
 # now examples in
 print(file.path(getwd(), 'main'))
+
+
+
+
+
+
+
+
+
+
+
