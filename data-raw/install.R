@@ -21,7 +21,17 @@ update_package <- function(user, keyfile, session=NULL){
       }
     }
   }
-  x <- capture.output(ssh::scp_download(session, '/usr/local/lib/backtest/stratbuilder2pub.tar.gz', tempdir(), verbose = FALSE))
+  if(missing(user)){
+    user <- paste0(ssh::ssh_info(.env$session)[['user']], '@', ssh::ssh_info(.env$session)[['host']])
+  }
+  if(missing(keyfile)){
+    if('keyfile' %in% names(.env)){
+      keyfile <- .env$keyfile
+    }else{
+      stop('Enter keyfile')
+    }
+  }
+  x <- capture.output(ssh::scp_download(session, '/usr/local/lib/backtest/stratbuilder2pub.tar.gz', tempdir()))
   tryCatch({
     detach("package:stratbuilder2pub", unload = TRUE)
   }, error = function(e){})

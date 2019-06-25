@@ -9,7 +9,7 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.2.11')
+lines[ind] <- paste0('Version: ', '1.3.1')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
@@ -99,7 +99,10 @@ create_contest('Mean reversion', '2019-05-31')
 
 
 
-
+setwd('/stratbuilder2pub')
+devtools::document()
+setwd('..')
+devtools::install('stratbuilder2pub')
 
 
 

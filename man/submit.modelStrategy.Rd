@@ -11,6 +11,8 @@
 
 \item{contest}{character, name of contest}
 
+\item{session}{ssh_session}
+
 \item{verbose}{logical}
 }
 \description{

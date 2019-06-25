@@ -18,13 +18,13 @@ applyParamsetServer.modelStrategy <- function(this,
   if(missing(session)){
     session <- .env[['session']]
   }
-  if(missing(paramset.label)){
-    paramset.label <- names(this$thisEnv$paramsets)[1]
-  }
   this$thisEnv$user_args <- c(list(action = 'applyParamset',
-                                 nsamples = nsamples, 
-                                 paramset.label = paramset.label),
+                                   nsamples = nsamples),
                               list(...))
+  if(!missing(paramset.label)){
+    this$thisEnv$user_args <- c(this$thisEnv$user_args, list(paramset.label = paramset.label))
+  }
+  
   this[['settings']] <- stratbuilder2pub:::.settings
   # upload part  ---------------------------
   this[['version']] <- packageVersion('stratbuilder2pub')
@@ -75,10 +75,6 @@ applyParamsetServer.list <- function(l,
   e[['data_changed']] <- TRUE#any(sapply(l, function(x) x$thisEnv$data_changed))
   e[['version']] <- packageVersion('stratbuilder2pub')
   send_rdata(session, e)
-  # for(this in l){
-  #   this$thisEnv$data_changed <- FALSE
-  #   this$thisEnv$user_beta_table_changed <- FALSE
-  # }
   
   Sys.sleep(3)
   get_results(l, session, 'strategy', verbose)
@@ -181,6 +177,7 @@ performServer.list <- function(l, session, verbose=FALSE, ...){
 }
 
 send_rdata <- function(session, obj, verbose=FALSE){
+  uploadPyModel(obj, session)
   file_path <- file.path(tempdir(), 'file.RData')
   saveRDS(obj, file_path, version = rds_version)
   tryCatch({
@@ -613,45 +610,18 @@ clearData.modelStrategy <- function(this){
 #' @param contest character, name of contest
 #' @param verbose logical
 #' @param session ssh_session
-#' @param pymodel list, should contain names dockername, pyfile and might contain modelpath.
 #'
 #' @export
-submit.modelStrategy <- function(this, contest, session, pymodel = list(), verbose=FALSE){
-  competeInContest(this, contest, session, method='submit', pymodel, verbose)
+submit.modelStrategy <- function(this, contest, session, verbose=FALSE){
+  competeInContest(this, contest, session, method='submit', verbose)
 }
 
 
-competeInContest <- function(this, contest, session, method, pymodel, verbose){
+competeInContest <- function(this, contest, session, method, verbose){
   if(missing(session)){
     session <- .env[['session']]
   }
-  if(length(pymodel) > 0){
-    if(!all(c('pyfile', 'dockername') %in% names(pymodel))){
-      stop('Please, define following arguments in pymodel: pyfile, dockername. And you can define modelpath argument
-           for path to pretrained model')
-    }
-    temp <- tempdir()
-    file_path <- file.path(temp, 'archive.zip')
-    files <- character()
-    if(file.exists(pymodel[['pyfile']])){
-      file.copy(pymodel[['pyfile']], file.path(temp, 'model.py'))
-      files <- c(files, file.path(temp, 'model.py'))
-    }else{
-      stop('pyfile should be existing file')
-    }
-    if('modelpath' %in% names(pymodel)){
-      if(file.exists(pymodel[['modelpath']])){
-        files <- c(files, pymodel[['modelpath']])
-      }else{
-        stop('modelpath should be existing file')
-      }
-    }
-    utils::zip(file_path, files = files, flags = '-j9Xq')
-    capture.output(ssh::scp_upload(session, file_path))
-    this$thisEnv$user_args <- list(action = method, contest = contest, pymodel = pymodel)
-  }else{
-    this$thisEnv$user_args <- list(action = method, contest = contest)
-  }
+  this$thisEnv$user_args <- list(action = method, contest = contest)
   this[['settings']] <- stratbuilder2pub:::.settings
   this[['version']] <- packageVersion('stratbuilder2pub')
   if(verbose){
@@ -671,11 +641,10 @@ competeInContest <- function(this, contest, session, method, pymodel, verbose){
 #' @param contest character, name of contest
 #' @param verbose logical
 #' @param session ssh_session
-#' @param pymodel list, should contain names dockername, pyfile and might contain modelpath.
 #'
 #' @export
-evaluate.modelStrategy <- function(this, contest, session,  pymodel = list(), verbose=FALSE){
-  competeInContest(this, contest, session, method='evaluate', pymodel, verbose)
+evaluate.modelStrategy <- function(this, contest, session, verbose=FALSE){
+  competeInContest(this, contest, session, method='evaluate', verbose)
 }
 
 
@@ -695,9 +664,6 @@ addDocker <- function(path, dockername, session, verbose=FALSE){
     session <- .env[['session']]
   }
   if(file.exists(path)){
-    if(basename(path) != 'Dockerfile'){
-      stop('name of file should be Dockerfile')
-    }
     lines <- readLines(path) 
     temp <- file.path(tempdir(), 'Dockerfile')
     writeLines(c(paste0('###', dockername), lines, paste0('RUN pip install flask')), temp)

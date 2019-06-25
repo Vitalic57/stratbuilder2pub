@@ -425,4 +425,26 @@ getScores <- function(this, ...){
   UseMethod('getScores', this)
 }
 
+#' @export
+setPyModel <- function(this, ...){
+  UseMethod('setPyModel', this)
+}
 
+#' @export
+setPyModelParams <- function(this, ...){
+  UseMethod('setPyModelParams', this)
+}
+
+#' @export
+deletePyModel <- function(this){
+  UseMethod('deletePyModel', this)
+}
+
+#' @export
+getPyModel <- function(this){
+  UseMethod('getPyModel', this)
+}
+
+uploadPyModel <- function(this, ...){
+  UseMethod('uploadPyModel', this)
+}
