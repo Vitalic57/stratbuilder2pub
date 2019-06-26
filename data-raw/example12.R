@@ -2,8 +2,10 @@ library(stratbuilder2pub)
 library(quantmod)
 
 # This command should be executed only once when you set up docker. 
-addDocker('path to dockerfile',
-          'test' # name of docker container
+session = ssh_connect("drastamat@142.93.143.142", "/home/dkazanchyan/.ssh/id_rsa")
+addDocker(session = session,
+          path = '/home/dkazanchyan/stratbuilder2pub Docker/Dockerfile',
+          'test1' # name of docker container
           )
 
 # download Coca cola and Pepsi adjusted prices
@@ -23,11 +25,12 @@ beta <- c( 0.5, -0.5)
   setBeta(this, pryr::partial(function(data, w, ...) return(w), w = beta, .lazy = FALSE))
   
   setPyModel(this,
-             pyfile = '/home/vitaly/Documents/app/model.py', # file where Model class is defined
-             dockername = 'test', # name of docker container
+             pyfile = '/home/dkazanchyan/stratbuilder2pub Docker/model.py', # file where Model class is defined
+             dockername = 'test1', # name of docker container
              lookback_init = 1, # how many period is needed for initialization of model
-             lookback_step = 1, # how many periods is needed on each step
-             as = 'signal' # how to name output of the model
+             lookback_step = 4, # how many periods is needed on each step
+             as = 'signal', 
+             args = list(prev = 1, current = 2)
   )
   addRule(this, as = 'short',
           condition = signal < 0.5, # now signal variable can be used in rules
@@ -55,11 +58,29 @@ beta <- c( 0.5, -0.5)
                  'test',
                  list(
                    data = quote({
+                     print(this$thisEnv$paramsets$TEST$distributions)
                      modelD$log <- log(coredata(modelD$data_raw))
                    })
                  )
   )
 }
+
+paramset = "TEST"
+
+addDistribution(this, 
+                paramset.label = paramset, 
+                component.type = 'pymodel', 
+                variable = list(prev = c(0, 1, 2)), 
+                label = 'prev')
+
+addDistribution(this, 
+                paramset.label = paramset, 
+                component.type = 'pymodel', 
+                variable = list(current = c(0, 1, 2)), 
+                label = 'current')
+
+
+
 
 
 
@@ -72,6 +93,13 @@ beta <- c( 0.5, -0.5)
 }
 
 
-performServer(this)
+applyParamsetServer(this, paramset.label = paramset)
+getBacktestResults(this) %>% View()
+
+
+
+performServer(this, session = session)
 
 plotPnL(this)
+getReportStrategy(this)
+this$thisEnv$modelD$data_raw %>% plot

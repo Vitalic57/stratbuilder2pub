@@ -5,8 +5,8 @@
 \title{Adds rule or variable to strategy}
 \usage{
 \method{addRule}{modelStrategy}(this, condition, as, args = list(), type,
-  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount =
-  getMoney(this)), pathwise = FALSE)
+  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount
+  = getMoney(this)), pathwise = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}

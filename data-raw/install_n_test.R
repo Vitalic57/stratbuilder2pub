@@ -12,7 +12,7 @@ print(cur_version)
 lines[ind] <- paste0('Version: ', '1.3.1')
 writeLines(lines, 'DESCRIPTION')
 
-setwd('/home/vitaly/Documents/stratbuilder2pub')
+setwd('/home/dkazanchyan/stratbuilder2pub')
 devtools::test('.')
 devtools::document()
 

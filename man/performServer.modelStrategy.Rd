@@ -4,7 +4,8 @@
 \alias{performServer.modelStrategy}
 \title{Send your strategy to server for backtesting.}
 \usage{
-\method{performServer}{modelStrategy}(this, session, verbose = FALSE, ...)
+\method{performServer}{modelStrategy}(this, session, verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{this}{modelStrategy}

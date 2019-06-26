@@ -2,7 +2,6 @@
 % Please edit documentation in R/modelPortfolio.R, R/utils.R
 \name{getModelD.modelPortfolio}
 \alias{getModelD.modelPortfolio}
-\alias{getModelD.modelPortfolio}
 \title{Get modelData}
 \usage{
 \method{getModelD}{modelPortfolio}(this)

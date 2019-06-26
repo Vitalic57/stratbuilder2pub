@@ -4,7 +4,8 @@
 \alias{getRules.modelStrategy}
 \title{Gets inforamtion about rules in the model}
 \usage{
-\method{getRules}{modelStrategy}(this, pathwise = FALSE, recalc = FALSE)
+\method{getRules}{modelStrategy}(this, pathwise = FALSE,
+  recalc = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}

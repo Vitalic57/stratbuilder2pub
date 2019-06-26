@@ -3,14 +3,13 @@
 %   R/distribution_contraints.R
 \name{addDistributionConstraint.modelStrategy}
 \alias{addDistributionConstraint.modelStrategy}
-\alias{addDistributionConstraint.modelStrategy}
 \title{Adds contraints to distributions}
 \usage{
-\method{addDistributionConstraint}{modelStrategy}(this, paramset.label, expr,
-  label)
+\method{addDistributionConstraint}{modelStrategy}(this, paramset.label,
+  expr, label)
 
-\method{addDistributionConstraint}{modelStrategy}(this, paramset.label, expr,
-  label)
+\method{addDistributionConstraint}{modelStrategy}(this, paramset.label,
+  expr, label)
 }
 \arguments{
 \item{this}{modelStrategy}
