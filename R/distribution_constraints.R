@@ -86,6 +86,7 @@ addDistribution.modelStrategy <- function(this,
                              }
                              'pms'
                            },
+                           pymodel = 'pymodel',
                            params =,
                            param =,
                            par =,
@@ -109,6 +110,7 @@ addDistribution.modelStrategy <- function(this,
                                                         indicator=,
                                                         indicators='indicators',
                                                         beta=,
+                                                        pymodel='pymodel',
                                                         beta_fun= 'beta_fun',
                                                         {warning('wrong component label');return()}
                              )

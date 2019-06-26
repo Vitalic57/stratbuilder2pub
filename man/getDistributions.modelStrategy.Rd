@@ -3,7 +3,6 @@
 %   R/distribution_contraints.R
 \name{getDistributions.modelStrategy}
 \alias{getDistributions.modelStrategy}
-\alias{getDistributions.modelStrategy}
 \title{Gets list of distributions}
 \usage{
 \method{getDistributions}{modelStrategy}(this, paramset.label)

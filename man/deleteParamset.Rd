@@ -3,7 +3,6 @@
 %   R/distribution_contraints.R
 \name{deleteParamset.modelStrategy}
 \alias{deleteParamset.modelStrategy}
-\alias{deleteParamset.modelStrategy}
 \title{Removes paramset from strategy}
 \usage{
 \method{deleteParamset}{modelStrategy}(this, paramset.label)

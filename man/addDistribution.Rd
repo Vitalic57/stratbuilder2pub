@@ -3,14 +3,13 @@
 %   R/distribution_contraints.R
 \name{addDistribution.modelStrategy}
 \alias{addDistribution.modelStrategy}
-\alias{addDistribution.modelStrategy}
 \title{Add distribution}
 \usage{
-\method{addDistribution}{modelStrategy}(this, paramset.label, component.type,
-  component.label, variable, label)
+\method{addDistribution}{modelStrategy}(this, paramset.label,
+  component.type, component.label, variable, label)
 
-\method{addDistribution}{modelStrategy}(this, paramset.label, component.type,
-  component.label, variable, label)
+\method{addDistribution}{modelStrategy}(this, paramset.label,
+  component.type, component.label, variable, label)
 }
 \arguments{
 \item{this}{modelStrategy}

@@ -3,7 +3,6 @@
 %   R/distribution_contraints.R
 \name{addDistributionConstraint.list}
 \alias{addDistributionConstraint.list}
-\alias{addDistributionConstraint.list}
 \title{Add distributions' constraint to list of models}
 \usage{
 \method{addDistributionConstraint}{list}(l, ...)

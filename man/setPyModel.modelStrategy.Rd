@@ -8,7 +8,7 @@
   lookback_step = 0, lookback = 0, data = quote(spread),
   pathwise = FALSE, as = "signal", hostname = "localhost",
   modelpath = NULL, update_with_betas = FALSE, vector_step = FALSE,
-  port = 4000)
+  args = list(), port = 4000)
 }
 \arguments{
 \item{this}{modelStrategy}

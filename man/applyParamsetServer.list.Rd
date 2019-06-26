@@ -4,8 +4,8 @@
 \alias{applyParamsetServer.list}
 \title{Apply paramset to list of strategies}
 \usage{
-\method{applyParamsetServer}{list}(l, paramset.label, session, nsamples = 100,
-  verbose = FALSE, ...)
+\method{applyParamsetServer}{list}(l, paramset.label, session,
+  nsamples = 100, verbose = FALSE, ...)
 }
 \arguments{
 \item{l, }{list of modelStrategy}

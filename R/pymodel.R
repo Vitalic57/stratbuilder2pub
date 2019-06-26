@@ -32,6 +32,7 @@ setPyModel.modelStrategy <- function(this,
                                      modelpath = NULL,
                                      update_with_betas = FALSE,
                                      vector_step = FALSE,
+                                     args = list(),
                                      port = 4000
 ){
   if(!file.exists(pyfile)){
@@ -66,6 +67,7 @@ setPyModel.modelStrategy <- function(this,
     port_str = port_str,
     as = as,
     vector_step = vector_step,
+    args = args, 
     id = '1'
   )
 }

@@ -3,7 +3,6 @@
 %   R/distribution_contraints.R
 \name{addDistribution.list}
 \alias{addDistribution.list}
-\alias{addDistribution.list}
 \title{Add distribution to list of models}
 \usage{
 \method{addDistribution}{list}(l, ...)

@@ -5,8 +5,9 @@
 \title{Plots change of pnl through backtest period}
 \usage{
 \method{plotPnL}{modelStrategy}(this, type = "money", from = "base",
-  comOn = TRUE, leg = "all", graph_type = "ggplot2", each_year = FALSE,
-  adjust = FALSE, return_type = "plot", cutoff = FALSE, ...)
+  comOn = TRUE, leg = "all", graph_type = "ggplot2",
+  each_year = FALSE, adjust = FALSE, return_type = "plot",
+  cutoff = FALSE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
