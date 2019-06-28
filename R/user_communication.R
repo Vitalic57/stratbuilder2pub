@@ -242,6 +242,14 @@ ssh_info <- function(session){
 
 .env <- new.env()
 
+#' Connect to server
+#'
+#' @param host character, name of host
+#'
+#' @param keyfile character, path to key
+#' @param passwd askpass::askpass
+#' @param verbose logical
+#'
 #' @export
 ssh_connect <- function(host, keyfile = NULL, passwd = askpass::askpass, verbose = FALSE){
   .env[['keyfile']] <- keyfile

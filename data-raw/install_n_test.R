@@ -9,10 +9,10 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.1')
+lines[ind] <- paste0('Version: ', '1.3.2')
 writeLines(lines, 'DESCRIPTION')
 
-setwd('/home/dkazanchyan/stratbuilder2pub')
+setwd('/home/vitaly/Documents/stratbuilder2pub')
 devtools::test('.')
 devtools::document()
 

@@ -2,7 +2,7 @@ library(stratbuilder2pub)
 library(quantmod)
 
 # This command should be executed only once when you set up docker. 
-session = ssh_connect("drastamat@142.93.143.142", "/home/dkazanchyan/.ssh/id_rsa")
+session <- ssh_connect("test_backtest_user@142.93.143.142", "/home/vitaly/Documents/ilia")
 addDocker(session = session,
           path = '/home/dkazanchyan/stratbuilder2pub Docker/Dockerfile',
           'test1' # name of docker container

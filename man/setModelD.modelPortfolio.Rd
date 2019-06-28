@@ -2,6 +2,7 @@
 % Please edit documentation in R/modelPortfolio.R, R/utils.R
 \name{setModelD.modelPortfolio}
 \alias{setModelD.modelPortfolio}
+\alias{setModelD.modelPortfolio}
 \title{Set modelData}
 \usage{
 \method{setModelD}{modelPortfolio}(this, data)
