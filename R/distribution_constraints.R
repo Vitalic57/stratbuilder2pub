@@ -124,30 +124,49 @@ addDistribution.modelStrategy <- function(this,
                            })
   #print(variable[[1]])
   if(is.list(variable[[1]]) && any(sapply(variable[[1]], is.function))){
-    ee <- new.env()
-    q <- substitute(variable)[[-1]]
-    #print(q)
-    nms <- sapply(q[-1], deparse)
-    for(i in 1:length(nms)){
-      assign(nms[i], variable[[1]][[i]], envir = ee)
-    }
-    nms <- list(nms)
-    names(nms) <- names(variable)
-    l <- list(component.type = component.type,
-              component.label = component.label,
-              env = ee,
-              variable = nms)
-  }else{
-    l <- list(component.type = component.type,
-              component.label = component.label,
-              variable = variable)
+      ee <- new.env()
+      q <- substitute(variable)[[-1]]
+      #print(q)
+      if (is.symbol(q)) {
+          if (!is.null(names(variable[[1]]))) {
+              nms <- names(variable[[1]])
+              nms[nms == ""] <- paste(q, which(nms == ""), sep = '')
+          } else {
+              nms <- paste(q, 1:length(variable[[1]]), sep = '')
+          }
+      } else {
+          nms <- sapply(q[-1], deparse)
+      }
+      for(i in 1:length(nms)){
+          assign(nms[i], variable[[1]][[i]], envir = ee)
+      }
+      nms <- list(nms)
+      names(nms) <- names(variable)
+      l <- list(component.type = component.type,
+                component.label = component.label,
+                env = ee,
+                variable = nms)
+  } else  if (is.function(variable[[1]])) {
+      ee <- new.env()
+      func_name <- deparse(substitute(variable)[[-1]])
+      assign(func_name, variable[[1]], envir = ee)
+      func_name <- list(func_name)
+      names(func_name) <- names(variable)
+      l <- list(component.type = component.type,
+                component.label = component.label,
+                env = ee,
+                variable = func_name)
+      
+  } else {
+      l <- list(component.type = component.type,
+                component.label = component.label,
+                variable = variable)
   }
   if(!(paramset.label %in% names(e$paramsets))){
-    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
+      e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
 }
-
 
 
 #' Add distribution to list of models

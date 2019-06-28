@@ -1,5 +1,6 @@
 library(stratbuilder2pub)
 library(quantmod)
+library(magrittr)
 
 # This command should be executed only once when you set up docker. 
 session <- ssh_connect("test_backtest_user@142.93.143.142", "/home/vitaly/Documents/ilia")
@@ -10,10 +11,11 @@ addDocker(session = session,
 
 # download Coca cola and Pepsi adjusted prices
 downloaded <- lapply(c('KO', 'PEP'), function(x){
-  getSymbols(x, from = '2000-01-01', auto.assign = FALSE) %>% Ad
+  getSymbols(x, from = '2000-01-01', auto.assign = FALSE, period = 'week') %>% Ad 
 }) %>%
   Reduce('cbind', .) %>%
   na.omit
+
 
 # define weights 
 beta <- c( 0.5, -0.5)
@@ -27,10 +29,10 @@ beta <- c( 0.5, -0.5)
   setPyModel(this,
              pyfile = '/home/dkazanchyan/stratbuilder2pub Docker/model.py', # file where Model class is defined
              dockername = 'test1', # name of docker container
-             lookback_init = 1, # how many period is needed for initialization of model
-             lookback_step = 4, # how many periods is needed on each step
+             lookback_init = 2, # how many period is needed for initialization of model
+             lookback_step = 2, # how many periods is needed on each step
              as = 'signal', 
-             args = list(prev = 1, current = 2)
+             args = list(prev = 0, current = 1)
   )
   addRule(this, as = 'short',
           condition = signal < 0.5, # now signal variable can be used in rules
@@ -100,6 +102,8 @@ getBacktestResults(this) %>% View()
 
 performServer(this, session = session)
 
+
+this1 <- this
 plotPnL(this)
 getReportStrategy(this)
 this$thisEnv$modelD$data_raw %>% plot
