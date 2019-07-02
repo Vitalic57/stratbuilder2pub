@@ -5,7 +5,16 @@
 #' @param this modelStrategy
 #'
 #' @return xts zoo
+#' 
 #' @export
+#' @rdname getPnL
+getPnL <- function(this){
+  UseMethod('getPnL', this)
+}
+
+#' @export
+#' @rdname getPnL
+#' @method getPnL modelStrategy
 getPnL.modelStrategy <- function(this){
   range <- this$thisEnv$backtests[['base']]$activeField
   range <- range[1]:range[2]
@@ -14,14 +23,10 @@ getPnL.modelStrategy <- function(this){
 }
 
 
-#' Get pnl as xts series
-#'
-#' This method should be called only after backtest is done
-#'
-#' @param this modelPortfolio
-#'
-#' @return xts zoo
+
 #' @export
+#' @rdname getPnL
+#' @method getPnL modelPortfolio
 getPnL.modelPortfolio <- function(this){
   range <- this$thisEnv$backtests[['base']]$activeField
   range <- range[1]:range[2]
@@ -30,16 +35,13 @@ getPnL.modelPortfolio <- function(this){
 }
 
 
-#' Get pnl as list of xts series
-#'
-#' This method should be called only after backtest is done
-#'
-#' @param this modelPortfolio
-#'
+
 #' @return xts zoo
 #' @export
-getPnL.list <- function(l){
-  lapply(l, getPnL.modelStrategy) 
+#' @rdname getPnL
+#' @method getPnL list
+getPnL.list <- function(this){
+  lapply(this, getPnL.modelStrategy) 
 }
 
 

@@ -2,38 +2,43 @@
 #'
 #' @param this modelStrategy
 #'
-#' @return
+#' @return noquote data.frame with report
 #' @export
+#' @rdname getReportStrategy
+getReportStrategy <- function(this){
+  UseMethod('getReportStrategy', this)
+}
+
+#' @export
+#' @rdname getReportStrategy
+#' @method getReportStrategy modelStrategy
 getReportStrategy.modelStrategy <- function(this){
   return(this$thisEnv$backtests$base$reports$strategy %>% t %>% t %>% noquote)
 }
 
-#' Report of strategy
-#'
-#' @param l list of modelStrategies
-#'
-#' @return
+
+#' @return data.frame
 #' @export
-getReportStrategy.list <- function(l){
-  lapply(l, function(x){
+#' @rdname getReportStrategy
+#' @method getReportStrategy list
+getReportStrategy.list <- function(this){
+  lapply(this, function(x){
     getReportStrategy(x) 
   }) %>%
     Reduce('cbind', .) %>%
     {
-      if(!is.null(names(l))){
-        colnames(.) <- names(l)
+      if(!is.null(names(this))){
+        colnames(.) <- names(this)
       }
       .
     } %>%
     return
 }
 
-#' Report of strategy
-#'
-#' @param this modelPortfolio
-#'
-#' @return
+
 #' @export
+#' @rdname getReportStrategy
+#' @method getReportStrategy modelPortfolio
 getReportStrategy.modelPortfolio <- function(this){
   getReportStrategy.modelStrategy(this)
 }
@@ -44,30 +49,35 @@ getReportStrategy.modelPortfolio <- function(this){
 #'
 #' @return
 #' @export
+#' @rdname getReportCalendar
+getReportCalendar <- function(this){
+  UseMethod('getReportCalendar', this)
+}
+
+#' @export
+#' @rdname getReportCalendar
+#' @method getReportCalendar modelStrategy
 getReportCalendar.modelStrategy <- function(this){
   return(this$thisEnv$backtests$base$reports$calendar)
 }
 
-#' Report of strategy year by year
-#'
-#' @param l list of modelStrategies
-#'
-#' @return
+
+#' @return list of data.frames
 #' @export
-getReportCalendar.list <- function(l){
-  lapply(l, function(x){
+#' @rdname getReportCalendar
+#' @method getReportCalendar list
+getReportCalendar.list <- function(this){
+  lapply(this, function(x){
     getReportCalendar(x)
   }) %>%
-    set_names(names(l)) %>%
+    set_names(names(this)) %>%
     return
 }
 
-#' Report of strategy year by year
-#'
-#' @param this modelPortfolio
-#'
-#' @return
+
 #' @export
+#' @rdname getReportCalendar
+#' @method getReportCalendar modelPortfolio
 getReportCalendar.modelPortfolio <- function(this){
   return(this$thisEnv$backtests$base$reports$calendar)
 }
@@ -78,30 +88,35 @@ getReportCalendar.modelPortfolio <- function(this){
 #'
 #' @return
 #' @export
+#' @rdname getReportTrades
+getReportTrades <- function(this){
+  UseMethod('getReportTrades', this)
+}
+
+#' @export
+#' @rdname getReportTrades
+#' @method getReportTrades modelStrategy
 getReportTrades.modelStrategy <- function(this){
   return(this$thisEnv$backtests$base$reports$trades)
 }
 
-#' Report of trades
-#'
-#' @param l list
-#'
+
 #' @return
 #' @export
-getReportTrades.list <- function(l){
-  lapply(l, function(x){
+#' @rdname getReportTrades
+#' @method getReportTrades list
+getReportTrades.list <- function(this){
+  lapply(this, function(x){
     getReportTrades(x)
   }) %>%
-    set_names(names(l)) %>%
+    set_names(names(this)) %>%
     return
 }
 
-#' Report of trades
-#'
-#' @param this modelPortfolio
-#'
-#' @return
+
 #' @export
+#' @rdname getReportTrades
+#' @method getReportTrades modelPortfolio
 getReportTrades.modelPortfolio <- function(this){
   return(this$thisEnv$backtests$base$reports$trades)
 }
@@ -114,6 +129,14 @@ getReportTrades.modelPortfolio <- function(this){
 #'
 #' @return data.frame
 #' @export
+#' @rdname getBacktestResults
+getBacktestResults <- function(this, paramset.label){
+  UseMethod('getBacktestResults', this)
+}
+
+#' @export
+#' @rdname getBacktestResults
+#' @method getBacktestResults modelStrategy
 getBacktestResults.modelStrategy <- function(this, paramset.label){
   if(missing(paramset.label)){
     paramset.label <- 1
@@ -122,28 +145,26 @@ getBacktestResults.modelStrategy <- function(this, paramset.label){
 }
 
 
-#' Results of backtest
-#'
-#' @param this modelStrategy
-#' @param paramset.label character, name of paramset
+
+#' @param ... arguments to getBacktestResults.modelStrategy
 #'
 #' @return list of data.frames
 #' @export
-getBacktestResults.list <- function(l, ...){
-  lapply(l, function(x){
+#' @rdname getBacktestResults
+#' @method getBacktestResults list
+getBacktestResults.list <- function(this, ...){
+  lapply(this, function(x){
     getBacktestResults(x, ...)
   }) %>%
-    set_names(names(l))
+    set_names(names(this))
 }
 
 
-#' Results of backtest
-#'
-#' @param this modelStrategy
-#' @param paramset.label character, name of paramset
-#'
+
 #' @return list of data.frames
 #' @export
+#' @rdname getBacktestResults
+#' @method getBacktestResults modelPortfolio
 getBacktestResults.modelPortfolio <- function(this, ...){
   getBacktestResults.list(this$thisEnv$models, ...)
 }

@@ -2,18 +2,28 @@
 
 #' Add distribution
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param paramset.label character, label of paramset
 #' @param component.type character, one of rule, indicator, params, lookback, lookforward, beta_fun
 #' @param component.label character, name of component, argument 'as' is resposible for that. 
 #' If component.type is equal to one of lookback, lookforward, beta_fun, then this argument should be missed
 #' @param variable list with only one element, for example list(n = 1:10)
 #' @param label character, name for this distribution
-#'
+#' 
 #' @export
 #' @rdname addDistribution
-#' @method addDistribution modelStrategy
+addDistribution <- function(this,
+                            paramset.label,
+                            component.type,
+                            component.label,
+                            variable,
+                            label){
+  UseMethod('addDistribution', this)
+}
+
+#' @export
 #' @examples
+#' \dontrun{
 #' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
 #'         lookback = 100)
 #' addDistribution(this,
@@ -42,6 +52,9 @@
 #'     variable = list(n = seq(0.005,0.03,0.002)),
 #'     label = 'my_distr'
 #' )
+#' }
+#' @rdname addDistribution
+#' @method addDistribution modelStrategy
 addDistribution.modelStrategy <- function(this,
                                           paramset.label,
                                           component.type,
@@ -58,13 +71,6 @@ addDistribution.modelStrategy <- function(this,
                              }
                              'rules'
                            },
-                           var = ,
-                           vars ={
-                             if(!(component.label %in% names(getVariables(this)))){
-                               return()
-                             }
-                             'vars'
-                           },
                            indicator =,
                            indicators = {
                              if(!(component.label %in% names(getIndicators(this)))){
@@ -72,13 +78,13 @@ addDistribution.modelStrategy <- function(this,
                              }
                              'indicators'
                            },
-                           stop =,
-                           stops={
-                             if(!(component.label %in% names(getStops(this)))){
-                               return()
-                             }
-                             'stops'
-                           },
+                           # stop =,
+                           # stops={
+                           #   if(!(component.label %in% names(getStops(this)))){
+                           #     return()
+                           #   }
+                           #   'stops'
+                           # },
                            pm =,
                            pms = {
                              if(!(component.label %in% names(getPM(this)))){
@@ -86,7 +92,7 @@ addDistribution.modelStrategy <- function(this,
                              }
                              'pms'
                            },
-                           pymodel = 'pymodel',
+                           #pymodel = 'pymodel',
                            params =,
                            param =,
                            par =,
@@ -169,33 +175,40 @@ addDistribution.modelStrategy <- function(this,
 }
 
 
-#' Add distribution to list of models
-#' 
-#' This method add the same distribution to each model in list
-#'
-#' @param l list, list of modelStrategy objects
+
+
 #' @param ... params for addDistribution
 #'
 #' @export
-addDistribution.list <- function(l, ...){
-  for(x in l){
+#' @rdname addDistribution
+#' @method addDistribution list
+addDistribution.list <- function(this, ...){
+  for(x in this){
     addDistribution(x, ...)
   }
 }
 
 
 
-#' Adds contraints to distributions
+#' Add constraints to distributions
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param paramset.label character, paramset label
 #' @param expr expression, that contains names from labels of distributions
 #' @param label character, name of the constraint
-#'
+#' 
 #' @export
 #' @rdname addDistributionConstraint
-#' @method addDistributionConstraint modelStrategy
+addDistributionConstraint <- function(this,
+                                      paramset.label,
+                                      expr, 
+                                      label){
+  UseMethod('addDistributionConstraint', this)
+}
+
+#' @export
 #' @examples
+#' \dontrun{
 #' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
 #'         lookback = 100)
 #' addDistribution(this,
@@ -229,11 +242,13 @@ addDistribution.list <- function(l, ...){
 #'     paramset.label = paramset,
 #'     expr = bb.sd > my_distr * 100
 #' )
+#' }
+#' @rdname addDistributionConstraint
+#' @method addDistributionConstraint modelStrategy
 addDistributionConstraint.modelStrategy <- function(this,
                                                     paramset.label,
-                                                    expr, #expression of constraint, it must contain only names
-                                                    #in paramset.label
-                                                    label #label of this contraint
+                                                    expr, 
+                                                    label
 ){
   e <- this$thisEnv
   if(!(paramset.label %in% names(e$paramsets))){
@@ -250,25 +265,31 @@ addDistributionConstraint.modelStrategy <- function(this,
 }
 
 
-#' Add distributions' constraint to list of models
-#' 
-#' This method add the same distributions' constraint to each model in list
-#'
-#' @param l list, list of modelStrategy objects
+
 #' @param ... params for addDistribution
 #'
 #' @export
-addDistributionConstraint.list <- function(l, ...){
-  for(x in l){
+#' @rdname addDistributionConstraint
+#' @method addDistributionConstraint list
+addDistributionConstraint.list <- function(this, ...){
+  for(x in this){
     addDistributionConstraint(x, ...)
   }
 }
 
-#' Removes paramset from strategy
+#' Remove paramset from strategy
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param paramset.label name of paramset
-#'
+#' 
+#' @export
+#' @rdname deleteParamset
+deleteParamset <- function(this, 
+                           paramset.label){
+  UseMethod('deleteParamset', this)
+}
+
+#' 
 #' @export
 #' @rdname deleteParamset
 #' @method deleteParamset modelStrategy
@@ -282,14 +303,14 @@ deleteParamset.modelStrategy <- function(this,
 }
 
 
-#' Removes paramset from each strategy in list of models
-#'
-#' @param l list, list of modelStrategy objects
+
 #' @param ... params for addDistribution
 #'
 #' @export
-deleteParamset.list <- function(l, ...){
-  for(x in l){
+#' @rdname deleteParamset
+#' @method deleteParamset list
+deleteParamset.list <- function(this, ...){
+  for(x in this){
     deleteParamset(x, ...)
   }
 }
@@ -297,13 +318,22 @@ deleteParamset.list <- function(l, ...){
 
 
 
-#' Gets list of distributions
+#' Get list of distributions
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param paramset.label character
 #'
 #' @return list of distributions
+#' 
 #' @export
+#' @rdname  getDistributions
+getDistributions <- function(this, paramset.label){
+  UseMethod('getDistributions', this)
+}
+
+#' @export
+#' @rdname getDistributions
+#' @method getDistributions modelStrategy
 getDistributions.modelStrategy <- function(this, paramset.label){
   return(this$thisEnv$paramsets[[paramset.label]]$distributions)
 }

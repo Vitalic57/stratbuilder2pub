@@ -5,19 +5,27 @@
 #' This indicator will be calculated each time when spread update coefs
 #' indicators must return data.frame or matrix or array
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param args list, the first argument should be name, it should be equal to function (your indicator), other arguments of list
 #' will be passed to this function
 #' @param as character, local name of this indicator
 #' @param lookback numeric, how many points does it need to do calculation
 #' @param ... addtional params
-#'
+#' 
 #' @export
 #' @rdname addIndicator
-#' @method addIndicator modelStrategy
+addIndicator <- function(this, args, as, lookback, ...){
+  UseMethod('addIndicator', this)
+}
+
+#' @export
 #' @examples
+#' \dontrun{
 #' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
 #'     lookback = 100)
+#' }
+#' @rdname addIndicator
+#' @method addIndicator modelStrategy
 addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
   e <- this$thisEnv
   if(missing(lookback)){
@@ -47,7 +55,7 @@ addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
 #' Conditions will be calculated and then action will be done according to type. osFun arg is needed for definition of 
 #' how much money you want to invest in enter type rules. 
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param condition expression, it must use name of indicators and local args
 #' @param as character, local name of rule
 #' @param args list, arguments that can be used in condition
@@ -59,11 +67,25 @@ addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
 #' @param pathwise logical, if it is FALSE, then calculation of rules  will be performed on the tables once per 
 #' computation of coefficients and condition should return logical vector, 
 #' otherwise calculation of rules will be performed on each iteration and condition should return logical scalar
-#'
+#' 
 #' @export
 #' @rdname addRule
-#' @method addRule modelStrategy
+addRule <- function(this,
+                    condition, 
+                    as, 
+                    args = list(),
+                    type, 
+                    side, 
+                    oco = 'base',  
+                    osFun = sameMoneyOs, 
+                    osFun_args = alist(amount = getMoney(this)),
+                    pathwise = FALSE){
+  UseMethod('addRule', this)
+}
+
+#' @export
 #' @examples
+#' \dontrun{
 #'   addRule(this, as = 'bb_dn_up',
 #'           condition = (Lag(spread,1) < Lag(bb[,'dn'],1)) &
 #'                       (spread > bb[,'dn']) &
@@ -88,16 +110,17 @@ addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
 #'           oco = 'long',
 #'           osFun = sameMoneyOs,
 #'           osFun_args = alist(amount = 5000000))
-addRule.modelStrategy <- function(this, #object
-                                  condition, #condition when to apply rule,
-                                  #it can include such variables as
-                                  #spread and names of indicators
-                                  as, #name of rule
+#' }
+#' @rdname addRule
+#' @method addRule modelStrategy
+addRule.modelStrategy <- function(this,
+                                  condition, 
+                                  as, 
                                   args = list(),
-                                  type, #enter or exit
-                                  side, #1 for buy and -1 for sell
-                                  oco = 'base',  #environment of rule
-                                  osFun = sameMoneyOs, # how much money you want to use in rule
+                                  type, 
+                                  side, 
+                                  oco = 'base',  
+                                  osFun = sameMoneyOs, 
                                   osFun_args = alist(amount = getMoney(this)),
                                   pathwise = FALSE
 ){
@@ -142,11 +165,18 @@ addRule.modelStrategy <- function(this, #object
 
 
 
-#' Gets inforamtion about indicators in the model
+#' Get inforamtion about indicators in the model
 #'
-#' @param this modelStrategy
+#' @param this model
 #'
 #' @return list of inforamation
+#' 
+#' @export
+#' @rdname getIndicators
+getIndicators <- function(this){
+  UseMethod('getIndicators', this)
+}
+
 #' @export
 #' @rdname getIndicators
 #' @method getIndicators modelStrategy
@@ -154,14 +184,19 @@ getIndicators.modelStrategy <- function(this){
   return(this$thisEnv$indicators)
 }
 
-#' Gets inforamtion about rules in the model
+#' Get inforamtion about rules in the model
 #'
 #' @param this modelStrategy
+#' @param pathwise logical, if TRUE only pathwise rules will be returned
+#' @param recalc logical, if TRUE then rules will be recalculated
 #'
 #' @return list of inforamation
 #' @export
-#' @rdname getRules
-#' @method getRules modelStrategy
+getRules <- function(this, pathwise = FALSE, recalc = FALSE){
+  UseMethod('getRules', this)
+}
+
+#' @export
 getRules.modelStrategy <- function(this, pathwise = FALSE, recalc = FALSE){
   if(length(pathwise) == 0){
     return(this$thisEnv$rules)
@@ -189,14 +224,16 @@ getRules.modelStrategy <- function(this, pathwise = FALSE, recalc = FALSE){
 
 
 
-#' Removes rule by name
+#' Remove rule by name
 #'
 #' @param this modelStrategy
 #' @param name character, name of rule
-#'
 #' @export
-#' @rdname removeRule
-#' @method removeRule modelStrategy
+removeRule <- function(this, name){
+  UseMethod('removeRule', this)
+}
+
+#' @export
 removeRule.modelStrategy <- function(this, name){
   table <- getRules(this)
   names <- sapply(table, function(x) x$as)
@@ -208,14 +245,16 @@ removeRule.modelStrategy <- function(this, name){
 
 
 
-#' Removes indicator by name
+#' Remove indicator by name
 #'
 #' @param this modelStrategy
 #' @param name character, name of indicator
-#'
 #' @export
-#' @rdname removeIndicator
-#' @method removeIndicator modelStrategy
+removeIndicator <- function(this, name){
+  UseMethod('removeIndicator', this)
+}
+
+#' @export
 removeIndicator.modelStrategy <- function(this, name){
   table <- getIndicators(this)
   names <- sapply(table, function(x) x$as)

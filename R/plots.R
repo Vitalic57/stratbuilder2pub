@@ -42,26 +42,31 @@
 
 
 
-#' Plots change of pnl through backtest period
+#' Plot change of pnl through backtest period
 #'
 #' @param this modelStrategy
+#' @param ... params
+#' @export
+#' @rdname plotPnL
+plotPnL <- function(this, 
+                    ...){
+  UseMethod('plotPnL', this)
+}
+
 #' @param type character, one of c('money','trades','percents')
-#' @param from character, name of folder in backtests
 #' @param leg numeric/character, number of leg, if it is equal to 'all' or 'sum', then all pnl among all legs
 #' will be summed, if it is equal to 'sep', then pnl among legs will be plotted
 #' @param graph_type character, ggplot2 or xts 
 #' @param each_year logical, if TRUE, then each graph will start with 0 each year
 #' @param adjust logical, if TRUE, then values will be divided by getMoney(this)
-#' @param ... 
 #' @param comOn bool, if true then commission will be included in the 'trades' graph
 #' @param return_type character, plot or data
-#'
+#' @param cutoff logical, if TRUE then on plot will be horizonal line indicating when model was created
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelStrategy
 plotPnL.modelStrategy <- function(this, 
                                   type = 'money', 
-                                  from = 'base', 
                                   comOn = TRUE, 
                                   leg = 'all', 
                                   graph_type = 'ggplot2',
@@ -70,6 +75,7 @@ plotPnL.modelStrategy <- function(this,
                                   return_type = 'plot',
                                   cutoff = FALSE,
                                   ...){
+  from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   switch(type,
          money = {
@@ -132,7 +138,7 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df, 'date')
-               p <- ggplot(newdf,aes(x=date, y=value, color = variable) ) +
+               p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by date")
                if(each_year){
                  p <- p + geom_vline(xintercept=last_dates, linetype=4, colour="red")
@@ -167,7 +173,7 @@ plotPnL.modelStrategy <- function(this,
          money_trade =,
          trades_money = ,
          trade_money = {
-           report <- getReportTrades(this, from = from)
+           report <- getReportTrades(this)
            init_money <- e$results$money[e$activeField['start'],]
            if(leg %in% c('all', 'sum')){
              tmp <- report$pnl.sum
@@ -197,7 +203,7 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df,'index')
-               p <- ggplot(newdf, aes(x= index, y = value, color = variable) ) +
+               p <- ggplot(newdf, aes(x= index, y = "value", color = "variable") ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by trade")
                if(leg != 'sep'){
                  p + scale_color_manual(
@@ -247,16 +253,26 @@ plotPnL.modelStrategy <- function(this,
 #' Plot drawdowns
 #'
 #' @param this modelStrategy
-#' @param from character, name of backtest
-#' @param return_type character, plot or data
-#' @param graph_type character, ggplot2 or xts
+#' @param ... params
 #'
 #' @return ggplot/xts
 #' @export
+#' @rdname plotDrawdowns
+plotDrawdowns <- function(this,
+                          ...){
+  UseMethod('plotDrawdowns', this)
+}
+
+#' @param return_type character, plot or data
+#' @param graph_type character, ggplot2 or xts
+#' @export
+#' @rdname plotDrawdowns
+#' @method plotDrawdowns modelStrategy
 plotDrawdowns.modelStrategy <- function(this,
-                                        from = 'base',
                                         return_type = 'plot',
-                                        graph_type = 'ggplot2'){
+                                        graph_type = 'ggplot2',
+                                        ...){
+  from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
   range_start <- e$activeField['start']
@@ -272,7 +288,7 @@ plotDrawdowns.modelStrategy <- function(this,
   if(return_type == 'plot'){
     if(graph_type == 'ggplot2'){
       newdf <- reshape2::melt(df, 'date')
-      ggplot(newdf,aes(x=date, y=value, color = variable) ) +
+      ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
         geom_line() + theme_bw() + theme(legend.position="none") +
         scale_color_manual(
           values = c(
@@ -291,10 +307,17 @@ plotDrawdowns.modelStrategy <- function(this,
 #'
 #' @param this modelStrategy 
 #' @param type character, MAE or MFE
-#' @param from character, name of backtest
 #'
 #' @return ggplot
 #' @export
+#' @rdname plotReturns
+plotReturns <- function(this, type = 'MAE'){
+  UseMethod('plotReturns', this)
+}
+
+#' @export
+#' @rdname plotReturns
+#' @method plotReturns modelStrategy
 plotReturns.modelStrategy <- function(this, type = 'MAE'){
   e <- this$thisEnv$backtests[['base']]
   report <- getReportTrades(this) %>%
@@ -336,12 +359,20 @@ plotReturns.modelStrategy <- function(this, type = 'MAE'){
 
 #' Plot pnl in month-year matrix
 #'
+#' @param ... params
 #' @param this modelStrategy
-#' @param from character, name of backtest
-#' @param compounded logical, compounded returns to use or not
 #'
 #' @export
-plotCalendar.modelStrategy <- function(this, compounded = FALSE){
+#' @rdname plotCalendar
+plotCalendar <- function(this, ...){
+  UseMethod('plotCalendar', this)
+}
+
+#' @export
+#' @param compounded logical, compounded returns to use or not
+#' @rdname plotCalendar
+#' @method plotCalendar modelStrategy
+plotCalendar.modelStrategy <- function(this, compounded = FALSE, ...){
   M <- apply.monthly(getPnL(this), FUN = function(x){
     if(compounded){
       (tail(x, 1)[[1]] - head(x, 1)[[1]]) / head(x, 1)[[1]] * 100
@@ -375,13 +406,12 @@ plotCalendar.modelStrategy <- function(this, compounded = FALSE){
 }
 
 
-#' Plot pnl in month-year matrix
-#'
-#' @param x xts one column of cumulative profit and loss
-#'
+
 #' @export
-plotCalendar.xts <- function(x){
-  M <- apply.monthly(x, FUN = function(x){
+#' @rdname plotCalendar
+#' @method plotCalendar xts
+plotCalendar.xts <- function(this, ...){
+  M <- apply.monthly(this, FUN = function(x){
     (tail(x, 1)[[1]] - head(x, 1)[[1]]) / head(x, 1)[[1]] * 100
   }) %>%
     set_colnames('rets') %>%
@@ -412,25 +442,23 @@ plotCalendar.xts <- function(x){
 
 
 
-#' plot profit and loss graph
-#'
-#' @param l list, list of strategies
-#' @param ... params
-#'
+#' @param legend logical, if true then legend will be printed on the plot
 #' @export
-plotPnL.list <- function(l, legend = TRUE, ...){
+#' @rdname plotPnL
+#' @method plotPnL list
+plotPnL.list <- function(this, legend = TRUE, ...){
   args <- list(...)
   args['leg'] <- 'sum'
-  df <- lapply(l, function(x){
-    do.call('plotPnL', args = c(list(this = x, return_type = 'data'), args))
+  df <- lapply(this, function(x){
+    do.call('plotPnL', args = c(list("this" = x, "return_type" = 'data'), args))
     #plotPnL(x, return_type = 'data', ...)
   }) %>%  
     Reduce('cbind', .) %>%
     {
-      if(!is.null(names(l))){
-        set_colnames(., names(l))
+      if(!is.null(names(this))){
+        set_colnames(., names(this))
       }else{
-        set_colnames(., paste0('Strategy', seq_len(length(l)))) 
+        set_colnames(., paste0('Strategy', seq_len(length(this)))) 
       }
     }
   dates <- index(df)
@@ -438,7 +466,7 @@ plotPnL.list <- function(l, legend = TRUE, ...){
     dplyr::mutate(date = dates)
   newdf <- reshape2::melt(df, 'date')
   
-  p <- ggplot(newdf,aes(x=date, y=value, color = variable) ) +
+  p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
     geom_line() + theme_bw() + 
     ggtitle("PnL money by date")
   if(!legend){
@@ -448,20 +476,20 @@ plotPnL.list <- function(l, legend = TRUE, ...){
 }
 
 
-#' plot profit and loss graph
-#'
-#' @param l list, list of strategies
-#' @param ... params
-#'
+
+
+#' @param legend logical, if true then legend will be printed on the plot
 #' @export
-plotDrawdowns.list <- function(l, legend = TRUE, ...){
-  df <- lapply(l, function(x){
+#' @rdname plotDrawdowns
+#' @method plotDrawdowns list
+plotDrawdowns.list <- function(this, legend = TRUE, ...){
+  df <- lapply(this, function(x){
     plotDrawdowns(x, return_type = 'data', ...)
   }) %>%  
     Reduce('cbind', .) %>%
     {
-      if(!is.null(names(l))){
-        set_colnames(., names(l))
+      if(!is.null(names(this))){
+        set_colnames(., names(this))
       }else{
         . 
       }
@@ -471,7 +499,7 @@ plotDrawdowns.list <- function(l, legend = TRUE, ...){
     dplyr::mutate(date = dates)
   newdf <- reshape2::melt(df, 'date')
   
-  p <- ggplot(newdf,aes(x=date, y=value, color = variable) ) +
+  p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
     geom_line() + theme_bw() + 
     ggtitle("Drawdowns by date")
   if(!legend){
@@ -483,36 +511,38 @@ plotDrawdowns.list <- function(l, legend = TRUE, ...){
 
 
 
-#' plot profit and loss graph
-#'
-#' @param this modelPortfolio
-#' @param ... params
-#'
+
 #' @export
-plotPnL.modelPortfolio <- function(this, legend = TRUE, ...){
-  plotPnL.modelStrategy(this, ...)
+#' @rdname plotPnL
+#' @method plotPnL modelPortfolio
+plotPnL.modelPortfolio <- function(this, ...){
+  dots <- list(...)
+  if('legend' %in% names(dots)){
+    dots[['legend']] <- NULL
+  }
+  do.call("plotPnL.modelStrategy", args=dots)
 }
 
 
-#' plot pnl in month-year matrix
-#'
-#' @param this modelPortfolio
-#' @param ... params
-#'
+
 #' @export
+#' @rdname plotCalendar
+#' @method plotCalendar modelPortfolio
 plotCalendar.modelPortfolio <- function(this, ...){
   plotCalendar.modelStrategy(this, ...)
 }
 
 
-#' plot drawdowns
-#' 
-#' @param this modelPortfolio
-#' @param ... params
-#'
+
 #' @export
-plotDrawdowns.modelPortfolio <- function(this, legend = TRUE, ...){
-  plotDrawdowns.modelStrategy(this, ...)
+#' @rdname plotDrawdowns
+#' @method plotDrawdowns modelPortfolio
+plotDrawdowns.modelPortfolio <- function(this, ...){
+  dots <- list(...)
+  if('legend' %in% names(dots)){
+    dots[['legend']] <- NULL
+  }
+  do.call("plotDrawdowns.modelStrategy", args=dots)
 }
 
 

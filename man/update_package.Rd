@@ -9,7 +9,9 @@ update_package(user, keyfile, session = NULL)
 \arguments{
 \item{user}{character, ssh address}
 
-\item{key}{character, path to private key}
+\item{keyfile}{character, path to private key}
+
+\item{session}{ssh_sessin}
 }
 \description{
 Update this package

@@ -17,8 +17,30 @@
 #' @param vector_step logical, if TRUE then model.py file should have ability to take vector to step and output vector after predict 
 #' @param port numeric, port for docker container
 #' @param lookback numeric, how many periods need to be to evaluate data expression
-#'
+#' @param args list, list of arguments for python file
 #' @export
+#' @rdname setPyModel
+setPyModel <- function(this,
+                       pyfile,
+                       dockername,
+                       lookback_init,
+                       lookback_step = 0,
+                       lookback = 0,
+                       data = quote(spread),
+                       pathwise = FALSE,
+                       as = 'signal',
+                       hostname = 'localhost',
+                       modelpath = NULL,
+                       update_with_betas = FALSE,
+                       vector_step = FALSE,
+                       args = list(),
+                       port = 4000){
+  UseMethod('setPyModel', this)
+}
+
+#' @export
+#' @rdname setPyModel
+#' @method setPyModel modelStrategy
 setPyModel.modelStrategy <- function(this,
                                      pyfile,
                                      dockername,
@@ -77,11 +99,22 @@ setPyModel.modelStrategy <- function(this,
 #' Delete settings of python model
 #'
 #' @param this modelStrategy
-#'
 #' @export
+#' @rdname deletePyModel
+deletePyModel <- function(this){
+  UseMethod('deletePyModel', this)
+}
+
+#' @export
+#' @rdname deletePyModel
+#' @method deletePyModel modelStrategy
 deletePyModel.modelStrategy <- function(this){
   this$thisEnv$pymodel <- list()
 }
+
+
+
+
 
 #' Get settings of python model
 #'
@@ -89,6 +122,14 @@ deletePyModel.modelStrategy <- function(this){
 #'
 #' @return list
 #' @export
+#' @rdname getPyModel
+getPyModel <- function(this){
+  UseMethod('getPyModel', this)
+}
+
+#' @export
+#' @rdname getPyModel
+#' @method getPyModel modelStrategy
 getPyModel.modelStrategy <- function(this){
   this$thisEnv$pymodel
 }
@@ -98,8 +139,15 @@ getPyModel.modelStrategy <- function(this){
 #'
 #' @param this modelStrategy
 #' @param ... params
-#'
 #' @export
+#' @rdname setPyModelParams
+setPyModelParams <- function(this, ...){
+  UseMethod('setPyModelParams', this)
+}
+
+#' @export
+#' @rdname setPyModelParams
+#' @method setPyModelParams modelStrategy
 setPyModelParams.modelStrategy <- function(this, ...){
   pm <- getPyModel(this)
   if(length(pm) > 0){
@@ -120,6 +168,13 @@ setPyModelParams.modelStrategy <- function(this, ...){
 #'
 #' @param this modelStrategy
 #' @param session ssh_session
+#' @rdname uploadPyModel
+uploadPyModel <- function(this, session){
+  UseMethod('uploadPyModel', this)
+}
+
+#' @rdname uploadPyModel
+#' @method uploadPyModel modelStrategy
 uploadPyModel.modelStrategy <- function(this, session){
   if(missing(session)){
     session <- .env[['session']]
@@ -155,19 +210,18 @@ uploadPyModel.modelStrategy <- function(this, session){
 }
 
 
-#' Upload python model to server
-#'
-#' @param this modelStrategy
-#' @param session ssh_session
+
+#' @rdname uploadPyModel
+#' @method uploadPyModel environment
 uploadPyModel.environment <- function(this, session){
   
 }
 
 
-#' Upload python model to server
-#'
-#' @param this modelStrategy
-#' @param session ssh_session
+
+
+#' @rdname uploadPyModel
+#' @method uploadPyModel modelPortfolio
 uploadPyModel.modelPortfolio <- function(this, session){
   
 }

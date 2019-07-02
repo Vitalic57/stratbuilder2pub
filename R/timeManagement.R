@@ -28,16 +28,23 @@ sec_of_day = function(x){
 #'
 #' Adds time when trading is permitted
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param type character, one of enter, open, exit, close
 #' @param l list, each element is a string that represents time
-#'
+#' 
+#' @export
 #' @rdname addTradeTime
-#' @method addTradeTime modelStrategy
+addTradeTime <- function(this, type, l){
+  UseMethod('addTradeTime', this)
+}
+
 #' @export
 #' @example
-#'
+#' \dontrun{
 #' addTradeTime(this, 'open', list('10:00:00','12:00:00'))
+#' }
+#' @rdname addTradeTime
+#' @method addTradeTime modelStrategy
 addTradeTime.modelStrategy <- function(this, type, l){
   #type can be open or close
   #l is time of start and end
@@ -58,13 +65,18 @@ addTradeTime.modelStrategy <- function(this, type, l){
 
 #' Gets tarding time of strategy
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param type character, one of  c('all', 'enter', 'open', 'exit', 'close')
-#'
+#' 
+#' @export
+#' @rdname getTradeTime
+getTradeTime <- function(this, type = 'all'){
+  UseMethod('getTradeTime', this)
+}
+
+#' @export
 #' @rdname getTradeTime
 #' @method getTradeTime modelStrategy
-#' @export
-#'
 getTradeTime.modelStrategy <- function(this, type = 'all'){
   switch(type,
          all = {
@@ -82,13 +94,17 @@ getTradeTime.modelStrategy <- function(this, type = 'all'){
 
 #' Remove trading time by type
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param type character, one of c('all', 'enter', 'open', 'exit', 'close')
-#'
+#' @export
+#' @rdname clearTradeTime
+clearTradeTime <- function(this, type = 'all'){
+  UseMethod('clearTradeTime', this)
+}
+
+#' @export
 #' @rdname clearTradeTime
 #' @method clearTradeTime modelStrategy
-#' @export
-#'
 clearTradeTime.modelStrategy <- function(this, type = 'all'){
   switch(type,
          all = {
@@ -106,12 +122,17 @@ clearTradeTime.modelStrategy <- function(this, type = 'all'){
 
 #' Prints trading time in format of time
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param type character, one of c('all', 'enter', 'open', 'exit', 'close')
-#'
+#' @export
+#' @rdname printTradeTime
+printTradeTime <- function(this, type = 'all'){
+  UseMethod('printTradeTime', this)
+}
+
+#' @export
 #' @rdname printTradeTime
 #' @method printTradeTime modelStrategy
-#' @export
 printTradeTime.modelStrategy <- function(this, type = 'all'){
   switch(type,
          all = {

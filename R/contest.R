@@ -4,6 +4,14 @@
 #'
 #' @return list
 #' @export
+#' @rdname getScores
+getScores <- function(this){
+  UseMethod('getScores', this)
+}
+
+#' @export
+#' @rdname getScores
+#' @method getScores modelStrategy
 getScores.modelStrategy <- function(this){
   return(this$thisEnv$scores)
 }
@@ -14,8 +22,14 @@ getScores.modelStrategy <- function(this){
 #'
 #' @return
 #' @export
-#'
-#' @examples
+#' @rdname getPublicName
+getPublicName <- function(this){
+  UseMethod('getPublicName', this)
+}
+
+#' @export
+#' @rdname getPublicName
+#' @method getPublicName modelStrategy
 getPublicName.modelStrategy <- function(this){
   if(is.null(this$thisEnv$public_name)){
     message('Submit model and than call this method')

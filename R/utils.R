@@ -12,12 +12,18 @@ set_names_list <- function(l){
 }
 
 
-#' Gets dates by indexes from modelData
+#' Get dates by indexes from modelData
 #'
 #' @param this modelStrategy
 #' @param indexes numeric vector or NULL
 #'
 #' @return vector of dates
+#' @export
+#' @rdname getDateByIndex
+getDateByIndex <- function(this, indexes = NULL){
+  UseMethod('getDateByIndex', this)
+}
+
 #' @export
 #' @rdname getDateByIndex
 #' @method getDateByIndex modelStrategy
@@ -33,12 +39,7 @@ getDateByIndex.modelStrategy <- function(this, indexes = NULL){
 }
 
 
-#' Gets dates by indexes from modelData
-#'
-#' @param this modelPortfolio
-#' @param indexes numeric vector or NULL
-#'
-#' @return vector of dates
+
 #' @export
 #' @rdname getDateByIndex
 #' @method getDateByIndex modelPortfolio
@@ -50,43 +51,46 @@ getDateByIndex.modelPortfolio <- function(this, indexes = NULL){
 }
 
 
-#' Get modelData
-#'
-#' @param l list, list of strategies
 #' @param ... arguments 
 #'
 #' @export
-getModelD.list <- function(l, ...){
-  lapply(l, function(x){
+#' @rdname getModelD
+#' @method getModelD list
+getModelD.list <- function(this, ...){
+  lapply(this, function(x){
     getModelD(x, ...)
   }) %>%
-    set_names(names(l))
+    set_names(names(this))
 }
 
 
-#' Set modelData
-#'
-#' @param l list, list of strategies
-#' @param ... arguments 
-#'
+
 #' @export
-setModelD.list <- function(l, data){
-  for(i in seq_along(l)){
-    if(class(data)[1] == 'modelData'){
-      setModelD(l[[i]], data)
+#' @rdname setModelD
+#' @method setModelD list
+setModelD.list <- function(this, x, ...){
+  for(i in seq_along(this)){
+    if(class(x)[1] == 'modelData'){
+      setModelD(this[[i]], x, ...)
     }else{
-      setModelD(l[[i]], data[[i]])
+      setModelD(this[[i]], x[[i]], ...)
     }
   }
 }
 
 
 
-#' Sets modelData object to modelStrategy object
+#' Set modelData object to modelStrategy object
 #'
 #' @param this modelStrategy
 #' @param x modelData
-#'
+#' @param clearBacktests logical, if TRUE then all backtests will be deleted
+#' @export
+#' @rdname setModelD
+setModelD <- function(this, x, clearBacktests = TRUE){
+  UseMethod('setModelD', this)
+}
+
 #' @export
 #' @rdname setModelD
 #' @method setModelD modelStrategy
@@ -102,14 +106,19 @@ setModelD.modelStrategy <- function(this, x, clearBacktests = TRUE){
     e$paramsets[[x]]$results <- NULL
     e$paramsets[[x]]$report <- NULL
   })
-  processBetaTable(this)
+  #processBetaTable(this)
 }
 
 
-#' Gets modelData object from modelStrategy object
+#' Get modelData object from modelStrategy object
 #'
 #' @param this modelStrategy
-#'
+#' @export
+#' @rdname getModelD
+getModelD <- function(this){
+  UseMethod('getModelD', this)
+}
+
 #' @export
 #' @rdname getModelD
 #' @method getModelD modelStrategy
@@ -118,23 +127,24 @@ getModelD.modelStrategy <- function(this){
 }
 
 
-#' Get modelData
-#'
-#' @param this modelPortfolio
-#'
+
 #' @export
+#' @rdname getModelD
+#' @method getModelD modelPortfolio
 getModelD.modelPortfolio <- function(this){
   getModelD.list(this$thisEnv$models)
 }
 
 
-#' Set modelData
-#'
-#' @param this modelPortfolio
+
+
+#' @param ... params
 #'
 #' @export
-setModelD.modelPortfolio <- function(this, data){
-  setModelD.list(this$thisEnv$models, data)
+#' @rdname setModelD
+#' @method setModelD modelPortfolio
+setModelD.modelPortfolio <- function(this, x, ...){
+  setModelD.list(this$thisEnv$models, x, ...)
 }
 
 

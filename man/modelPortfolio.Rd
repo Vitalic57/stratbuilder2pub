@@ -6,6 +6,9 @@
 \usage{
 modelPortfolio(...)
 }
+\arguments{
+\item{...}{list or models, list of models}
+}
 \value{
 modelPortfolio object
 }

@@ -1,11 +1,22 @@
+## quiets concerns of R CMD check re: the .'s that appear in pipelines
+if(getRversion() >= "2.15.1")  globalVariables(c("."))
+
 #' creates modelStrategy object
 #'
 #' @return modelStrategy object
 #' @export
 #'
+#' @import xts 
+#' @import magrittr
+#' @import ggplot2
+#' @importFrom xts xts
+#' @importFrom zoo coredata index
+#' @importFrom grDevices colorRampPalette
+#' @importFrom graphics plot
+#' @importFrom stats runif
+#' @importFrom utils capture.output head install.packages installed.packages packageVersion remove.packages tail untar globalVariables
 modelStrategy <- function(){
   thisEnv <- environment()
-  tradingData <- 'data_raw'
   stats_init <- list()
   stats <- list()
   user_add_data <- list()
@@ -59,7 +70,9 @@ modelStrategy <- function(){
 #'
 #' @export
 #' @example 
+#' \dontrun{
 #' settings(plot = list(adjust = TRUE, each_year = TRUE))
+#' }
 settings <- function(...){
   l <- list(...)
   list2env(l, .settings)
@@ -67,31 +80,53 @@ settings <- function(...){
 }
 
 
-#' Gets waitAfterClose. If it is true, then new open will be after last close, else they may be in the same time
+#' Get waitAfterClose. If it is true, then new open will be after last close, else they may be in the same time
 #'
 #' @param this modelStrategy
-#'
 #' @export
+#' @rdname getWaitAfterClose
+getWaitAfterClose <- function(this){
+  UseMethod('getWaitAfterClose', this)
+}
+
+#' @export
+#' @rdname getWaitAfterClose
+#' @method getWaitAfterClose modelStrategy
 getWaitAfterClose.modelStrategy <- function(this){
   return(this$thisEnv$waitAfterClose)
 }
 
-#' Sets waitAfterClose. If it is true, then new open will be after last close, else they may be in the same time
+#' Set waitAfterClose. If it is true, then new open will be after last close, else they may be in the same time
 #'
 #' @param this modelStrategy
-#'
+#' @param x logical
 #' @export
+#' @rdname setWaitAfterClose
+setWaitAfterClose <- function(this, x){
+  UseMethod('setWaitAfterClose', this)
+}
+
+#' @export
+#' @rdname setWaitAfterClose
+#' @method setWaitAfterClose modelStrategy
 setWaitAfterClose.modelStrategy <- function(this, x){
   this$thisEnv$waitAfterClose <- x
 }
 
-#' Gets pmAfterOpen. 
+#' Get pmAfterOpen. 
 #' 
 #' If it is true, then position manager will be turned on just after opening position
 #'
 #' @param this modelStrategy
-#'
 #' @export
+#' @rdname getPmAfterOpen
+getPmAfterOpen <- function(this){
+  UseMethod('getPmAfterOpen', this)
+}
+
+#' @export
+#' @rdname getPmAfterOpen
+#' @method getPmAfterOpen modelStrategy
 getPmAfterOpen.modelStrategy <- function(this){
   if(is.null(this$thisEnv$pmAfterOpen)){
     return(FALSE)
@@ -105,21 +140,35 @@ getPmAfterOpen.modelStrategy <- function(this){
 #'
 #' @param this modelStrategy
 #' @param x logical
-#'
 #' @export
+#' @rdname setPmAfterOpen
+setPmAfterOpen <- function(this, x){
+  UseMethod('setPmAfterOpen', this)
+}
+
+#' @export
+#' @rdname setPmAfterOpen
+#' @method setPmAfterOpen modelStrategy
 setPmAfterOpen.modelStrategy <- function(this, x){
   this$thisEnv$pmAfterOpen <- x
 }
 
 
 
-#' Gets variable ignorePosition.
+#' Get variable ignorePosition.
 #'
 #' If it is true, then when model  simulated, when there was time to change coefs and we had position,
 #'  then position would be closed
 #'
 #' @param this modelStrategy
 #'
+#' @rdname getIgnorePosition
+#' @method getIgnorePosition modelStrategy
+#' @export
+getIgnorePosition <- function(this){
+  UseMethod('getIgnorePosition', this)
+}
+
 #' @export
 #' @rdname getIgnorePosition
 #' @method getIgnorePosition modelStrategy
@@ -130,12 +179,20 @@ getIgnorePosition.modelStrategy <- function(this){
   return(this$thisEnv$ignorePosition)
 }
 
-#' Gets variable ignorePosition.
+#' Get variable ignorePosition.
 #'
 #' @param this modelStrategy
 #' @param bool bool, if it is true, then when model  simulated, when there was time to change coefs and we had position,
 #'  then position would be closed
 #'
+
+#' @rdname setIgnorePosition
+#' @method setIgnorePosition modelStrategy
+#' @export
+setIgnorePosition <- function(this, bool){
+  UseMethod('setIgnorePosition', this)
+}
+
 #' @export
 #' @rdname setIgnorePosition
 #' @method setIgnorePosition modelStrategy
@@ -144,43 +201,17 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 }
 
 
-#' tradingData indicates which data strategy should use for spread calculating
-#'
-#' @param this modelStrategy
-#'
-#' @return character
-#' @export
-#' @rdname getTradingData
-#' @method getTradingData modelStrategy
-getTradingData.modelStrategy <- function(this){
-  return(this$thisEnv$tradingData)
-}
-
-#' tradingData indicates which data strategy should use for spread calculating
-#'
-#' @param this modelStrategy
-#'
-#' @export
-#' @rdname setTradingData
-#' @method setTradingData modelStrategy
-setTradingData.modelStrategy <- function(this,x){
-  this$thisEnv$tradingData <- x
-}
-
-
-
-
-
-
-
-#' Sets rule for calculating spread.
+#' Set rule for calculating spread.
 #'
 #' @param this modelStrategy
 #' @param fun function, it calculates coefs for spread
-#'
+#' @param args list, arguments in setBeta function
 #' @export
-#' @rdname setBeta
-#' @method setBeta modelStrategy
+setBeta <- function(this, fun, args = NULL){
+  UseMethod('setBeta', this)
+}
+
+#' @export
 setBeta.modelStrategy <- function(this, fun, args = NULL){
   if(missing(fun)){
     stop("Please provide name or fun argument")
@@ -194,11 +225,17 @@ setBeta.modelStrategy <- function(this, fun, args = NULL){
   }
 }
 
-#' Sets amount of money, that we have at the beginning
+#' Set amount of money, that we have at the beginning
 #'
-#' @param this modelStrategy
+#' @param this model
 #' @param x numeric, amount of money
-#'
+#' 
+#' @export
+#' @rdname setMoney
+setMoney <- function(this, x){
+  UseMethod('setMoney', this)
+}
+
 #' @export
 #' @rdname setMoney
 #' @method setMoney modelStrategy
@@ -208,157 +245,189 @@ setMoney.modelStrategy <- function(this,x){
 }
 
 
-#' Gets amount of money that we have at the beginning in specific backtest
+#' Get amount of money that we have at the beginning in specific backtest
 #'
 #' @param this modelStrategy
-#' @param from character, name of folder in backtests
 #'
 #' @return numeric, amount of money
 #' @export
-#' @rdname getMoney
-#' @method getMoney modelStrategy
-getMoney.modelStrategy <- function(this, from = NULL){
-  if(is.null(from)){
-    return(this$thisEnv$money)
-  }else if(from %in% names(this$thisEnv$backtests)){
-    return(this$thisEnv$backtests[[from]]$money)
-  }else{
-    return(this$thisEnv$money)
-  }
+getMoney <- function(this){
+  UseMethod('getMoney', this)
+}
+
+#' @export
+getMoney.modelStrategy <- function(this){
+  return(this$thisEnv$money)
 }
 
 
-#' Sets window for calculating coefs
+#' Set window for calculating coefs
 #'
 #' @param this modelStrategy
 #' @param x numeric, window for calculating
-#'
 #' @export
-#' @rdname setLookback
-#' @method setLookback modelStrategy
+setLookback <- function(this, x){
+  UseMethod('setLookback', this)
+}
+
+#' @export
 setLookback.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$lookback <- x
 }
 
-#' Gets window for calculating coefs
+#' Get window for calculating coefs
 #'
 #' @param this modelStrategy
-#'
 #' @export
-#' @rdname getLookback
-#' @method getLookback modelStrategy
+getLookback <- function(this){
+  UseMethod('getLookback', this)
+}
+
+#' @export
 getLookback.modelStrategy <- function(this){
   return(this$thisEnv$lookback)
 }
 
-#' Sets window how far the same coefs will be used
+#' Set window how far the same coefs will be used
 #'
 #' @param this modelStrategy
 #' @param x numeric, window
-#'
 #' @export
-#' @rdname setLookForward
-#' @method setLookForward modelStrategy
+setLookForward <- function(this, x){
+  UseMethod('setLookForward', this)
+}
+
+#' @export
 setLookForward.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$lookForward <- x
 }
 
-#' Gets window how far the same coefs will be used
+#' Get window how far the same coefs will be used
 #'
 #' @param this modelStrategy
-#'
 #' @export
-#' @rdname getLookForward
-#' @method getLookForward modelStrategy
+getLookForward <- function(this){
+  UseMethod('getLookForward', this)
+}
+
+#' @export
 getLookForward.modelStrategy <- function(this){
   return(this$thisEnv$lookForward)
 }
 
 
-#' Sets tolerance of betas computation
+#' Set tolerance of betas computation
 #'
 #' @param this modelStrategy
 #' @param x numeric, tolerance
-#'
 #' @export
-#' @rdname setToleranceBeta
-#' @method setToleranceBeta modelStrategy
+setToleranceBeta <- function(this, x){
+  UseMethod('setToleranceBeta', this)
+}
+
+#' @export
 setToleranceBeta.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$toleranceBeta <- x
 }
 
-#' Gets tolerance of betas computation
+#' Get tolerance of betas computation
 #'
 #' @param this modelStrategy
 #'
 #' @return numeric
 #' @export
-#' @rdname getToleranceBeta
-#' @method getToleranceBeta modelStrategy
+getToleranceBeta <- function(this){
+  UseMethod('getToleranceBeta', this)
+}
+
+#' @export
 getToleranceBeta.modelStrategy <- function(this){
   return(this$thisEnv$toleranceBeta)
 }
 
 
-#' Sets window for calculating indicators
+#' Set window for calculating indicators
 #'
 #' @param this modelStrategy
 #' @param x numeric, window
-#'
 #' @export
-#' @rdname setMaxLookback
-#' @method setMaxLookback modelStrategy
+setMaxLookback <- function(this, x){
+  UseMethod('setMaxLookback', this)
+}
+
+#' @export
 setMaxLookback.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$maxLookback <- x
 }
 
 
-#' Gets window for calculating indicators
+#' Get window for calculating indicators
 #'
 #' @param this modelStrategy
-#'
 #' @export
-#' @rdname getMaxLookback
-#' @method getMaxLookback modelStrategy
+getMaxLookback <- function(this){
+  UseMethod('getMaxLookback', this)
+}
+
+#' @export
 getMaxLookback.modelStrategy <- function(this){
   return(this$thisEnv$maxLookback)
 }
 
 #' Return if you have a need to convert betas to int.
 #' It is TRUE by default
-#' @param model modelStrategy
-#'
+#' @param this modelStrategy
 #' @export
-getBetasInt.modelStrategy <- function(model){
-  if(is.null(model$thisEnv$betasInt)){
-    model$thisEnv$betasInt <- TRUE
+#' @rdname getBetasInt
+getBetasInt <- function(this){
+  UseMethod('getBetasInt', this)
+}
+
+#' @export
+#' @rdname getBetasInt
+#' @method getBetasInt modelStrategy
+getBetasInt.modelStrategy <- function(this){
+  if(is.null(this$thisEnv$betasInt)){
+    this$thisEnv$betasInt <- TRUE
   }
-  return(model$thisEnv$betasInt)
+  return(this$thisEnv$betasInt)
 }
 
-#' Sets if you have a need to convert betas to int.
+#' Set TRUE if you have a need to convert betas to integers.
 #'
-#' @param model modelStrategy
+#' @param this modelStrategy
 #' @param x logical
-#'
 #' @export
-setBetasInt.modelStrategy <- function(model, x){
-  model$thisEnv$betasInt <- x
+#' @rdname setBetasInt
+setBetasInt <- function(this, x){
+  UseMethod('setBetasInt', this)
 }
 
-
+#' @export
+#' @rdname setBetasInt
+#' @method setBetasInt modelStrategy
+setBetasInt.modelStrategy <- function(this, x){
+  this$thisEnv$betasInt <- x
+}
 
 
 #' Add user-defined objects to modelStrategy for future usage in backtest 
 #'
 #' @param this modelStrategy
 #' @param ... named args
-#'
 #' @export
+#' @rdname addObject
+addObject <- function(this, ...){
+  UseMethod('addObject', this)
+}
+
+#' @export
+#' @rdname addObject
+#' @method addObject modelStrategy
 addObject.modelStrategy <- function(this, ...){
   dots <- list(...)
   if(is.null(names(dots)) || any(names(dots) == '')){

@@ -1,6 +1,8 @@
 getwd()
 usethis::use_package('magrittr', type = 'Imports')
 
+
+
 packageVersion('stratbuilder2pub')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
@@ -9,7 +11,7 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.2')
+lines[ind] <- paste0('Version: ', '1.3.3')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
@@ -41,7 +43,7 @@ ssh::scp_upload(session, '/home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbu
 
 #download examples
 session <- ssh::ssh_connect('vshishkov@142.93.143.142')
-ssh::scp_upload(session, '/home/vitaly/Documents/stratbuilder2pub/data-raw/example10.R', '/usr/share/backtest/main')
+ssh::scp_upload(session, '/home/vitaly/Documents/stratbuilder2pub/data-raw/example13.R', '/usr/share/backtest/main')
 
 ssh::scp_upload(session, '/home/vitaly/Documents/models/Sentiment/Data/sber_result_table_1.xlsx', '/usr/share/backtest/main')
 

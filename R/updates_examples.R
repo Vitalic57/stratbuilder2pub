@@ -1,7 +1,8 @@
 #' Update this package 
 #'
 #' @param user character, ssh address
-#' @param key character, path to private key
+#' @param keyfile character, path to private key
+#' @param session ssh_sessin
 #'
 #' @export
 update_package <- function(user, keyfile, session=NULL){

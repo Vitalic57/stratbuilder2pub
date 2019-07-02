@@ -15,8 +15,17 @@
 #' 8. befor_exit_from_pos -- it executes just before exiting from position
 #' 9. data -- in this section you can define your datasets, that depend on modelData slots
 #' 
-#'
 #' @export
+#' @rdname addProgramPart
+addProgramPart <- function(this,
+                           as,
+                           evolution = list()){
+  UseMethod('addProgramPart', this)
+}
+
+#' @export
+#' @rdname addProgramPart
+#' @method addProgramPart modelStrategy
 addProgramPart.modelStrategy <- function(this,
                                       as,
                                       evolution = list()){
@@ -25,11 +34,18 @@ addProgramPart.modelStrategy <- function(this,
                             evolution = evolution)
 }
 
-#' Gets list of variables(program parts)
+#' Get list of variables(program parts)
 #'
 #' @param this modelStrategy
-#'
 #' @export
+#' @rdname getProgramParts
+getProgramParts <- function(this){
+  UseMethod('getProgramParts', this)
+}
+
+#' @export
+#' @rdname getProgramParts
+#' @method getProgramParts modelStrategy
 getProgramParts.modelStrategy <- function(this){
   return(this$thisEnv$pps)
 }
@@ -77,24 +93,20 @@ getPartByName <- function(name){
                  }))
 }
 
-#' Set names of data, that should be saved after finishing of perform function
-#'
-#' @param this modelStrategy
-#' @param s character, array of names
-#'
-#' @export
-saveData.modelStrategy <- function(this, s){
-  this$thisEnv$saveData <- s
-}
-
-
-
 #' This variable will be included to program and after calling perform function  it will be updated
 #'
 #' @param this modelStrategy
 #' @param name character
 #' @param value not NULL
 #' @export
+#' @rdname addStat
+addStat <- function(this, name, value){
+  UseMethod('addStat', this)
+}
+
+#' @export
+#' @rdname addStat
+#' @method addStat modelStrategy
 addStat.modelStrategy <- function(this, name, value){
   this$thisEnv$stats_init[[name]] <- value
   this$thisEnv$stats[[name]] <- value
@@ -105,6 +117,14 @@ addStat.modelStrategy <- function(this, name, value){
 #' @param this modelStrategy
 #' @param name character
 #' @export
+#' @rdname removeStat
+removeStat <- function(this, name){
+  UseMethod('removeStat', this)
+}
+
+#' @export
+#' @rdname removeStat
+#' @method removeStat modelStrategy
 removeStat.modelStrategy <- function(this, name){
   this$thisEnv$stats_init[[name]] <- NULL
   this$thisEnv$stats[[name]] <- NULL
@@ -115,6 +135,14 @@ removeStat.modelStrategy <- function(this, name){
 #'
 #' @param this modelStrategy
 #' @export
+#' @rdname reinitStat
+reinitStat <- function(this){
+  UseMethod('reinitStat', this)
+}
+
+#' @export
+#' @rdname reinitStat
+#' @method reinitStat modelStrategy
 reinitStat.modelStrategy <- function(this){
   if('stats' %in% names(this$thisEnv)){
     for(name in names(this$thisEnv$stats)){
@@ -123,30 +151,5 @@ reinitStat.modelStrategy <- function(this){
   }
 }
 
-#' Updates all variables in stats from environment
-#'
-#' @param e environment
-#' @param this modelStrategy
-#'
-#' @export
-updateStat.modelStrategy <- function(this, e){
-  if('stats' %in% names(this$thisEnv)){
-    for(name in names(this$thisEnv$stats)){
-      this$thisEnv$stats[[name]] <- get(name, envir = e)
-    }
-  }
-}
-
-#' Updates environment
-#'
-#' @param e environment
-#' @param this modelStrategy
-#'
-#' @export
-extractStat.modelStrategy <- function(this, e){
-  if('stats' %in% names(this$thisEnv)){
-    list2env(this$thisEnv$stats, envir = e)
-  }
-}
 
 

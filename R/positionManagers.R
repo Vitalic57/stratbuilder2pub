@@ -12,8 +12,23 @@
 #' @param rebalance list, see increase, in expr quote beta_new must be defined
 #' @param change list, see increase, in expr quote mult_delta must be defined
 #' @param args list, arguments of that manager
-#'
 #' @export
+#' @rdname addPM
+addPM <- function(this,
+                  as,
+                  increase = list(cond = quote(FALSE), expr = quote({})),
+                  decrease = list(cond = quote(FALSE), expr = quote({})),
+                  rebalance = list(cond = quote(FALSE), expr = quote({})),
+                  change = list(cond = quote(FALSE), expr = quote({})),
+                  close = list(cond = quote(FALSE)),
+                  oco = "base",
+                  args = list()){
+  UseMethod('addPM', this)
+}
+
+#' @export
+#' @rdname addPM
+#' @method addPM modelStrategy
 addPM.modelStrategy <- function(this,
                                 as,
                                 increase = list(cond = quote(FALSE), expr = quote({})),
@@ -39,6 +54,24 @@ addPM.modelStrategy <- function(this,
 }
 
 
+#' Return all position managers blocks
+#' 
+#' @param this model
+#' 
+#' @return list
+#' @export
+#' @rdname getPM
+getPM <- function(this){
+  UseMethod('getPM', this)
+}
+
+
+#' @export
+#' @rdname getPM
+#' @method getPM modelStrategy
+getPM.modelStrategy <- function(this){
+  return(this$thisEnv$positionManagers)
+}
 
 
 

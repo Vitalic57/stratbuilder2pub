@@ -5,13 +5,24 @@
 #' @param type character, it can be equal to rules, indicators, pp or pm 
 #' @param args list, define your params here
 #' @param this modelStrategy
-#'
+#' @export
+#' @rdname setParams
+setParams <- function(this,
+                      type,
+                      args){
+  UseMethod('setParams', this)
+}
+
 #' @export
 #' @examples
+#' \dontrun{
 #' setParams(this,
 #'        type = 'rules',
 #'        args = list(n = 5, a = 2)
 #' )
+#' }
+#' @rdname setParams
+#' @method setParams modelStrategy 
 setParams.modelStrategy <- function(this,
                                     type,
                                     args){
@@ -36,8 +47,16 @@ setParams.modelStrategy <- function(this,
 #'
 #' @param type character, it can be equal to rules, indicators, pp or pm 
 #' @param this modelStrategy
-#'
 #' @export
+#' @rdname getParams
+getParams <- function(this,
+                      type){
+  UseMethod('getParams', this)
+}
+
+#' @export
+#' @rdname getParams
+#' @method getParams modelStrategy
 getParams.modelStrategy <- function(this,
                                     type){
   type <- switch (tolower(type),

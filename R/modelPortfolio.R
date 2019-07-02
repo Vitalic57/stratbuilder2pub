@@ -1,5 +1,7 @@
 #' creates modelPortfolio object
 #'
+#' @param ... list or models, list of models
+#'
 #' @return modelPortfolio object
 #' @export
 #'
@@ -31,12 +33,10 @@ modelPortfolio <- function(...){
 
 
 
-#' Simulate portfolio of strategies
-#'
-#' @param this modelPortfolio
-#' @param ... arguments to perform function
-#'
+
 #' @export
+#' @rdname performServer
+#' @method performServer modelPortfolio
 performServer.modelPortfolio <- function(this, ...){
   this$thisEnv$data_changed <- TRUE#any(sapply(this$thisEnv$models, function(x) x$thisEnv$data_changed)) 
   x <- performServer.modelStrategy(this, ...)
@@ -48,12 +48,10 @@ performServer.modelPortfolio <- function(this, ...){
 }
 
 
-#' Apply paramset to list of strategies and summarize results
-#'
-#' @param this modelPortfolio
-#' @param ... arguments to perform function
-#'
+
 #' @export
+#' @rdname applyParamsetServer
+#' @method applyParamsetServer modelPortfolio
 applyParamsetServer.modelPortfolio <- function(this, ...){
   this$thisEnv$data_changed <- TRUE
   x <- applyParamsetServer.modelStrategy(this, ...)
@@ -63,23 +61,22 @@ applyParamsetServer.modelPortfolio <- function(this, ...){
 
 
 
-#' Get modelData
-#'
-#' @param this modelPortfolio
-#'
+
 #' @export
+#' @return list of modelDatas
+#' @rdname getModelD
+#' @method getModelD modelPortfolio
 getModelD.modelPortfolio <- function(this){
   getModelD.list(this$thisEnv$models)
 }
 
 
-#' Set modelData
-#'
-#' @param this modelPortfolio
-#'
+
 #' @export
-setModelD.modelPortfolio <- function(this, data){
-  setModelD.list(this$thisEnv$models, data)
+#' @rdname setModelD
+#' @method setModelD modelPortfolio
+setModelD.modelPortfolio <- function(this, x){
+  setModelD.list(this$thisEnv$models, x)
 }
 
 
@@ -88,10 +85,9 @@ setModelD.modelPortfolio <- function(this, data){
 
 #' Return sum money of models inside portfolio
 #'
-#' @param this modelPortfolio
-#'
-#' @return numeric
 #' @export
+#' @rdname getMoney
+#' @method getMoney modelPortfolio
 getMoney.modelPortfolio <- function(this){
   s <- 0
   for(model in this$thisEnv$models){
@@ -107,10 +103,9 @@ getMoney.modelPortfolio <- function(this){
 #' 
 #' This method add the same distribution to each model in list
 #'
-#' @param this modelPortfolio
-#' @param ... params for addDistribution
-#'
 #' @export
+#' @rdname addDistribution
+#' @method addDistribution modelPortfolio
 addDistribution.modelPortfolio <- function(this, ...){
   addDistribution.list(this$thisEnv$models, ...)
 }
@@ -121,22 +116,20 @@ addDistribution.modelPortfolio <- function(this, ...){
 #' 
 #' This method add the same distributions' constraint to each model in list
 #'
-#' @param this modelPortfolio
-#' @param ... params for addDistribution
-#'
 #' @export
+#' @rdname addDistributionConstraint
+#' @method addDistributionConstraint modelPortfolio
 addDistributionConstraint.modelPortfolio <- function(this, ...){
   addDistributionConstraint.list(this$thisEnv$models, ...)
 }
 
 
 
-#' Removes paramset from each strategy in list of models
-#'
-#' @param this modelPortfolio
-#' @param ... params for addDistribution
+#' Remove paramset from each strategy in list of models
 #'
 #' @export
+#' @rdname deleteParamset
+#' @method deleteParamset modelPortfolio
 deleteParamset.modelPortfolio <- function(this, ...){
   deleteParamset.list(this$thisEnv$models, ...)
 }

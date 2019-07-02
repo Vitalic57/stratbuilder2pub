@@ -2,18 +2,24 @@
 % Please edit documentation in R/modelOsFun.R
 \name{proportionOs}
 \alias{proportionOs}
-\title{beta -- coefficients in spread
-money -- all money that strategy has
-proportion -- how much money we can use in rule
-price -- current price of instruments( how much it costs to buy or sell)
-it returns multiplier( how much minimal position )}
+\title{Weight's functions}
 \usage{
 proportionOs(beta, money, proportion, price, ...)
 }
+\arguments{
+\item{beta}{coefficients of spread}
+
+\item{money}{all money that strategy has}
+
+\item{proportion}{how much money we can use in rule}
+
+\item{price}{current price of instruments}
+
+\item{...}{additional args}
+}
+\value{
+numeric multiplier( how much minimal position to buy)
+}
 \description{
-beta -- coefficients in spread
-money -- all money that strategy has
-proportion -- how much money we can use in rule
-price -- current price of instruments( how much it costs to buy or sell)
-it returns multiplier( how much minimal position )
+Weight's functions
 }
