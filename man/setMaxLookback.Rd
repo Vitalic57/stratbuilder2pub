@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{setMaxLookback}
 \alias{setMaxLookback}
+\alias{setMaxLookback.modelStrategy}
 \title{Set window for calculating indicators}
 \usage{
 setMaxLookback(this, x)
+
+\method{setMaxLookback}{modelStrategy}(this, x)
 }
 \arguments{
 \item{this}{modelStrategy}

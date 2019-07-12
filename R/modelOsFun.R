@@ -1,8 +1,10 @@
-#' Weight's functions
+#' Function for volume in rule
+#' 
+#' How many sum(price \* abs(beta)) in money \* proportion
 #'
-#' @param beta coefficients of spread
-#' @param money  all money that strategy has
-#' @param proportion how much money we can use in rule
+#' @param beta numeric vector, coefficients of spread
+#' @param money  numeric, all money that strategy has
+#' @param proportion numeric, number between 0 and 1, how much money we can use in rule
 #' @param price current price of instruments
 #' @param ... additional args
 #' 
@@ -14,7 +16,8 @@ proportionOs <- function(beta, money, proportion, price, ...){
   return(floor(money_proportion/price_position))
 }
 
-
+#' Function for volume in rule
+#' 
 #' How many sum(price * abs(beta)) in amount
 #'
 #' @param beta numeric, number of assets

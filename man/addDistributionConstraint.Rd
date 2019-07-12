@@ -5,7 +5,7 @@
 \alias{addDistributionConstraint.modelStrategy}
 \alias{addDistributionConstraint.list}
 \alias{addDistributionConstraint.modelPortfolio}
-\title{Add contraints to distributions}
+\title{Add constraints to distributions}
 \usage{
 addDistributionConstraint(this, paramset.label, expr, label)
 
@@ -28,7 +28,7 @@ addDistributionConstraint(this, paramset.label, expr, label)
 \item{...}{params for addDistribution}
 }
 \description{
-Add contraints to distributions
+Add constraints to distributions
 
 This method add the same distributions' constraint to each model in list
 }

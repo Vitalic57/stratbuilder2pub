@@ -2,16 +2,16 @@
 % Please edit documentation in R/modelOsFun.R
 \name{proportionOs}
 \alias{proportionOs}
-\title{Weight's functions}
+\title{Function for volume in rule}
 \usage{
 proportionOs(beta, money, proportion, price, ...)
 }
 \arguments{
-\item{beta}{coefficients of spread}
+\item{beta}{numeric vector, coefficients of spread}
 
-\item{money}{all money that strategy has}
+\item{money}{numeric, all money that strategy has}
 
-\item{proportion}{how much money we can use in rule}
+\item{proportion}{numeric, number between 0 and 1, how much money we can use in rule}
 
 \item{price}{current price of instruments}
 
@@ -21,5 +21,5 @@ proportionOs(beta, money, proportion, price, ...)
 numeric multiplier( how much minimal position to buy)
 }
 \description{
-Weight's functions
+How many sum(price \* abs(beta)) in money \* proportion
 }

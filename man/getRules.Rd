@@ -2,9 +2,12 @@
 % Please edit documentation in R/rules_indicators.R
 \name{getRules}
 \alias{getRules}
+\alias{getRules.modelStrategy}
 \title{Get inforamtion about rules in the model}
 \usage{
 getRules(this, pathwise = FALSE, recalc = FALSE)
+
+\method{getRules}{modelStrategy}(this, pathwise = FALSE, recalc = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}

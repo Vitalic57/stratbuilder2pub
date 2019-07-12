@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{setToleranceBeta}
 \alias{setToleranceBeta}
+\alias{setToleranceBeta.modelStrategy}
 \title{Set tolerance of betas computation}
 \usage{
 setToleranceBeta(this, x)
+
+\method{setToleranceBeta}{modelStrategy}(this, x)
 }
 \arguments{
 \item{this}{modelStrategy}

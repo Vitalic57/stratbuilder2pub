@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{setLookForward}
 \alias{setLookForward}
+\alias{setLookForward.modelStrategy}
 \title{Set window how far the same coefs will be used}
 \usage{
 setLookForward(this, x)
+
+\method{setLookForward}{modelStrategy}(this, x)
 }
 \arguments{
 \item{this}{modelStrategy}

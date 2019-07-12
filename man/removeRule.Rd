@@ -2,9 +2,12 @@
 % Please edit documentation in R/rules_indicators.R
 \name{removeRule}
 \alias{removeRule}
+\alias{removeRule.modelStrategy}
 \title{Remove rule by name}
 \usage{
 removeRule(this, name)
+
+\method{removeRule}{modelStrategy}(this, name)
 }
 \arguments{
 \item{this}{modelStrategy}

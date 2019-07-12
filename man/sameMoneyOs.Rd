@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelOsFun.R
 \name{sameMoneyOs}
 \alias{sameMoneyOs}
-\title{How many sum(price * abs(beta)) in amount}
+\title{Function for volume in rule}
 \usage{
 sameMoneyOs(beta, amount, price, ...)
 }

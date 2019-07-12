@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{getLookback}
 \alias{getLookback}
+\alias{getLookback.modelStrategy}
 \title{Get window for calculating coefs}
 \usage{
 getLookback(this)
+
+\method{getLookback}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}

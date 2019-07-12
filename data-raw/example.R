@@ -17,20 +17,20 @@ library(TTR) # this package contains functions for creating indicators from tech
   
   addRule(this, # This is another rule, now it is for going long
           as = 'spread_less_sma', 
-          condition = spread < my_sma,
+          condition = spread < ema,
           type = 'enter',
           side = 1,
           oco = 'long'
   )
   addRule(this, # This rule for exiting from position
           as = 'short_exit', 
-          condition = spread < my_sma, # trigger when to exit
+          condition = spread < ema, # trigger when to exit
           type = 'exit', # the second and the last type of rules
           oco = 'short' # and here namespace, after which entering rule we exit
   )
   addRule(this,  # This rule for exiting from long position
           as = 'long_exit',
-          condition = spread > my_sma,
+          condition = spread > ema,
           type = 'exit',
           oco = 'long'
   )
@@ -41,9 +41,9 @@ library(TTR) # this package contains functions for creating indicators from tech
 setUserData(this, list(dataset = 'Russia', # There is only one dataset for now
                        assets = 'GAZP', # Assets, that will take part in backtest
                        period = 'day', # there are 2 available period hour and day for Russia dataset
-                                      # to get available datasets enter getDatasets()
+                       # to get available datasets enter getDatasets()
                        time = 13)) # if period equals to day and dataset have intraday data, 
-                                   # then you can specify time when you strategy will be traded
+# then you can specify time when you strategy will be traded
 
 performServer(this) # run this function to do backtest. Results will be saved in you remote acc
 

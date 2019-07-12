@@ -7,13 +7,14 @@ if(getRversion() >= "2.15.1")  globalVariables(c("."))
 #' @export
 #'
 #' @import xts 
+#' @import zoo
 #' @import magrittr
 #' @import ggplot2
-#' @importFrom xts xts
 #' @importFrom zoo coredata index
 #' @importFrom grDevices colorRampPalette
 #' @importFrom graphics plot
 #' @importFrom stats runif
+#' @importFrom quantmod Lag
 #' @importFrom utils capture.output head install.packages installed.packages packageVersion remove.packages tail untar globalVariables
 modelStrategy <- function(){
   thisEnv <- environment()
@@ -182,16 +183,16 @@ getIgnorePosition.modelStrategy <- function(this){
 #' Get variable ignorePosition.
 #'
 #' @param this modelStrategy
-#' @param bool bool, if it is true, then when model  simulated, when there was time to change coefs and we had position,
+#' @param bool bool, if it is true, then when model  simulated, 
+#' when there was time to change coefs and we had position,
 #'  then position would be closed
 #'
-
-#' @rdname setIgnorePosition
-#' @method setIgnorePosition modelStrategy
 #' @export
+#' @rdname setIgnorePosition
 setIgnorePosition <- function(this, bool){
   UseMethod('setIgnorePosition', this)
 }
+
 
 #' @export
 #' @rdname setIgnorePosition
@@ -207,11 +208,14 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 #' @param fun function, it calculates coefs for spread
 #' @param args list, arguments in setBeta function
 #' @export
+#' @rdname setBeta
 setBeta <- function(this, fun, args = NULL){
   UseMethod('setBeta', this)
 }
 
 #' @export
+#' @rdname setBeta
+#' @method setBeta modelStrategy
 setBeta.modelStrategy <- function(this, fun, args = NULL){
   if(missing(fun)){
     stop("Please provide name or fun argument")
@@ -251,11 +255,14 @@ setMoney.modelStrategy <- function(this,x){
 #'
 #' @return numeric, amount of money
 #' @export
+#' @rdname getMoney
 getMoney <- function(this){
   UseMethod('getMoney', this)
 }
 
 #' @export
+#' @rdname getMoney
+#' @method getMoney modelStrategy
 getMoney.modelStrategy <- function(this){
   return(this$thisEnv$money)
 }
@@ -266,11 +273,14 @@ getMoney.modelStrategy <- function(this){
 #' @param this modelStrategy
 #' @param x numeric, window for calculating
 #' @export
+#' @rdname setLookback
 setLookback <- function(this, x){
   UseMethod('setLookback', this)
 }
 
 #' @export
+#' @rdname setLookback
+#' @method setLookback modelStrategy
 setLookback.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$lookback <- x
@@ -280,11 +290,14 @@ setLookback.modelStrategy <- function(this,x){
 #'
 #' @param this modelStrategy
 #' @export
+#' @rdname getLookback
 getLookback <- function(this){
   UseMethod('getLookback', this)
 }
 
 #' @export
+#' @rdname getLookback
+#' @method getLookback modelStrategy
 getLookback.modelStrategy <- function(this){
   return(this$thisEnv$lookback)
 }
@@ -294,11 +307,14 @@ getLookback.modelStrategy <- function(this){
 #' @param this modelStrategy
 #' @param x numeric, window
 #' @export
+#' @rdname setLookForward
 setLookForward <- function(this, x){
   UseMethod('setLookForward', this)
 }
 
 #' @export
+#' @rdname setLookForward
+#' @method setLookForward modelStrategy
 setLookForward.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$lookForward <- x
@@ -308,11 +324,14 @@ setLookForward.modelStrategy <- function(this,x){
 #'
 #' @param this modelStrategy
 #' @export
+#' @rdname getLookForward
 getLookForward <- function(this){
   UseMethod('getLookForward', this)
 }
 
 #' @export
+#' @rdname getLookForward
+#' @method getLookForward modelStrategy
 getLookForward.modelStrategy <- function(this){
   return(this$thisEnv$lookForward)
 }
@@ -323,11 +342,14 @@ getLookForward.modelStrategy <- function(this){
 #' @param this modelStrategy
 #' @param x numeric, tolerance
 #' @export
+#' @rdname setToleranceBeta
 setToleranceBeta <- function(this, x){
   UseMethod('setToleranceBeta', this)
 }
 
 #' @export
+#' @rdname setToleranceBeta
+#' @method setToleranceBeta modelStrategy
 setToleranceBeta.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$toleranceBeta <- x
@@ -339,11 +361,14 @@ setToleranceBeta.modelStrategy <- function(this,x){
 #'
 #' @return numeric
 #' @export
+#' @rdname getToleranceBeta
 getToleranceBeta <- function(this){
   UseMethod('getToleranceBeta', this)
 }
 
 #' @export
+#' @rdname getToleranceBeta
+#' @method getToleranceBeta modelStrategy
 getToleranceBeta.modelStrategy <- function(this){
   return(this$thisEnv$toleranceBeta)
 }
@@ -354,11 +379,14 @@ getToleranceBeta.modelStrategy <- function(this){
 #' @param this modelStrategy
 #' @param x numeric, window
 #' @export
+#' @rdname setMaxLookback
 setMaxLookback <- function(this, x){
   UseMethod('setMaxLookback', this)
 }
 
 #' @export
+#' @rdname setMaxLookback
+#' @method setMaxLookback modelStrategy
 setMaxLookback.modelStrategy <- function(this,x){
   e <- this$thisEnv
   e$maxLookback <- x
@@ -369,11 +397,14 @@ setMaxLookback.modelStrategy <- function(this,x){
 #'
 #' @param this modelStrategy
 #' @export
+#' @rdname getMaxLookback
 getMaxLookback <- function(this){
   UseMethod('getMaxLookback', this)
 }
 
 #' @export
+#' @rdname getMaxLookback
+#' @method getMaxLookback modelStrategy
 getMaxLookback.modelStrategy <- function(this){
   return(this$thisEnv$maxLookback)
 }
@@ -440,7 +471,39 @@ addObject.modelStrategy <- function(this, ...){
 
 
 
+#' get expandingLookback
+#' 
+#' If it is TRUE, then size of data in beta_fun will be equal to current index, else to lookback
+#'
+#' @param this modelStrategy
+#'
+#' @export
+#' @rdname getExpandingLookback
+#' @method getExpandingLookback modelStrategy
+getExpandingLookback.modelStrategy <- function(this){
+  if(!'expandingLookback' %in% names(this$thisEnv)){
+    this$thisEnv$expandingLookback <- FALSE
+  }
+  return(this$thisEnv$expandingLookback)
+}
 
+#' set expandingLookback
+#' 
+#' If it is TRUE, then size of data in beta_fun will be equal to current index, else to lookback
+#'
+#' @param this modelStrategy
+#' @param x logical
+#'
+#' @export
+#' @rdname setExpandingLookback
+#' @method setExpandingLookback modelStrategy
+setExpandingLookback.modelStrategy <- function(this, x){
+  if(is.logical(x)){
+    this$thisEnv$expandingLookback <- x
+  }else{
+    print('x must be logical')
+  }
+}
 
 
 

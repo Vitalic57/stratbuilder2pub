@@ -3,11 +3,14 @@
 \name{getMoney.modelPortfolio}
 \alias{getMoney.modelPortfolio}
 \alias{getMoney}
+\alias{getMoney.modelStrategy}
 \title{Return sum money of models inside portfolio}
 \usage{
 \method{getMoney}{modelPortfolio}(this)
 
 getMoney(this)
+
+\method{getMoney}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}

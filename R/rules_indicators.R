@@ -192,11 +192,14 @@ getIndicators.modelStrategy <- function(this){
 #'
 #' @return list of inforamation
 #' @export
+#' @rdname getRules
 getRules <- function(this, pathwise = FALSE, recalc = FALSE){
   UseMethod('getRules', this)
 }
 
 #' @export
+#' @rdname getRules
+#' @method getRules modelStrategy
 getRules.modelStrategy <- function(this, pathwise = FALSE, recalc = FALSE){
   if(length(pathwise) == 0){
     return(this$thisEnv$rules)
@@ -229,11 +232,14 @@ getRules.modelStrategy <- function(this, pathwise = FALSE, recalc = FALSE){
 #' @param this modelStrategy
 #' @param name character, name of rule
 #' @export
+#' @rdname removeRule
 removeRule <- function(this, name){
   UseMethod('removeRule', this)
 }
 
 #' @export
+#' @rdname removeRule
+#' @method removeRule modelStrategy
 removeRule.modelStrategy <- function(this, name){
   table <- getRules(this)
   names <- sapply(table, function(x) x$as)
@@ -250,11 +256,14 @@ removeRule.modelStrategy <- function(this, name){
 #' @param this modelStrategy
 #' @param name character, name of indicator
 #' @export
+#' @rdname removeIndicator
 removeIndicator <- function(this, name){
   UseMethod('removeIndicator', this)
 }
 
 #' @export
+#' @rdname removeIndicator
+#' @method removeIndicator modelStrategy
 removeIndicator.modelStrategy <- function(this, name){
   table <- getIndicators(this)
   names <- sapply(table, function(x) x$as)

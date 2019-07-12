@@ -2,9 +2,12 @@
 % Please edit documentation in R/commission_slippage.R
 \name{setCommission}
 \alias{setCommission}
+\alias{setCommission.modelStrategy}
 \title{Sets commission to model}
 \usage{
 setCommission(this, q)
+
+\method{setCommission}{modelStrategy}(this, q)
 }
 \arguments{
 \item{this}{modelStrategy}

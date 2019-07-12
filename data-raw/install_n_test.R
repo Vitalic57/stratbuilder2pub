@@ -11,12 +11,13 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.3')
+lines[ind] <- paste0('Version: ', '1.3.6')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
 devtools::test('.')
 devtools::document()
+devtools::check('.')
 
 setwd('..')
 devtools::install('stratbuilder2pub')
@@ -30,12 +31,15 @@ file.rename(x, "/home/vitaly/Documents/stratbuilder2pub.tar.gz")
 tryCatch(ssh::ssh_disconnect(session), error=function(e){})
 session <- ssh::ssh_connect('vshishkov@142.93.143.142')
 ssh::scp_upload(session, xx, '/usr/local/lib/backtest/')
+ssh::ssh_disconnect(session)
 # s <- paste0('scp -l 8192 ', xx,' vshishkov@142.93.143.142:/usr/local/lib/backtest/')
 # system(s)
 
 # download to server
+session <- ssh::ssh_connect('vshishkov@142.93.143.142')
 ssh::scp_upload(session, '/home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbuilder2pub',
                 '/home/vshishkov/backtestit/packrat/lib/x86_64-pc-linux-gnu/3.4.2')
+ssh::ssh_disconnect(session)
 # s <- paste0('scp -r /home/vitaly/R/x86_64-pc-linux-gnu-library/3.4/stratbuilder2pub
 #             vshishkov@142.93.143.142:/home/vshishkov/backtestit/packrat/lib/x86_64-pc-linux-gnu/3.4.2')
 # system(s)

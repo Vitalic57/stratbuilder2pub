@@ -13,10 +13,10 @@ session <- ssh_connect('YOUR ADDRESS', keyfile = 'PATH TO KEY') # create session
   setLookback(this, 1) # how many periods you need for computing beta 
   setLookForward(this, 1000000) # how many periods you don't need to rebalance
   setWaitAfterClose(this, TRUE) # if TRUE, then algorithm don't do revert
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema_fast') # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'sma_fast') # Here we add indicator, name argument should be function for now, other arguments in args list are arguments of
   # your function. spread is local name, it is name of process. 
   # as argument is responsible for name of your indicator, this name can be used in rules and other indicators
-  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'ema_slow')
+  addIndicator(this, args = list(name = SMA, x = quote(spread), n = 200), as = 'sma_slow')
   addRule(this, as = 'short',  # Here we create a rule for short
           condition = spread > sma_fast & sma_fast > sma_slow, # your trigger, spread is local name of process and ema name of moving average indicator
           type = 'enter', # There are only two types enter or exit.
@@ -101,7 +101,7 @@ getBacktestResults(this) %>% View
 # paramset.label argument can be omitted
 performServer(this, paramset.label = paramset, paramset.index = 237)
 
-
+getReportStrategy(this)
 # Now about content of report
 # trades                   48.0000 # number of trades 
 # trades.year               6.0000 # mean number of trades yearly

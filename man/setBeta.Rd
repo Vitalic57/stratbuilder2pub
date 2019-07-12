@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{setBeta}
 \alias{setBeta}
+\alias{setBeta.modelStrategy}
 \title{Set rule for calculating spread.}
 \usage{
 setBeta(this, fun, args = NULL)
+
+\method{setBeta}{modelStrategy}(this, fun, args = NULL)
 }
 \arguments{
 \item{this}{modelStrategy}

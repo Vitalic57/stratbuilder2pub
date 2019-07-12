@@ -138,7 +138,7 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df, 'date')
-               p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
+               p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by date")
                if(each_year){
                  p <- p + geom_vline(xintercept=last_dates, linetype=4, colour="red")
@@ -203,7 +203,7 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df,'index')
-               p <- ggplot(newdf, aes(x= index, y = "value", color = "variable") ) +
+               p <- ggplot(newdf, aes_string(x= "index", y = "value", color = "variable") ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by trade")
                if(leg != 'sep'){
                  p + scale_color_manual(
@@ -288,7 +288,7 @@ plotDrawdowns.modelStrategy <- function(this,
   if(return_type == 'plot'){
     if(graph_type == 'ggplot2'){
       newdf <- reshape2::melt(df, 'date')
-      ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
+      ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
         geom_line() + theme_bw() + theme(legend.position="none") +
         scale_color_manual(
           values = c(
@@ -466,7 +466,7 @@ plotPnL.list <- function(this, legend = TRUE, ...){
     dplyr::mutate(date = dates)
   newdf <- reshape2::melt(df, 'date')
   
-  p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
+  p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
     geom_line() + theme_bw() + 
     ggtitle("PnL money by date")
   if(!legend){
@@ -499,7 +499,7 @@ plotDrawdowns.list <- function(this, legend = TRUE, ...){
     dplyr::mutate(date = dates)
   newdf <- reshape2::melt(df, 'date')
   
-  p <- ggplot(newdf,aes(x=date, y="value", color = "variable") ) +
+  p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
     geom_line() + theme_bw() + 
     ggtitle("Drawdowns by date")
   if(!legend){
@@ -520,6 +520,7 @@ plotPnL.modelPortfolio <- function(this, ...){
   if('legend' %in% names(dots)){
     dots[['legend']] <- NULL
   }
+  dots[['this']] <- this
   do.call("plotPnL.modelStrategy", args=dots)
 }
 
@@ -542,6 +543,7 @@ plotDrawdowns.modelPortfolio <- function(this, ...){
   if('legend' %in% names(dots)){
     dots[['legend']] <- NULL
   }
+  dots[['this']] <- this
   do.call("plotDrawdowns.modelStrategy", args=dots)
 }
 

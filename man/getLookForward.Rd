@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{getLookForward}
 \alias{getLookForward}
+\alias{getLookForward.modelStrategy}
 \title{Get window how far the same coefs will be used}
 \usage{
 getLookForward(this)
+
+\method{getLookForward}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}

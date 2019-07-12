@@ -44,7 +44,9 @@ performServer.modelPortfolio <- function(this, ...){
   #   model$thisEnv$data_changed <- FALSE
   #   model$thisEnv$user_beta_table_changed <- FALSE
   # }
-  return(x)
+  if(!is.null(x)){
+    return(x)
+  }
 }
 
 

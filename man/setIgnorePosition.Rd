@@ -5,15 +5,16 @@
 \alias{setIgnorePosition.modelStrategy}
 \title{Get variable ignorePosition.}
 \usage{
-\method{setIgnorePosition}{modelStrategy}(this, bool)
+setIgnorePosition(this, bool)
 
 \method{setIgnorePosition}{modelStrategy}(this, bool)
 }
 \arguments{
 \item{this}{modelStrategy}
 
-\item{bool}{bool, if it is true, then when model  simulated, when there was time to change coefs and we had position,
-then position would be closed}
+\item{bool}{bool, if it is true, then when model  simulated, 
+when there was time to change coefs and we had position,
+ then position would be closed}
 }
 \description{
 Get variable ignorePosition.

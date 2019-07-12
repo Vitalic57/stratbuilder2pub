@@ -198,7 +198,7 @@ send_rdata <- function(session, obj, verbose=FALSE){
   tryCatch({
     capture.output(ssh::scp_upload(session, file_path))
   }, error = function(e){
-    print(e)
+    #print(e)
   })
   if(verbose){
     cat('data uploaded\n')
@@ -536,12 +536,15 @@ installModel <- function(this, target){
 #' x <- quantmod::getSymbols("MSFT", from = Sys.Date() - 365)
 #' setUserData(this, cbind(x, y))
 #' }
+#' @rdname setUserData
 setUserData <- function(this, l){
   UseMethod('setUserData', this)
 }
 
 
 #' @export
+#' @rdname setUserData
+#' @method setUserData modelStrategy
 setUserData.modelStrategy <- function(this, l){
   if(is.list(l) && !xts::is.xts(l[[1]])){
     if(!all(c('dataset') %in% names(l))){
@@ -604,11 +607,14 @@ setUserData.modelStrategy <- function(this, l){
 #' setBetaTable(this, tmp)
 #' }
 #' @export
+#' @rdname setBetaTable
 setBetaTable <- function(this, table, force_fun = FALSE){
   UseMethod('setBetaTable', this)
 }
 
 #' @export
+#' @rdname setBetaTable
+#' @method setBetaTable modelStrategy
 setBetaTable.modelStrategy <- function(this, table, force_fun = FALSE){
   if(xts::is.xts(table)){
     this$thisEnv$user_beta_table <- table
@@ -627,11 +633,14 @@ setBetaTable.modelStrategy <- function(this, table, force_fun = FALSE){
 #' @param this modelStrategy
 #' @param ... named arguments
 #' @export
+#' @rdname addData
 addData <- function(this, ...){
   UseMethod('addData', this)
 }
 
 #' @export
+#' @rdname addData
+#' @method addData modelStrategy
 addData.modelStrategy <- function(this, ...){
   dots <- list(...)
   if(length(dots) > 0){

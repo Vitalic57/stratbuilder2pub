@@ -4,7 +4,7 @@ library(TTR)
 # Example of usage for multiple asset and rebalancing of portfolio
 {
   this <- modelStrategy() 
-  setLookback(this, 100) # how many timeframes to look back
+  setLookback(this, 600) # how many timeframes to look back
   setLookForward(this, 50) # this amount of timeframes coeffincients will be unchanged
   setBeta(this, function(data, ...){ # dots are requared arguments, data is a matrix, that includes lookback + 1 rows
     # Here we define how we will calculate coefficients
@@ -20,7 +20,7 @@ library(TTR)
   }) 
   setIgnorePosition(this, TRUE) # If it is TRUE, then after lookforward timeframes open positions will be closed and betas will be recalculated
   addIndicator(this, args = list(name = SMA, x = quote(spread), n = 100), as = 'ema',
-               lookback = 101) 
+               lookback = 600) 
   addRule(this, as = 'short', 
           condition = spread > ema, 
           type = 'enter',
@@ -66,7 +66,13 @@ performServer(this)
                     variable = list(n = c(50, 100, 150, 200, 250, 300, 500)),
                     label = 'lookback'
     )
-    
+    addDistribution(this,
+                    paramset.label = paramset,
+                    component.type = 'indicator', 
+                    component.label = 'ema',
+                    variable = list(n = c(50, 100, 150, 200, 250, 300, 500)),
+                    label = 'ema.n'
+    )
     # This distribution for arguments of rules
     # addDistribution(this,
     #                 paramset.label = paramset,
@@ -92,9 +98,7 @@ performServer(this)
   }
 }
 
-applyParamsetServer(this, 
-                    nsamples = 10)
-
+applyParamsetServer(this, nsamples = 10)
 performServer(this, paramset.index = 18)
 
 

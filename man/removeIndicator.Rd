@@ -2,9 +2,12 @@
 % Please edit documentation in R/rules_indicators.R
 \name{removeIndicator}
 \alias{removeIndicator}
+\alias{removeIndicator.modelStrategy}
 \title{Remove indicator by name}
 \usage{
 removeIndicator(this, name)
+
+\method{removeIndicator}{modelStrategy}(this, name)
 }
 \arguments{
 \item{this}{modelStrategy}

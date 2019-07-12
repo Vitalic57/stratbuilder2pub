@@ -2,9 +2,12 @@
 % Please edit documentation in R/modelStrategy.R
 \name{getMaxLookback}
 \alias{getMaxLookback}
+\alias{getMaxLookback.modelStrategy}
 \title{Get window for calculating indicators}
 \usage{
 getMaxLookback(this)
+
+\method{getMaxLookback}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}

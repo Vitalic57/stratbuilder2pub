@@ -2,9 +2,12 @@
 % Please edit documentation in R/user_communication.R
 \name{addData}
 \alias{addData}
+\alias{addData.modelStrategy}
 \title{Add user data}
 \usage{
 addData(this, ...)
+
+\method{addData}{modelStrategy}(this, ...)
 }
 \arguments{
 \item{this}{modelStrategy}

@@ -2,9 +2,12 @@
 % Please edit documentation in R/user_communication.R
 \name{setBetaTable}
 \alias{setBetaTable}
+\alias{setBetaTable.modelStrategy}
 \title{Set your coefficients for any moment}
 \usage{
 setBetaTable(this, table, force_fun = FALSE)
+
+\method{setBetaTable}{modelStrategy}(this, table, force_fun = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}

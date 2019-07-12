@@ -2,9 +2,12 @@
 % Please edit documentation in R/user_communication.R
 \name{setUserData}
 \alias{setUserData}
+\alias{setUserData.modelStrategy}
 \title{Select data to backtest.}
 \usage{
 setUserData(this, l)
+
+\method{setUserData}{modelStrategy}(this, l)
 }
 \arguments{
 \item{this}{modelStrategy}
