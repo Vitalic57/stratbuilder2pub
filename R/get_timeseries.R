@@ -134,7 +134,7 @@ getCapital.modelStrategy <- function(this,
     stop("start > end")
   }
   range <- range_start:range_end
-  as.numeric(this$thisEnv$backtests$base$results$money_in_pos[range,])
+  xts(this$thisEnv$backtests$base$results$money_in_pos,dates)[range,]
 }
 
 #' @export

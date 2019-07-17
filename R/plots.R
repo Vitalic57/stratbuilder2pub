@@ -635,11 +635,11 @@ plotCapital.modelPortfolio <- function(this,interactive_plot = TRUE,
 
 
 
-#' Plot opening and closing position
+#' Plot open and close position
 #' 
 #' 
 #' 
-#' 
+#'
 #' @param this modelStrategy
 #' @param multi_plot logical, if TRUE plot spread and legs
 #' @export
@@ -658,14 +658,15 @@ plotStrategy <- function(this, multi_plot=F){
   range_end <- e$activeField['end']
   range <- range_start:range_end
   dates <- getDateByIndex(this)
+  eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
   df <- cbind( 
     data.frame(date=dates), 
-    data.frame(PnL = log(this$thisEnv$data_from_user)[,1]*beta[1] + log(this$thisEnv$data_from_user)[,2]*beta[2]))[range,] %>%set_colnames(c('date','spread'))
+    data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
   p1 <- plotly::ggplotly(ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4) +
              geom_point(data = df[start[start*side>0],], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
              geom_point(data = df[stop[stop*side>0],], aes_string("date", 'spread'), shape = 25, color='blue', size = 2) + 
              geom_point(data = df[start[start*side<0],], aes_string("date", 'spread'), shape = 24, color='red', size = 2) + 
-             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 25, color='orange', size = 2) ,dynamicTicks = T)
+             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 25, color='orange', size = 2) ,dynamicTicks = TRUE)
   if (!multi_plot){
     return(p1)
   }
@@ -677,7 +678,7 @@ plotStrategy <- function(this, multi_plot=F){
                      geom_point(data = df[start[start*side*beta[1]>0],],aes_string("date", "price_leg_1"), shape = 24, color='green', size = 2) + 
                      geom_point(data = df[stop[stop*side*beta[1]>0],], aes_string("date", "price_leg_1"), shape = 25, color='blue', size = 2) + 
                      geom_point(data = df[start[start*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 24, color='red', size = 2) + 
-                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='orange', size = 2), dynamicTicks = T
+                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='orange', size = 2), dynamicTicks = TRUE
                      
   )
   df <- cbind( 
@@ -687,7 +688,7 @@ plotStrategy <- function(this, multi_plot=F){
     geom_point(data = df[start[start*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 24, color='green', size = 2) + 
     geom_point(data = df[stop[stop*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 25, color='blue', size = 2) + 
     geom_point(data = df[start[start*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 24, color='red', size = 2) + 
-    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='orange', size = 2),dynamicTicks = T)
-  plotly::subplot(p1, p2,p3, nrows = 3, shareX = T, shareY = T)
+    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='orange', size = 2),dynamicTicks = TRUE)
+  plotly::subplot(p1, p2,p3, nrows = 3, shareX = TRUE, shareY = TRUE)
 }
 

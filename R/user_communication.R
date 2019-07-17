@@ -164,7 +164,6 @@ performServer.modelStrategy <- function(this,
 #' @rdname performServer
 #' @method performServer list
 performServer.list <- function(this, session, verbose=FALSE, ...){
-  print(1)
   if(missing(session)){
     session <- .env[['session']]
   }
@@ -177,7 +176,6 @@ performServer.list <- function(this, session, verbose=FALSE, ...){
   }
   if('paramset.index' %in% names(e[['user_args']]) && !'paramset.label' %in% names(e[['user_args']])){
     tryCatch({
-      print(names(this$thisEnv$paramsets)[1])
       e[['user_args']][['paramset.label']] <- as.numeric(names(this[[1]]$thisEnv$paramsets)[1])
     }, error = function(e){
       stop('Please, define paramset.label argument')

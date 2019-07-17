@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plotStrategy}
 \alias{plotStrategy}
-\title{Plot opening and closing position}
+\title{Plot open and close position}
 \usage{
 plotStrategy(this, multi_plot = F)
 }
@@ -12,5 +12,5 @@ plotStrategy(this, multi_plot = F)
 \item{multi_plot}{logical, if TRUE plot spread and legs}
 }
 \description{
-Plot opening and closing position
+Plot open and close position
 }
