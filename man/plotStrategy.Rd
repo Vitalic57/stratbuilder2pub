@@ -2,12 +2,17 @@
 % Please edit documentation in R/plots.R
 \name{plotStrategy}
 \alias{plotStrategy}
+\alias{plotStrategy.modelStrategy}
 \title{Plot open and close position}
 \usage{
-plotStrategy(this, multi_plot = F)
+plotStrategy(this, ...)
+
+\method{plotStrategy}{modelStrategy}(this, multi_plot = FALSE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
+
+\item{...}{params}
 
 \item{multi_plot}{logical, if TRUE plot spread and legs}
 }

@@ -75,9 +75,6 @@ getPnL.modelPortfolio <- function( this,
                                    ...)
 {
     dots <- list(...)
-    if('legend' %in% names(dots)){
-      dots[['legend']] <- NULL
-    }
     if('leg' %in% names(dots)){
       dots[['leg']] <- NULL
     }
@@ -93,9 +90,6 @@ getPnL.modelPortfolio <- function( this,
 #' @method getPnL list
 getPnL.list <- function(this, ...){
   dots <- list(...)
-  if('legend' %in% names(dots)){
-    dots[['legend']] <- NULL
-  }
   if('leg' %in% names(dots)){
     dots[['leg']] <- NULL
   }
@@ -122,14 +116,28 @@ getCapital <- function(this,
 }
 
 #' @export
+#' @param start_date date type, example: start_date='2008-01-01'
+#' @param end_date date type, example: end_date='2018-01-01'
 #' @rdname getCapital
 getCapital.modelStrategy <- function(this,
+                                     start_date = NULL,
+                                     end_date = NULL,
                                       ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
-  range_start <- e$activeField['start']
-  range_end <- e$activeField['end']
+  if (!is.null(start_date)){
+    range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
+  }
+  else{
+    range_start <- e$activeField['start']
+  }
+  if(!is.null(end_date)){
+    range_end <- min(e$activeField['end'], sum(dates < end_date))
+  }
+  else{
+    range_end <- e$activeField['end']
+  }
   if(range_start > range_end){
     stop("start > end")
   }

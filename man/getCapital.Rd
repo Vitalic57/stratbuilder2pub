@@ -8,7 +8,8 @@
 \usage{
 getCapital(this, ...)
 
-\method{getCapital}{modelStrategy}(this, ...)
+\method{getCapital}{modelStrategy}(this, start_date = NULL,
+  end_date = NULL, ...)
 
 \method{getCapital}{modelPortfolio}(this, ...)
 }
@@ -16,6 +17,10 @@ getCapital(this, ...)
 \item{this}{modelStrategy}
 
 \item{...}{params}
+
+\item{start_date}{date type, example: start_date='2008-01-01'}
+
+\item{end_date}{date type, example: end_date='2018-01-01'}
 }
 \description{
 Return money in position

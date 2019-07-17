@@ -594,15 +594,30 @@ plotCapital <- function(this,
 }
 
 #' @param interactive_plot, logical, use FALSE if you want to disable the interactive graph
+#' @param start_date date type, example: start_date='2008-01-01'
+#' @param end_date date type, example: end_date='2018-01-01'
 #' @export
 #' @rdname plotCapital
-plotCapital.modelStrategy <- function(this,interactive_plot = TRUE,
+plotCapital.modelStrategy <- function(this,
+                                      interactive_plot = TRUE,
+                                      start_date = NULL,
+                                      end_date = NULL,
                                   ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
-  range_start <- e$activeField['start']
-  range_end <- e$activeField['end']
+  if (!is.null(start_date)){
+    range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
+  }
+  else{
+    range_start <- e$activeField['start']
+  }
+  if(!is.null(end_date)){
+    range_end <- min(e$activeField['end'], sum(dates < end_date))
+  }
+  else{
+    range_end <- e$activeField['end']
+  }
   if(range_start > range_end){
     stop("start > end")
   }
@@ -633,24 +648,31 @@ plotCapital.modelPortfolio <- function(this,interactive_plot = TRUE,
   do.call("plotCapital.modelStrategy", args=dots)
 }
 
-
-
 #' Plot open and close position
 #' 
 #' 
 #' 
 #'
 #' @param this modelStrategy
+#' @param ... params
+#' @export
+#' @rdname plotStrategy
+plotStrategy <- function(this, 
+                        ...){
+  UseMethod('plotStrategy', this)
+}
+
 #' @param multi_plot logical, if TRUE plot spread and legs
 #' @export
 #' @rdname plotStrategy
 #' 
 
-plotStrategy <- function(this, multi_plot=F){
-  beta <- as.numeric(getReportTrades(this)[1,6:7])
+plotStrategy.modelStrategy <- function(this, multi_plot=FALSE, ...){
   reports <- getReportTrades(this)
   start <- reports$ind.start
   stop <- reports$ind.end
+  print(start)
+  print(stop)
   side <- reports$side
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
@@ -658,15 +680,21 @@ plotStrategy <- function(this, multi_plot=F){
   range_end <- e$activeField['end']
   range <- range_start:range_end
   dates <- getDateByIndex(this)
-  eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
+  tryCatch({
+    eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
+  }, error = function(e){
+    stop('You are using illegal arguments')
+    return()
+  })
+  
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
   p1 <- plotly::ggplotly(ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4) +
              geom_point(data = df[start[start*side>0],], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
              geom_point(data = df[stop[stop*side>0],], aes_string("date", 'spread'), shape = 25, color='blue', size = 2) + 
-             geom_point(data = df[start[start*side<0],], aes_string("date", 'spread'), shape = 24, color='red', size = 2) + 
-             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 25, color='orange', size = 2) ,dynamicTicks = TRUE)
+             geom_point(data = df[start[start*side<0],], aes_string("date", 'spread'), shape = 25, color='red', size = 2) + 
+             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 24, color='orange', size = 2) ,dynamicTicks = TRUE)
   if (!multi_plot){
     return(p1)
   }
@@ -677,8 +705,8 @@ plotStrategy <- function(this, multi_plot=F){
   p2 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_1")) + geom_line(size = 0.4) +
                      geom_point(data = df[start[start*side*beta[1]>0],],aes_string("date", "price_leg_1"), shape = 24, color='green', size = 2) + 
                      geom_point(data = df[stop[stop*side*beta[1]>0],], aes_string("date", "price_leg_1"), shape = 25, color='blue', size = 2) + 
-                     geom_point(data = df[start[start*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 24, color='red', size = 2) + 
-                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='orange', size = 2), dynamicTicks = TRUE
+                     geom_point(data = df[start[start*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='red', size = 2) + 
+                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 24, color='orange', size = 2), dynamicTicks = TRUE
                      
   )
   df <- cbind( 
@@ -687,8 +715,8 @@ plotStrategy <- function(this, multi_plot=F){
   p3 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_2")) + geom_line(size = 0.4) +
     geom_point(data = df[start[start*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 24, color='green', size = 2) + 
     geom_point(data = df[stop[stop*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 25, color='blue', size = 2) + 
-    geom_point(data = df[start[start*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 24, color='red', size = 2) + 
-    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='orange', size = 2),dynamicTicks = TRUE)
+    geom_point(data = df[start[start*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='red', size = 2) + 
+    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 24, color='orange', size = 2),dynamicTicks = TRUE)
   plotly::subplot(p1, p2,p3, nrows = 3, shareX = TRUE, shareY = TRUE)
 }
 

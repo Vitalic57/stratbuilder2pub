@@ -8,7 +8,8 @@
 \usage{
 plotCapital(this, ...)
 
-\method{plotCapital}{modelStrategy}(this, interactive_plot = TRUE, ...)
+\method{plotCapital}{modelStrategy}(this, interactive_plot = TRUE,
+  start_date = NULL, end_date = NULL, ...)
 
 \method{plotCapital}{modelPortfolio}(this, interactive_plot = TRUE, ...)
 }
@@ -18,6 +19,10 @@ plotCapital(this, ...)
 \item{...}{params}
 
 \item{interactive_plot, }{logical, use FALSE if you want to disable the interactive graph}
+
+\item{start_date}{date type, example: start_date='2008-01-01'}
+
+\item{end_date}{date type, example: end_date='2018-01-01'}
 }
 \description{
 Plot Capital of strategy
