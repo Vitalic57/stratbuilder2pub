@@ -54,6 +54,7 @@ plotPnL <- function(this,
 }
 
 #' @param type character, one of c('money','trades','percents')
+#'
 #' @param leg numeric/character, number of leg, if it is equal to 'all' or 'sum', then all pnl among all legs
 #' will be summed, if it is equal to 'sep', then pnl among legs will be plotted
 #' @param graph_type character, ggplot2 or xts 
@@ -61,7 +62,10 @@ plotPnL <- function(this,
 #' @param adjust logical, if TRUE, then values will be divided by getMoney(this)
 #' @param comOn bool, if true then commission will be included in the 'trades' graph
 #' @param return_type character, plot or data
+#' @param start_date date type, example: start_date='2008-01-01'
+#' @param end_date date type, example: end_date='2018-01-01'
 #' @param cutoff logical, if TRUE then on plot will be horizonal line indicating when model was created
+#' @param on_percentage logical, if TRUE then on plot will be in percentage
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelStrategy
@@ -74,14 +78,27 @@ plotPnL.modelStrategy <- function(this,
                                   adjust = FALSE,
                                   return_type = 'plot',
                                   cutoff = FALSE,
+                                  start_date = NULL,
+                                  end_date = NULL,
+                                  on_percentage = FALSE,
                                   ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   switch(type,
          money = {
            dates <- getDateByIndex(this)
-           range_start <- e$activeField['start']
-           range_end <- e$activeField['end']
+           if (!is.null(start_date)){
+              range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
+           }
+           else{
+              range_start <- e$activeField['start']
+           }
+           if(!is.null(end_date)){
+              range_end <- min(e$activeField['end'], sum(dates < end_date))
+           }
+           else{
+             range_end <- e$activeField['end']
+           }
            if(range_start > range_end){
              stop("start > end")
            }
@@ -90,8 +107,8 @@ plotPnL.modelStrategy <- function(this,
            if(leg %in% c('all', 'sum')){
              df <- cbind( 
                data.frame(date=dates), 
-               data.frame(PnL = init_money + apply(e$results$unrealized_money + e$results$realized_money +  
-                                                     apply( (1 - comOn) * e$results$commissions_table, 2, cumsum), 1, sum))
+               data.frame(PnL = (init_money + apply(e$results$unrealized_money + e$results$realized_money +  
+                                                     apply( (1 - comOn) * e$results$commissions_table, 2, cumsum), 1, sum))/ max(1,e$results$money[range_start,]*on_percentage))
              )[range,]
            }else if(is.numeric(leg)){ 
              df <- cbind(
@@ -515,13 +532,27 @@ plotDrawdowns.list <- function(this, legend = TRUE, ...){
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelPortfolio
-plotPnL.modelPortfolio <- function(this, ...){
+  plotPnL.modelPortfolio <- function(this, ...){
   dots <- list(...)
-  if('legend' %in% names(dots)){
-    dots[['legend']] <- NULL
+  # if('legend' %in% names(dots)){
+  #   dots[['legend']] <- NULL
+  # }
+  if ('leg' %in% names(dots)){
+    if (is.numeric(dots[['leg']])){
+      dots[['this']] <- this$thisEnv$models[[dots[['leg']]]]
+      do.call("plotPnL.modelStrategy", args=dots)
+    }else if(dots[['leg']] == 'sep'){
+      dots[['this']] <- this$thisEnv$models
+      dots[['legend']] <- T
+      do.call("plotPnL.list", args=dots)
+    }else {dots[['this']] <- this
+    do.call("plotPnL.modelStrategy", args=dots)
+    }
   }
-  dots[['this']] <- this
-  do.call("plotPnL.modelStrategy", args=dots)
+  else{
+    dots[['this']] <- this
+    do.call("plotPnL.modelStrategy", args=dots)
+  }
 }
 
 
@@ -548,8 +579,115 @@ plotDrawdowns.modelPortfolio <- function(this, ...){
 }
 
 
+#' Plot Capital of strategy
+#' 
+#' 
+#' 
+#' 
+#' @param this modelStrategy
+#' @param ... params
+#' @export
+#' @rdname plotCapital
+plotCapital <- function(this, 
+                    ...){
+  UseMethod('plotCapital', this)
+}
+
+#' @param interactive_plot, logical, use FALSE if you want to disable the interactive graph
+#' @export
+#' @rdname plotCapital
+plotCapital.modelStrategy <- function(this,interactive_plot = TRUE,
+                                  ...){
+  from <- 'base'
+  e <- this$thisEnv$backtests[[from]]
+  dates <- getDateByIndex(this)
+  range_start <- e$activeField['start']
+  range_end <- e$activeField['end']
+  if(range_start > range_end){
+    stop("start > end")
+  }
+  range <- range_start:range_end
+  x <- this$thisEnv$backtests$base$results$money_in_pos
+  x[x == 0] <- NA
+  df <- cbind( 
+    data.frame(date=dates), 
+    data.frame(Money_ = x)
+  )[range,]
+  newdf <- reshape2::melt(df, 'date')
+  if(interactive_plot){
+    return(plotly::ggplotly(ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+                       geom_line() + theme_bw() + ggtitle("Money in position")))
+  }
+  ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+             geom_line() + theme_bw() + ggtitle("Money in position")
+  
+}
+
+#' @export
+#' @rdname plotCapital
+plotCapital.modelPortfolio <- function(this,interactive_plot = TRUE,
+                                      ...){
+  dots <- list(...)
+  dots[['interactive_plot']]<-interactive_plot
+  dots[['this']] <- this
+  do.call("plotCapital.modelStrategy", args=dots)
+}
 
 
 
+#' Plot opening and closing position
+#' 
+#' 
+#' 
+#' 
+#' @param this modelStrategy
+#' @param multi_plot logical, if TRUE plot spread and legs
+#' @export
+#' @rdname plotStrategy
+#' 
 
+plotStrategy <- function(this, multi_plot=F){
+  beta <- as.numeric(getReportTrades(this)[1,6:7])
+  reports <- getReportTrades(this)
+  start <- reports$ind.start
+  stop <- reports$ind.end
+  side <- reports$side
+  from <- 'base'
+  e <- this$thisEnv$backtests[[from]]
+  range_start <- e$activeField['start']
+  range_end <- e$activeField['end']
+  range <- range_start:range_end
+  dates <- getDateByIndex(this)
+  df <- cbind( 
+    data.frame(date=dates), 
+    data.frame(PnL = log(this$thisEnv$data_from_user)[,1]*beta[1] + log(this$thisEnv$data_from_user)[,2]*beta[2]))[range,] %>%set_colnames(c('date','spread'))
+  p1 <- plotly::ggplotly(ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4) +
+             geom_point(data = df[start[start*side>0],], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
+             geom_point(data = df[stop[stop*side>0],], aes_string("date", 'spread'), shape = 25, color='blue', size = 2) + 
+             geom_point(data = df[start[start*side<0],], aes_string("date", 'spread'), shape = 24, color='red', size = 2) + 
+             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 25, color='orange', size = 2) ,dynamicTicks = T)
+  if (!multi_plot){
+    return(p1)
+  }
+  
+  df <- cbind( 
+    data.frame(date=dates), 
+    data.frame(PnL = this$thisEnv$data_from_user)[,1])[range,] %>%set_colnames(c('date','price_leg_1'))
+  p2 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_1")) + geom_line(size = 0.4) +
+                     geom_point(data = df[start[start*side*beta[1]>0],],aes_string("date", "price_leg_1"), shape = 24, color='green', size = 2) + 
+                     geom_point(data = df[stop[stop*side*beta[1]>0],], aes_string("date", "price_leg_1"), shape = 25, color='blue', size = 2) + 
+                     geom_point(data = df[start[start*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 24, color='red', size = 2) + 
+                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='orange', size = 2), dynamicTicks = T
+                     
+  )
+  df <- cbind( 
+    data.frame(date=dates), 
+    data.frame(PnL = this$thisEnv$data_from_user)[,2])[range,] %>%set_colnames(c('date','price_leg_2'))
+  p3 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_2")) + geom_line(size = 0.4) +
+    geom_point(data = df[start[start*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 24, color='green', size = 2) + 
+    geom_point(data = df[stop[stop*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 25, color='blue', size = 2) + 
+    geom_point(data = df[start[start*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 24, color='red', size = 2) + 
+    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='orange', size = 2),dynamicTicks = T)
+  plotly::subplot(p1, p2,p3, nrows = 3, shareX = T, shareY = T)
+}
 

@@ -11,7 +11,8 @@
 
 performServer(this, session, verbose = FALSE, ...)
 
-\method{performServer}{modelStrategy}(this, session, verbose = FALSE, ...)
+\method{performServer}{modelStrategy}(this, session, verbose = FALSE,
+  ...)
 
 \method{performServer}{list}(this, session, verbose = FALSE, ...)
 }

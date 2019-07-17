@@ -8,14 +8,14 @@
 addPM(this, as, increase = list(cond = quote(FALSE), expr = quote({ })),
   decrease = list(cond = quote(FALSE), expr = quote({ })),
   rebalance = list(cond = quote(FALSE), expr = quote({ })),
-  change = list(cond = quote(FALSE), expr = quote({ })), close = list(cond =
-  quote(FALSE)), oco = "base", args = list())
+  change = list(cond = quote(FALSE), expr = quote({ })),
+  close = list(cond = quote(FALSE)), oco = "base", args = list())
 
-\method{addPM}{modelStrategy}(this, as, increase = list(cond = quote(FALSE),
-  expr = quote({ })), decrease = list(cond = quote(FALSE), expr = quote({ })),
-  rebalance = list(cond = quote(FALSE), expr = quote({ })),
-  change = list(cond = quote(FALSE), expr = quote({ })), close = list(cond =
-  quote(FALSE)), oco = "base", args = list())
+\method{addPM}{modelStrategy}(this, as, increase = list(cond =
+  quote(FALSE), expr = quote({ })), decrease = list(cond = quote(FALSE),
+  expr = quote({ })), rebalance = list(cond = quote(FALSE), expr =
+  quote({ })), change = list(cond = quote(FALSE), expr = quote({ })),
+  close = list(cond = quote(FALSE)), oco = "base", args = list())
 }
 \arguments{
 \item{this}{modelStrategy}

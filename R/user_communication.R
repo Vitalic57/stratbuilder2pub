@@ -130,6 +130,9 @@ performServer.modelStrategy <- function(this,
     session <- .env[['session']]
   }
   this$thisEnv$user_args <- c(list(...), list(action = 'perform'))
+  if ('paramset.index' %in% names(this$thisEnv$user_args)){
+    this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['paramset.index'], use.names=FALSE)
+  }
   if('paramset.index' %in% names(this$thisEnv$user_args) && !'paramset.label' %in% names(this$thisEnv$user_args)){
     this$thisEnv$user_args[['paramset.label']] <- names(this$thisEnv$paramsets)[1]
   }
@@ -161,6 +164,7 @@ performServer.modelStrategy <- function(this,
 #' @rdname performServer
 #' @method performServer list
 performServer.list <- function(this, session, verbose=FALSE, ...){
+  print(1)
   if(missing(session)){
     session <- .env[['session']]
   }
@@ -168,9 +172,13 @@ performServer.list <- function(this, session, verbose=FALSE, ...){
   e <- new.env()
   e[['strategies']] <- this
   e[['user_args']] <- c(list(...), list(action = 'perform'))
+  if ('paramset.index' %in% names(this$thisEnv$user_args)){
+    this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['paramset.index'], use.names=FALSE)
+  }
   if('paramset.index' %in% names(e[['user_args']]) && !'paramset.label' %in% names(e[['user_args']])){
     tryCatch({
-      e[['user_args']][['paramset.label']] <- names(this[[1]]$thisEnv$paramsets)[1]
+      print(names(this$thisEnv$paramsets)[1])
+      e[['user_args']][['paramset.label']] <- as.numeric(names(this[[1]]$thisEnv$paramsets)[1])
     }, error = function(e){
       stop('Please, define paramset.label argument')
     })
