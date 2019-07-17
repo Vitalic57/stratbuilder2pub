@@ -671,8 +671,6 @@ plotStrategy.modelStrategy <- function(this, multi_plot=FALSE, ...){
   reports <- getReportTrades(this)
   start <- reports$ind.start
   stop <- reports$ind.end
-  print(start)
-  print(stop)
   side <- reports$side
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
