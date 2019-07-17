@@ -598,6 +598,7 @@ plotCapital <- function(this,
 #' @param end_date date type, example: end_date='2018-01-01'
 #' @export
 #' @rdname plotCapital
+#' @method plotCapital modelStrategy
 plotCapital.modelStrategy <- function(this,
                                       interactive_plot = TRUE,
                                       start_date = NULL,
@@ -640,6 +641,7 @@ plotCapital.modelStrategy <- function(this,
 
 #' @export
 #' @rdname plotCapital
+#' @method plotCapital modelPortfolio
 plotCapital.modelPortfolio <- function(this,interactive_plot = TRUE,
                                       ...){
   dots <- list(...)
@@ -664,20 +666,39 @@ plotStrategy <- function(this,
 
 #' @param multi_plot logical, if TRUE plot spread and legs
 #' @export
+#' @param start_date date type, example: start_date='2008-01-01'
+#' @param end_date date type, example: end_date='2018-01-01'
 #' @rdname plotStrategy
-#' 
-
-plotStrategy.modelStrategy <- function(this, multi_plot=FALSE, ...){
+#' @method plotStrategy modelStrategy
+plotStrategy.modelStrategy <- function(this, 
+                                       multi_plot=FALSE,
+                                       start_date = NULL,
+                                       end_date = NULL,
+                                       ...){
   reports <- getReportTrades(this)
-  start <- reports$ind.start
-  stop <- reports$ind.end
-  side <- reports$side
+  start <- reports$date.start
+  stop <- reports$date.end
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
-  range_start <- e$activeField['start']
-  range_end <- e$activeField['end']
-  range <- range_start:range_end
   dates <- getDateByIndex(this)
+  if (!is.null(start_date)){
+    reports <- reports[reports$date.start > start_date,]
+    side <- reports$side
+    range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
+  }
+  else{
+    range_start <- e$activeField['start']
+  }
+  if(!is.null(end_date)){
+    range_end <- min(e$activeField['end'], sum(dates < end_date))
+  }
+  else{
+    range_end <- e$activeField['end']
+  }
+  if(range_start > range_end){
+    stop("start > end")
+  }
+  range <- range_start:range_end
   tryCatch({
     eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
   }, error = function(e){
@@ -689,32 +710,26 @@ plotStrategy.modelStrategy <- function(this, multi_plot=FALSE, ...){
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
   p1 <- plotly::ggplotly(ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4) +
-             geom_point(data = df[start[start*side>0],], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
-             geom_point(data = df[stop[stop*side>0],], aes_string("date", 'spread'), shape = 25, color='blue', size = 2) + 
-             geom_point(data = df[start[start*side<0],], aes_string("date", 'spread'), shape = 25, color='red', size = 2) + 
-             geom_point(data = df[stop[stop*side<0],], aes_string("date", 'spread'), shape = 24, color='orange', size = 2) ,dynamicTicks = TRUE)
+             geom_point(data = df[df$date %in% stop,], aes_string("date", 'spread'),  color='blue', size = 2) + 
+             geom_point(data = df[df$date %in% start,][side>0,], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
+             geom_point(data = df[df$date %in% start,][side<0,], aes_string("date", 'spread'), shape = 25, color='red', size = 2)  ,dynamicTicks = TRUE)
   if (!multi_plot){
     return(p1)
   }
-  
-  df <- cbind( 
-    data.frame(date=dates), 
-    data.frame(PnL = this$thisEnv$data_from_user)[,1])[range,] %>%set_colnames(c('date','price_leg_1'))
-  p2 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_1")) + geom_line(size = 0.4) +
-                     geom_point(data = df[start[start*side*beta[1]>0],],aes_string("date", "price_leg_1"), shape = 24, color='green', size = 2) + 
-                     geom_point(data = df[stop[stop*side*beta[1]>0],], aes_string("date", "price_leg_1"), shape = 25, color='blue', size = 2) + 
-                     geom_point(data = df[start[start*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 25, color='red', size = 2) + 
-                     geom_point(data = df[stop[stop*side*beta[1]<0],], aes_string("date", "price_leg_1"), shape = 24, color='orange', size = 2), dynamicTicks = TRUE
+  beta <- this$thisEnv$beta_fun()
+  graph <- list(p1)
+  for (i in 1:length(beta)){
+    df <- cbind( 
+      data.frame(date=dates), 
+      data.frame(PnL = this$thisEnv$data_from_user)[,i])[range,] %>%set_colnames(c('date',paste0("price_leg_",as.character(i))))
+    graph[[i+1]] <- plotly::ggplotly(ggplot(df, aes_string("date", paste0("price_leg_", as.character(i)))) + geom_line(size = 0.4) +
+                       geom_point(data = df[df$date %in% stop,], aes_string("date", paste0("price_leg_" ,as.character(i))), color='blue', size = 2) + 
+                       geom_point(data = df[df$date %in% start,][beta[i]*side>0,],aes_string("date", paste0("price_leg_",as.character(i))), shape = 24, color='green', size = 2) + 
+                       geom_point(data = df[df$date %in% start,][beta[i]*side<0,], aes_string("date", paste0("price_leg_",as.character(i))), shape = 25, color='red', size = 2) , dynamicTicks = TRUE
                      
-  )
-  df <- cbind( 
-    data.frame(date=dates), 
-    data.frame(PnL = this$thisEnv$data_from_user)[,2])[range,] %>%set_colnames(c('date','price_leg_2'))
-  p3 <- plotly::ggplotly(ggplot(df, aes_string("date", "price_leg_2")) + geom_line(size = 0.4) +
-    geom_point(data = df[start[start*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 24, color='green', size = 2) + 
-    geom_point(data = df[stop[stop*side*beta[2]>0],], aes_string("date", "price_leg_2"), shape = 25, color='blue', size = 2) + 
-    geom_point(data = df[start[start*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 25, color='red', size = 2) + 
-    geom_point(data = df[stop[stop*side*beta[2]<0],], aes_string("date", "price_leg_2"), shape = 24, color='orange', size = 2),dynamicTicks = TRUE)
-  plotly::subplot(p1, p2,p3, nrows = 3, shareX = TRUE, shareY = TRUE)
+    )
+  }
+  
+  plotly::subplot( graph, nrows = (length(beta)+1), shareX = TRUE, shareY = TRUE)
 }
 

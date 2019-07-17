@@ -7,7 +7,8 @@
 \usage{
 plotStrategy(this, ...)
 
-\method{plotStrategy}{modelStrategy}(this, multi_plot = FALSE, ...)
+\method{plotStrategy}{modelStrategy}(this, multi_plot = FALSE,
+  start_date = NULL, end_date = NULL, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
@@ -15,6 +16,10 @@ plotStrategy(this, ...)
 \item{...}{params}
 
 \item{multi_plot}{logical, if TRUE plot spread and legs}
+
+\item{start_date}{date type, example: start_date='2008-01-01'}
+
+\item{end_date}{date type, example: end_date='2018-01-01'}
 }
 \description{
 Plot open and close position

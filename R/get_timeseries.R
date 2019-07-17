@@ -119,6 +119,7 @@ getCapital <- function(this,
 #' @param start_date date type, example: start_date='2008-01-01'
 #' @param end_date date type, example: end_date='2018-01-01'
 #' @rdname getCapital
+#' @method getCapital modelStrategy
 getCapital.modelStrategy <- function(this,
                                      start_date = NULL,
                                      end_date = NULL,
@@ -147,6 +148,7 @@ getCapital.modelStrategy <- function(this,
 
 #' @export
 #' @rdname getCapital
+#' @method getCapital modelPortfolio
 getCapital.modelPortfolio <- function(this,
                                        ...){
   dots <- list(...)
