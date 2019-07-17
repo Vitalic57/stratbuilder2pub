@@ -32,7 +32,8 @@ Imports:
     dplyr,
     reshape2,
     lubridate,
-    quantmod
+    quantmod,
+    plotly
 Suggests:
 	testthat
 RoxygenNote: 6.1.1

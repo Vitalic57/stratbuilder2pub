@@ -10,8 +10,8 @@ addRule(this, condition, as, args = list(), type, side, oco = "base",
   pathwise = FALSE)
 
 \method{addRule}{modelStrategy}(this, condition, as, args = list(), type,
-  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount =
-  getMoney(this)), pathwise = FALSE)
+  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount
+  = getMoney(this)), pathwise = FALSE)
 }
 \arguments{
 \item{this}{model}
