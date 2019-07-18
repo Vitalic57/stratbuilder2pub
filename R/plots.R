@@ -678,6 +678,7 @@ plotStrategy.modelStrategy <- function(this,
   reports <- getReportTrades(this)
   start <- reports$date.start
   stop <- reports$date.end
+  side <- reports$side
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
