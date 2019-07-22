@@ -710,10 +710,17 @@ plotStrategy.modelStrategy <- function(this,
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
-  p1 <- plotly::ggplotly(ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4) +
-             geom_point(data = df[df$date %in% stop,], aes_string("date", 'spread'),  color='blue', size = 2) + 
-             geom_point(data = df[df$date %in% start,][side>0,], aes_string("date", 'spread'), shape = 24, color='green', size = 2) + 
-             geom_point(data = df[df$date %in% start,][side<0,], aes_string("date", 'spread'), shape = 25, color='red', size = 2)  ,dynamicTicks = TRUE)
+  p1 <- ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4)
+  if (length(stop) != 0){
+    p1 <- p1 + geom_point(data = df[df$date %in% stop,], aes_string("date", 'spread'),  color='blue', size = 2)
+  }
+  if (TRUE %in% (side>0)){
+    p1 <- p1 + geom_point(data = df[df$date %in% start,][side>0,], aes_string("date", 'spread'), shape = 24, color='green', size = 2)
+  }
+  if (TRUE %in% (side<0)){
+    p1 <- p1 + geom_point(data = df[df$date %in% start,][side<0,], aes_string("date", 'spread'), shape = 25, color='red', size = 2)
+  }
+  p1 <- plotly::ggplotly( p1 ,dynamicTicks = TRUE)
   if (!multi_plot){
     return(p1)
   }
@@ -723,12 +730,17 @@ plotStrategy.modelStrategy <- function(this,
     df <- cbind( 
       data.frame(date=dates), 
       data.frame(PnL = this$thisEnv$data_from_user)[,i])[range,] %>%set_colnames(c('date',paste0("price_leg_",as.character(i))))
-    graph[[i+1]] <- plotly::ggplotly(ggplot(df, aes_string("date", paste0("price_leg_", as.character(i)))) + geom_line(size = 0.4) +
-                       geom_point(data = df[df$date %in% stop,], aes_string("date", paste0("price_leg_" ,as.character(i))), color='blue', size = 2) + 
-                       geom_point(data = df[df$date %in% start,][beta[i]*side>0,],aes_string("date", paste0("price_leg_",as.character(i))), shape = 24, color='green', size = 2) + 
-                       geom_point(data = df[df$date %in% start,][beta[i]*side<0,], aes_string("date", paste0("price_leg_",as.character(i))), shape = 25, color='red', size = 2) , dynamicTicks = TRUE
-                     
-    )
+    p1 <- ggplot(df, aes_string("date", paste0("price_leg_", as.character(i)))) + geom_line(size = 0.4)
+    if (length(stop) != 0){
+      p1 <- p1 + geom_point(data = df[df$date %in% stop,], aes_string("date", paste0("price_leg_" ,as.character(i))), color='blue', size = 2)
+    }
+    if (TRUE %in% (beta[i]*side>0)){
+      p1 <- p1 + geom_point(data = df[df$date %in% start,][beta[i]*side>0,],aes_string("date", paste0("price_leg_",as.character(i))), shape = 24, color='green', size = 2)
+    }
+    if (TRUE %in% (beta[i]*side<0)){
+      p1 <- p1 + geom_point(data = df[df$date %in% start,][beta[i]*side<0,], aes_string("date", paste0("price_leg_",as.character(i))), shape = 25, color='red', size = 2)
+    }       
+    graph[[i+1]] <- plotly::ggplotly(p1, dynamicTicks = TRUE)
   }
   
   plotly::subplot( graph, nrows = (length(beta)+1), shareX = TRUE, shareY = TRUE)
