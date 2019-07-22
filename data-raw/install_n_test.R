@@ -11,7 +11,7 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.6')
+lines[ind] <- paste0('Version: ', '1.3.7')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
@@ -20,8 +20,7 @@ devtools::test('.')
 devtools::document()
 devtools::check('.')
 
-setwd('..')
-devtools::install('stratbuilder2pub')
+devtools::install('.')
 
 
 # download new version of package to users

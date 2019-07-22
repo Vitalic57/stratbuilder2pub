@@ -532,7 +532,7 @@ plotDrawdowns.list <- function(this, legend = TRUE, ...){
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelPortfolio
-  plotPnL.modelPortfolio <- function(this, ...){
+plotPnL.modelPortfolio <- function(this, ...){
   dots <- list(...)
   # if('legend' %in% names(dots)){
   #   dots[['legend']] <- NULL

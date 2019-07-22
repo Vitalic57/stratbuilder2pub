@@ -7,8 +7,7 @@
 \usage{
 getRules(this, pathwise = FALSE, recalc = FALSE)
 
-\method{getRules}{modelStrategy}(this, pathwise = FALSE,
-  recalc = FALSE)
+\method{getRules}{modelStrategy}(this, pathwise = FALSE, recalc = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}
