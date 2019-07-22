@@ -1,0 +1,110 @@
+---
+title: "Introduction to stratbuilder2pub"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to stratbuilder2pub}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(stratbuilder2pub)
+library(TTR)
+library(quantmod)
+```
+
+
+When backtesting the model you must:
+
+* Describe what you want to do
+
+* Write a program for executing it
+
+* Get results and analyze model's statistics
+
+With package `stratbuilder2pub` you can do it easy:
+
+* We provide tools for creating model from wide variety of models
+
+* Your program will have clear interface
+
+* You will get statistics in form of tables and graphs
+
+This document introduces you basic set of tools of this package.
+
+## The First Model
+
+Let's create simple mean reverting strategy using technical indicators from package `TTR`. If asset is more then EMA (Exponential moving average), then open short position, if asset is less then EMA, then close short position and open long position. 
+
+So, firstly, create an empty model.
+
+```{r}
+this <- modelStrategy()
+```
+
+Backtester use inner names. One of them is `spread`. It is central element of every model. It is dynamically recalculated and equals to 
+linear combintaion of columns of subset of rows of predefined table. If only one asset is used in model, then spread usually will be equal to close or adjusted prices. 
+
+In our model `spread` will be equal to adjusted prices of asset, that we will determine later. Now we need to define indicators, that will be used in backtest. As mentioned above we want to use Exponential Moving Average of adjusted prices, for this `TTR` has function `EMA`. It has 2 arguments x and n. x responsible for timeseriries to filter and n for window. As we want to use `spread` as x and it is indefinite at this step, we will use `quote` function for making possible to substitute `spread` to `EMA` when it will be evaluated. `args` argument contains function in name cell and its argumens in other cells. `as` argument is the name of indicator. This name can be used later in other indicators and rules.
+```{r}
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+```
+
+So, we defined our first indicator, now let's create rules for enter to position and exit from it. Start with enter to short position. Name this rule as "short_enter" in `as` argument. In `condition` argument we must write logical expression indicating when condition is working. For our strategy it is simply `spread > ema`. In this place we do not have to use `quote` function, just write a condition. `type` argument must be on of "enter" or "exit", specifying enter to position or exiting from it. In our setting it is "enter". As we want to short asset `side` argument will be assigned to -1. And the last argument `oco` is neccessary when we want close position we point out that `oco` and strategy will exit from position if it was opened with rule with that `oco`.
+```{r}
+addRule(this, 
+        as = 'short_enter', 
+        condition = spread > ema, 
+        type = 'enter', 
+        side = -1,
+        oco = 'short' 
+)
+```
+
+Now add rule for exiting from short position when spread will be less then its ema. In that type of rule we don't need `side` argument and we should specify right `oco`.
+```{r}
+addRule(this,
+        as = 'short_exit', 
+        condition = spread < ema, 
+        type = 'exit',
+        oco = 'short' 
+)
+```
+
+For long position we should add analogious rules. Note that `side` is equal to 1 now and we use another `oco`. 
+```{r}
+addRule(this, 
+        as = 'long_enter', 
+        condition = spread < ema,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+)
+addRule(this, 
+        as = 'long_exit',
+        condition = spread > ema,
+        type = 'exit',
+        oco = 'long'
+)
+```
+
+At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`.
+```{r, warning = FALSE, message = FALSE}
+data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
+setUserData(this, Ad(data))
+setMoney(this, 100000)
+```
+
+Now evaluate model. Evaluation will have been done on the server. Client and server connect via ssh. All statistics of evaluated model will be inserted to your object after evaluation ends.
+```{r}
+performServer(this)
+```
+
+After completion of evalution you can get results of strategy.
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotPnL(this)
+```
+
+
