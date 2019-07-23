@@ -102,7 +102,7 @@ Now evaluate model. Evaluation will have been done on the server. Client and ser
 performServer(this)
 ```
 
-After completion of evalution you can get results of strategy.
+After completion of evalution you can get results of strategy as PnL plot.
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
 plotPnL(this)
 ```
