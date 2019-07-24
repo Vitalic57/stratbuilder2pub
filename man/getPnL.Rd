@@ -7,16 +7,27 @@
 \alias{getPnL.list}
 \title{Get pnl as xts series}
 \usage{
-getPnL(this)
+getPnL(this, ...)
 
-\method{getPnL}{modelStrategy}(this)
+\method{getPnL}{modelStrategy}(this, start_date = NULL, end_date = NULL,
+  comOn = TRUE, leg = "all", ...)
 
-\method{getPnL}{modelPortfolio}(this)
+\method{getPnL}{modelPortfolio}(this, ...)
 
-\method{getPnL}{list}(this)
+\method{getPnL}{list}(this, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
+
+\item{...}{params}
+
+\item{start_date}{date type, example: start_date='2008-01-01'}
+
+\item{end_date}{date type, example: end_date='2018-01-01'}
+
+\item{comOn}{bool, if true then commission will be included in the 'trades' graph}
+
+\item{leg}{numeric/character, number of leg, if it is equal to 'all' or 'sum', then all pnl among all legs}
 }
 \value{
 xts zoo

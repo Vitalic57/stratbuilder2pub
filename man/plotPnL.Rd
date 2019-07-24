@@ -11,7 +11,8 @@ plotPnL(this, ...)
 
 \method{plotPnL}{modelStrategy}(this, type = "money", comOn = TRUE,
   leg = "all", graph_type = "ggplot2", each_year = FALSE,
-  adjust = FALSE, return_type = "plot", cutoff = FALSE, ...)
+  adjust = FALSE, return_type = "plot", cutoff = FALSE,
+  start_date = NULL, end_date = NULL, on_percentage = FALSE, ...)
 
 \method{plotPnL}{list}(this, legend = TRUE, ...)
 
@@ -38,6 +39,12 @@ will be summed, if it is equal to 'sep', then pnl among legs will be plotted}
 \item{return_type}{character, plot or data}
 
 \item{cutoff}{logical, if TRUE then on plot will be horizonal line indicating when model was created}
+
+\item{start_date}{date type, example: start_date='2008-01-01'}
+
+\item{end_date}{date type, example: end_date='2018-01-01'}
+
+\item{on_percentage}{logical, if TRUE then on plot will be in percentage}
 
 \item{legend}{logical, if true then legend will be printed on the plot}
 }
