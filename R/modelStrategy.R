@@ -506,5 +506,40 @@ setExpandingLookback.modelStrategy <- function(this, x){
 }
 
 
+#' Set/Get betasByMoney variable
+#' 
+#' This variable is responsible for how spread will be trades. If it is TRUE then coefficients before trade will be update in
+#'  according to current prices in table data_raw. For example, if coefs is c(0.5, -0.5) and prices c(10, 100) and money is 1000,
+#'  then position will be opened with assets amount c(50, -5). But if variable  is FALSE, then assets amount will be c(9, -9).
+#'  If betasByMoney is TRUE, then option from setBetasInt will be ignored.
+#'
+#' @param this modelStrategy
+#' @param x logical
+#' @param price quote, price of each intrument in moment i
+#'
+#' @return
+#' @export
+#' @rdname setBetasByMoney
+#' @method setBetasByMoney modelStrategy
+setBetasByMoney.modelStrategy <- function(this, x, price=quote(data_raw[i - 1,])){
+  if(is.logical(x) && is.language(price)){
+    this$thisEnv$betasByMoney <- x
+    this$thisEnv$betasByMoneyPrice <- price
+  }else{
+    stop('x must be a logical and price must be a quote')
+  }
+}
+
+
+#' @return
+#' @export
+#' @rdname setBetasByMoney
+#' @method getBetasByMoney modelStrategy
+getBetasByMoney.modelStrategy <- function(this){
+  if(!'betasByMoney' %in% names(this$thisEnv)){
+    this$thisEnv$betasByMoney <- FALSE
+  }
+  return(this$thisEnv$betasByMoney)
+}
 
 
