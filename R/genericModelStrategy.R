@@ -29,3 +29,4 @@ setBetasByMoney <- function(this, x, price){
 
 
 
+
