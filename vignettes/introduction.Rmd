@@ -110,21 +110,26 @@ performServer(this)
 After completion of evalution you can get results of strategy. It is important to know how strategy is performing and how stable it can make profit. When you look at PnL graph you can undestand almost everything about your strategy. 
 
 The first plot is profit and loss graph. It shows cost of all instruments and cash on your account at every moment through period of backtest. 
-```{r, warning = FALSE, message = FALSE, fig.width = 6}
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 plotPnL(this, interactive_plot=FALSE)
 ```
 
-The second graph is about how much money your strategy uses.
-```{r, warning = FALSE, message = FALSE, fig.width = 6}
+Also there is possibility to return PnL by months in format of coloured table.
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
+plotCalendar(this)
+```
+
+The next graph is about how much money your strategy uses.
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 plotCapital(this, interactive_plot=FALSE)
 ```
 
 You can see that there are multiple separeted lines. Every line is responsible for a single trade, of course if some time was between openning and closing trades. The next graph was made to demonstrate performance of every trade in one plot. Each triangle is a trade. If it is green, then the trade is positive, else it is negative. X axis shows absolute value of pnl for trades and Y axis is the maximum amount of loss that was available while a trade was open. And you can change Y axis to MFE that means the maximum amount of profit that was available while a trade was open.
-```{r, warning = FALSE, message = FALSE, fig.width = 6}
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 plotReturns(this, "MAE", interactive_plot=FALSE)
 ```
 
-You can get inforamation for each trade in format of table with help of `getReportTrades` command.
+You can get information for each trade in format of table with help of `getReportTrades` command.
 ```{r}
 head(getReportTrades(this))
 ```
@@ -178,7 +183,7 @@ getBacktestResults(this)
 
 With help of library `dplyr` you can sort, filter, add new columns to that table and then select best parameters. Also you can use `View` function to see table in full screen. The first column is index of sample.  You can evaluate strategy with specific index, then parameters by this index will be inserted to your strategy.
 
-```{r, warning = FALSE, message = FALSE, fig.width = 6}
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 performServer(this,
               paramset.index = 9, 
               start_date = '2011-01-01',
@@ -187,6 +192,70 @@ getReportStrategy(this)
 plotPnL(this, interactive_plot=FALSE)
 ```
 
+## Multiple models
+
+What if you want to check your strategy on diffrent instruments? The package has an answer. Just create list of models. To do that you can make function that return model and insert diffrent data to diffrent objects.
+
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
+createModel <- function(){
+  this <- modelStrategy()
+  addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+  addRule(this, 
+        as = 'short_enter', 
+        condition = spread > ema, 
+        type = 'enter', 
+        side = -1,
+        oco = 'short' 
+  )
+  addRule(this,
+        as = 'short_exit', 
+        condition = spread < ema, 
+        type = 'exit',
+        oco = 'short' 
+  )
+  addRule(this, 
+        as = 'long_enter', 
+        condition = spread < ema,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+  )
+  addRule(this, 
+        as = 'long_exit',
+        condition = spread > ema,
+        type = 'exit',
+        oco = 'long'
+  )
+  setWaitAfterClose(this, TRUE)
+  setMoney(this, 100000)
+  return(this)
+}
+
+stocks <- c("GAZP.ME", "SBER.ME", "LKOH.ME", "ROSN.ME", "NVTK.ME")
+data <- lapply(stocks, function(x){
+  getSymbols(x, from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE) %>% Ad
+}) %>% set_names(stocks)
+
+models <- list()
+for(x in stocks){
+  models[[x]] <- createModel()
+  setUserData(models[[x]], data[[x]])
+}
+
+performServer(models)
+getReportStrategy(models)
+plotPnL(models, interactive_plot=FALSE)
+```
+
+Most of all reporting, optimization and performing functions working with list as with modelStrategy. 
+
+If we have list of models then we can create portfolio of models. Backtests will be summed inside it and plotPnL will draw summed profit and loss graph.
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
+portfolio <- modelPortfolio(models)
+performServer(portfolio)
+getReportStrategy(portfolio)
+plotPnL(portfolio, interactive_plot=FALSE)
+```
 
 This is the end of introduction. Thank you for reading. 
 
