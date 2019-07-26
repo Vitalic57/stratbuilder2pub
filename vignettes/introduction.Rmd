@@ -168,15 +168,100 @@ applyParamsetServer(this,
                     seed = 42)
 ```
 
-After completion of this procedure you can get results of backtesting this samples. The first part of this table consist of columns with values of distributions, other columns is statistics from `getReportStrategy`.
+After completion of this procedure you can get results of backtesting this samples. The first part of this table consist of columns with values of distributions, other columns is statistics from `getReportStrategy`. 
 
 ```{r}
 getBacktestResults(this)
 ```
 
-With help of library `dplyr` you can sort, filter, add new columns to that table and then select best parameters. The first column is index of sample.  You can evaluate strategy with specific index, then parameters by this index will be inserted to your strategy.
+With help of library `dplyr` you can sort, filter, add new columns to that table and then select best parameters. Also you can use `View` function to see table in full screen. The first column is index of sample.  You can evaluate strategy with specific index, then parameters by this index will be inserted to your strategy.
 
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
-performServer(this, paramset.index = 5)
+performServer(this,
+              paramset.index = 9, 
+              start_date = '2011-01-01',
+              end_date = '2017-01-01')
+getReportStrategy(this)
+plotPnL(this)
+```
+
+
+This is the end of instroduction. Thank you for reading. For convinience the full code of the vignette is below.
+```{r, eval=FALSE}
+library(stratbuilder2pub)
+library(TTR)
+library(quantmod)
+this <- modelStrategy()
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+addRule(this, 
+        as = 'short_enter', 
+        condition = spread > ema, 
+        type = 'enter', 
+        side = -1,
+        oco = 'short' 
+)
+addRule(this,
+        as = 'short_exit', 
+        condition = spread < ema, 
+        type = 'exit',
+        oco = 'short' 
+)
+addRule(this, 
+        as = 'long_enter', 
+        condition = spread < ema,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+)
+addRule(this, 
+        as = 'long_exit',
+        condition = spread > ema,
+        type = 'exit',
+        oco = 'long'
+)
+
+data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
+setUserData(this, Ad(data))
+setWaitAfterClose(this, TRUE)
+setMoney(this, 100000)
+
+performServer(this)
+
+plotPnL(this)
+
+plotCapital(this)
+
+plotReturns(this, "MAE")
+
+head(getReportTrades(this))
+
+getReportStrategy(this)
+getReportCalendar(this)
+
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(n = seq(10, 100, 10)), 
+                label = 'ema.n')
+
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(name = c(EMA, SMA, DEMA)), 
+                label = 'ema.name')
+
+applyParamsetServer(this, 
+                    nsamples = 5,
+                    start_date = '2011-01-01',
+                    end_date = '2017-01-01',
+                    seed = 42)
+
+getBacktestResults(this) 
+
+performServer(this,
+              paramset.index = 9, 
+              start_date = '2011-01-01',
+              end_date = '2017-01-01')
+getReportStrategy(this)
 plotPnL(this)
 ```
