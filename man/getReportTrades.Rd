@@ -19,5 +19,36 @@ getReportTrades(this)
 \item{this}{modelStrategy}
 }
 \description{
-Report of trades
+Returns model statistics, see details
+}
+\details{
+ind.start - index start trade
+
+index.send - index end trede
+
+date.start - date start trade
+
+date.end - date end trade
+
+side - position 1 - long, -1 - short
+
+beta - beta spread
+
+price.start - price in the date.start
+
+price.end - price in the date.end
+
+pnl.asset - pnl by asset
+
+com.asset - commission by asset
+
+com.sum - commissions on all assets
+
+pnl.sum - PnL on all assets
+
+MAE.with.com - max loss in position
+
+MFE.with.com - max win in position
+
+return.from.money - profit/(money_in_strategy)
 }
