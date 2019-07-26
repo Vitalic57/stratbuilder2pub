@@ -5,7 +5,6 @@
 \alias{getModelD.list}
 \alias{getModelD}
 \alias{getModelD.modelStrategy}
-\alias{getModelD.modelPortfolio}
 \title{Get modelData object from modelStrategy object}
 \usage{
 \method{getModelD}{modelPortfolio}(this)

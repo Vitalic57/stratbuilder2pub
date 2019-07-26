@@ -22,5 +22,16 @@ getReportCalendar(this)
 list of data.frames
 }
 \description{
-Report of strategy year by year
+Returns model statistics, see details
+}
+\details{
+sharpe.ann - sharpe coefficient https://en.wikipedia.org/wiki/Sharpe_ratio
+
+return.pos.drawdown  - PnL/(max(money in pos) + max.drawdow), where max.drawdow -> https://en.wikipedia.org/wiki/Drawdown_(economics)
+
+return.avg - Average annual return on capital employed
+
+return.ann - Average annual return
+
+return.drawdown.year - PnL/max.drawdow
 }

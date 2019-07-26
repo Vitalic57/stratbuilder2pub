@@ -9,8 +9,8 @@
 \usage{
 addDistributionConstraint(this, paramset.label, expr, label)
 
-\method{addDistributionConstraint}{modelStrategy}(this, paramset.label, expr,
-  label)
+\method{addDistributionConstraint}{modelStrategy}(this, paramset.label,
+  expr, label)
 
 \method{addDistributionConstraint}{list}(this, ...)
 
@@ -28,8 +28,6 @@ addDistributionConstraint(this, paramset.label, expr, label)
 \item{...}{params for addDistribution}
 }
 \description{
-Add constraints to distributions
-
 This method add the same distributions' constraint to each model in list
 }
 \examples{

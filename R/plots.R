@@ -632,10 +632,10 @@ plotCapital.modelStrategy <- function(this,
   newdf <- reshape2::melt(df, 'date')
   if(interactive_plot){
     return(plotly::ggplotly(ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-                       geom_line() + theme_bw() + ggtitle("Money in position")))
+                       geom_line() + theme_bw() + ggtitle("Money in position") + theme(legend.position = "none")))
   }
   ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-             geom_line() + theme_bw() + ggtitle("Money in position")
+             geom_line() + theme_bw() + ggtitle("Money in position")  + theme(legend.position = "none")
   
 }
 

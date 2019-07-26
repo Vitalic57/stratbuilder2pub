@@ -11,8 +11,8 @@ getBetasByMoney(this)
 
 setBetasByMoney(this, x, price)
 
-\method{setBetasByMoney}{modelStrategy}(this, x, price = quote(data_raw[i - 1,
-  ]))
+\method{setBetasByMoney}{modelStrategy}(this, x, price = quote(data_raw[i
+  - 1, ]))
 
 \method{getBetasByMoney}{modelStrategy}(this)
 }
