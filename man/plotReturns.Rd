@@ -5,14 +5,17 @@
 \alias{plotReturns.modelStrategy}
 \title{Plot returns vs MAE/MFE}
 \usage{
-plotReturns(this, type = "MAE")
+plotReturns(this, type = "MAE", interactive_plot = FALSE)
 
-\method{plotReturns}{modelStrategy}(this, type = "MAE")
+\method{plotReturns}{modelStrategy}(this, type = "MAE",
+  interactive_plot = FALSE)
 }
 \arguments{
 \item{this}{modelStrategy}
 
 \item{type}{character, MAE or MFE}
+
+\item{interactive_plot}{logical, if it is TRUE, then plot will be interactive}
 }
 \value{
 ggplot

@@ -1,9 +1,10 @@
 ---
+author: "Vitaly Shishkov"
 title: "Introduction to stratbuilder2pub"
 output: rmarkdown::html_vignette
 vignette: >
+  %\VignetteEngine{knitr::knitr}
   %\VignetteIndexEntry{Introduction to stratbuilder2pub}
-  %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
 
@@ -13,6 +14,7 @@ options(tibble.print_min = 4L, tibble.print_max = 4L)
 library(stratbuilder2pub)
 library(TTR)
 library(quantmod)
+session <- ssh_connect("test_backtest_user@142.93.143.142", keyfile = "/home/vitaly/Documents/ilia")
 ```
 
 
@@ -109,17 +111,17 @@ After completion of evalution you can get results of strategy. It is important t
 
 The first plot is profit and loss graph. It shows cost of all instruments and cash on your account at every moment through period of backtest. 
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
-plotPnL(this)
+plotPnL(this, interactive_plot=FALSE)
 ```
 
 The second graph is about how much money your strategy uses.
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
-plotCapital(this)
+plotCapital(this, interactive_plot=FALSE)
 ```
 
 You can see that there are multiple separeted lines. Every line is responsible for a single trade, of course if some time was between openning and closing trades. The next graph was made to demonstrate performance of every trade in one plot. Each triangle is a trade. If it is green, then the trade is positive, else it is negative. X axis shows absolute value of pnl for trades and Y axis is the maximum amount of loss that was available while a trade was open. And you can change Y axis to MFE that means the maximum amount of profit that was available while a trade was open.
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
-plotReturns(this, "MAE")
+plotReturns(this, "MAE", interactive_plot=FALSE)
 ```
 
 You can get inforamation for each trade in format of table with help of `getReportTrades` command.
@@ -182,86 +184,9 @@ performServer(this,
               start_date = '2011-01-01',
               end_date = '2017-01-01')
 getReportStrategy(this)
-plotPnL(this)
+plotPnL(this, interactive_plot=FALSE)
 ```
 
 
-This is the end of instroduction. Thank you for reading. For convinience the full code of the vignette is below.
-```{r, eval=FALSE}
-library(stratbuilder2pub)
-library(TTR)
-library(quantmod)
-this <- modelStrategy()
-addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
-addRule(this, 
-        as = 'short_enter', 
-        condition = spread > ema, 
-        type = 'enter', 
-        side = -1,
-        oco = 'short' 
-)
-addRule(this,
-        as = 'short_exit', 
-        condition = spread < ema, 
-        type = 'exit',
-        oco = 'short' 
-)
-addRule(this, 
-        as = 'long_enter', 
-        condition = spread < ema,
-        type = 'enter',
-        side = 1,
-        oco = 'long'
-)
-addRule(this, 
-        as = 'long_exit',
-        condition = spread > ema,
-        type = 'exit',
-        oco = 'long'
-)
+This is the end of introduction. Thank you for reading. 
 
-data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
-setUserData(this, Ad(data))
-setWaitAfterClose(this, TRUE)
-setMoney(this, 100000)
-
-performServer(this)
-
-plotPnL(this)
-
-plotCapital(this)
-
-plotReturns(this, "MAE")
-
-head(getReportTrades(this))
-
-getReportStrategy(this)
-getReportCalendar(this)
-
-addDistribution(this, 
-                component.type = 'indicator', 
-                component.label = 'ema', 
-                variable = list(n = seq(10, 100, 10)), 
-                label = 'ema.n')
-
-addDistribution(this, 
-                component.type = 'indicator', 
-                component.label = 'ema', 
-                variable = list(name = c(EMA, SMA, DEMA)), 
-                label = 'ema.name')
-
-applyParamsetServer(this, 
-                    nsamples = 5,
-                    start_date = '2011-01-01',
-                    end_date = '2017-01-01',
-                    seed = 42)
-
-getBacktestResults(this) 
-
-performServer(this,
-              paramset.index = 9, 
-              start_date = '2011-01-01',
-              end_date = '2017-01-01')
-getReportStrategy(this)
-plotPnL(this)
-```

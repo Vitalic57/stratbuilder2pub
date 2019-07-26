@@ -112,15 +112,6 @@ getReportStrategy.modelPortfolio <- function(this){
 #'
 #' return.drawdown.year - PnL/max.drawdow
 #'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
 #' @param this modelStrategy
 #'
 #' @return
@@ -234,8 +225,6 @@ getReportTrades.modelPortfolio <- function(this){
 
 #' Results of backtest
 #'
-#'
-#'
 #' Returns model statistics, see details
 #'
 #' trades - Number of trade
@@ -286,12 +275,6 @@ getReportTrades.modelPortfolio <- function(this){
 #' 
 #' profit.drawdown.year - PnL/max.drawdow
 #' 
-#' 
-#' 
-#' 
-#'
-#'
-#'
 #' @param this modelStrategy
 #' @param paramset.label character, name of paramset
 #'

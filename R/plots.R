@@ -66,6 +66,7 @@ plotPnL <- function(this,
 #' @param end_date date type, example: end_date='2018-01-01'
 #' @param cutoff logical, if TRUE then on plot will be horizonal line indicating when model was created
 #' @param on_percentage logical, if TRUE then on plot will be in percentage
+#' @param interactive_plot logical, if it is TRUE and graph_type == 'ggplot2', plot will be interactive
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelStrategy
@@ -81,6 +82,7 @@ plotPnL.modelStrategy <- function(this,
                                   start_date = NULL,
                                   end_date = NULL,
                                   on_percentage = FALSE,
+                                  interactive_plot = FALSE,
                                   ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
@@ -164,13 +166,15 @@ plotPnL.modelStrategy <- function(this,
                  p <- p + geom_vline(xintercept=as.numeric(this$thisEnv$created), linetype=4, colour="green")
                }
                if(leg != 'sep'){
-                 p + scale_color_manual(
+                 p <- p + scale_color_manual(
                    values = c(
                      PnL = 'darkblue'
                    )) + theme(legend.position="none")
-               }else{
-                 p 
                }
+               if(interactive_plot){
+                 return(plotly::ggplotly(p))
+               }
+               return(p)
                
                
              }else{
@@ -223,13 +227,15 @@ plotPnL.modelStrategy <- function(this,
                p <- ggplot(newdf, aes_string(x= "index", y = "value", color = "variable") ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by trade")
                if(leg != 'sep'){
-                 p + scale_color_manual(
+                 p <- p + scale_color_manual(
                    values = c(
                      PnL = 'darkblue'
                    )) + theme(legend.position="none")
-               }else{
-                 p
                }
+               if(interactive_plot){
+                 return(plotly::ggplotly(p))
+               }
+               return(p)
                
              }else{
                plot(df[,-ncol(df)], type = 'l', main = 'PnL', ylab = 'money', xlab = 'trades')
@@ -282,12 +288,14 @@ plotDrawdowns <- function(this,
 
 #' @param return_type character, plot or data
 #' @param graph_type character, ggplot2 or xts
+#' @param interactive_plot logical, if graph_type == 'ggplot2' and this option is TRUE, then plot will be interactive
 #' @export
 #' @rdname plotDrawdowns
 #' @method plotDrawdowns modelStrategy
 plotDrawdowns.modelStrategy <- function(this,
                                         return_type = 'plot',
                                         graph_type = 'ggplot2',
+                                        interactive_plot = FALSE,
                                         ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
@@ -305,13 +313,17 @@ plotDrawdowns.modelStrategy <- function(this,
   if(return_type == 'plot'){
     if(graph_type == 'ggplot2'){
       newdf <- reshape2::melt(df, 'date')
-      ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+      p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
         geom_line() + theme_bw() + theme(legend.position="none") +
         scale_color_manual(
           values = c(
             PnL = 'darkblue'
           ))+
         ggtitle("Drawdowns by date")
+      if(interactive_plot){
+        return(plotly::ggplotly(p))
+      }
+      return(p)
     }else{
       plot(xts(df[,'PnL'], df[,'date']), format.labels = '%Y-%m-%d', main = 'PnL', ylab = 'money')
     }
@@ -324,18 +336,19 @@ plotDrawdowns.modelStrategy <- function(this,
 #'
 #' @param this modelStrategy 
 #' @param type character, MAE or MFE
+#' @param interactive_plot logical, if it is TRUE, then plot will be interactive
 #'
 #' @return ggplot
 #' @export
 #' @rdname plotReturns
-plotReturns <- function(this, type = 'MAE'){
+plotReturns <- function(this, type = 'MAE', interactive_plot=FALSE){
   UseMethod('plotReturns', this)
 }
 
 #' @export
 #' @rdname plotReturns
 #' @method plotReturns modelStrategy
-plotReturns.modelStrategy <- function(this, type = 'MAE'){
+plotReturns.modelStrategy <- function(this, type = 'MAE', interactive_plot=FALSE){
   e <- this$thisEnv$backtests[['base']]
   report <- getReportTrades(this) %>%
     dplyr::mutate(ind = 1:(dplyr::n()))
@@ -369,6 +382,9 @@ plotReturns.modelStrategy <- function(this, type = 'MAE'){
     labs(y = paste(strsplit(var,'\\.')[[1]][1]),
          x = paste0(strsplit(rets,'\\.')[[1]][1],'s')) +
     ggtitle(paste(strsplit(var,'\\.')[[1]][1] ,'vs', paste0(strsplit(rets,'\\.')[[1]][1],'s') ) )
+  if(interactive_plot){
+    return(plotly::ggplotly(p))
+  }
   return(p)
   
 }
@@ -463,7 +479,7 @@ plotCalendar.xts <- function(this, ...){
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL list
-plotPnL.list <- function(this, legend = TRUE, ...){
+plotPnL.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
   args <- list(...)
   args['leg'] <- 'sum'
   df <- lapply(this, function(x){
@@ -489,6 +505,9 @@ plotPnL.list <- function(this, legend = TRUE, ...){
   if(!legend){
     p <- p + theme(legend.position="none")
   }
+  if(interactive_plot){
+    return(plotly::ggplotly(p))
+  }
   return(p)
 }
 
@@ -499,7 +518,7 @@ plotPnL.list <- function(this, legend = TRUE, ...){
 #' @export
 #' @rdname plotDrawdowns
 #' @method plotDrawdowns list
-plotDrawdowns.list <- function(this, legend = TRUE, ...){
+plotDrawdowns.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
   df <- lapply(this, function(x){
     plotDrawdowns(x, return_type = 'data', ...)
   }) %>%  
@@ -521,6 +540,9 @@ plotDrawdowns.list <- function(this, legend = TRUE, ...){
     ggtitle("Drawdowns by date")
   if(!legend){
     p <- p + theme(legend.position="none")
+  }
+  if(interactive_plot){
+    return(plotly::ggplotly(p))
   }
   return(p)
 }
@@ -630,22 +652,21 @@ plotCapital.modelStrategy <- function(this,
     data.frame(Money_ = x)
   )[range,]
   newdf <- reshape2::melt(df, 'date')
+  p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+    geom_line() + theme_bw() + ggtitle("Money in position") + theme(legend.position = "none")
   if(interactive_plot){
-    return(plotly::ggplotly(ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-                       geom_line() + theme_bw() + ggtitle("Money in position") + theme(legend.position = "none")))
+    return(plotly::ggplotly(p))
   }
-  ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-             geom_line() + theme_bw() + ggtitle("Money in position")  + theme(legend.position = "none")
-  
+  p
 }
 
 #' @export
 #' @rdname plotCapital
 #' @method plotCapital modelPortfolio
-plotCapital.modelPortfolio <- function(this,interactive_plot = TRUE,
+plotCapital.modelPortfolio <- function(this,#interactive_plot = TRUE,
                                       ...){
   dots <- list(...)
-  dots[['interactive_plot']]<-interactive_plot
+  #dots[['interactive_plot']]<-interactive_plot
   dots[['this']] <- this
   do.call("plotCapital.modelStrategy", args=dots)
 }

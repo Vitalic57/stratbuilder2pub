@@ -30,11 +30,9 @@ list of data.frames
 list of data.frames
 }
 \description{
-Results of backtest
+Returns model statistics, see details
 }
 \details{
-Returns model statistics, see details
-
 trades - Number of trade
 
 trades.year - Average annual number of trades
@@ -58,11 +56,6 @@ return.ann - Average annual return
 return.avg - Average annual return on capital employed
 
 return.pos.drawdown  - PnL/(max(money in pos) + max.drawdow), where max.drawdow -> https://en.wikipedia.org/wiki/Drawdown_(economics)
-
-return.pos.drawdown.c95 - PnL/(Exp_shor + max.drawdow), where Exp_shor =Expected_shortfall(from = 0.95_quantile(money in position), 
-                                                                       to = max(money in position))
-                                                                       
-return.pos.drawdown.95 - PnL/(0.95_quantile(money in position) + max.drawdow)
 
 drawdown.money - max.drawdown/money_in_strategy
 

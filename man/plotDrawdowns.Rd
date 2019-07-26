@@ -10,9 +10,10 @@
 plotDrawdowns(this, ...)
 
 \method{plotDrawdowns}{modelStrategy}(this, return_type = "plot",
-  graph_type = "ggplot2", ...)
+  graph_type = "ggplot2", interactive_plot = FALSE, ...)
 
-\method{plotDrawdowns}{list}(this, legend = TRUE, ...)
+\method{plotDrawdowns}{list}(this, legend = TRUE, interactive_plot = FALSE,
+  ...)
 
 \method{plotDrawdowns}{modelPortfolio}(this, ...)
 }
@@ -24,6 +25,8 @@ plotDrawdowns(this, ...)
 \item{return_type}{character, plot or data}
 
 \item{graph_type}{character, ggplot2 or xts}
+
+\item{interactive_plot}{logical, if graph_type == 'ggplot2' and this option is TRUE, then plot will be interactive}
 
 \item{legend}{logical, if true then legend will be printed on the plot}
 }

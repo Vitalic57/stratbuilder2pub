@@ -6,10 +6,9 @@
 \title{Set python model}
 \usage{
 setPyModel(this, pyfile, dockername, lookback_init, lookback_step = 0,
-  lookback = 0, data = quote(spread), pathwise = FALSE,
-  as = "signal", hostname = "localhost", modelpath = NULL,
-  update_with_betas = FALSE, vector_step = FALSE, args = list(),
-  port = 4000)
+  lookback = 0, data = quote(spread), pathwise = FALSE, as = "signal",
+  hostname = "localhost", modelpath = NULL, update_with_betas = FALSE,
+  vector_step = FALSE, args = list(), port = 4000)
 
 \method{setPyModel}{modelStrategy}(this, pyfile, dockername, lookback_init,
   lookback_step = 0, lookback = 0, data = quote(spread),

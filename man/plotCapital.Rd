@@ -11,7 +11,7 @@ plotCapital(this, ...)
 \method{plotCapital}{modelStrategy}(this, interactive_plot = TRUE,
   start_date = NULL, end_date = NULL, ...)
 
-\method{plotCapital}{modelPortfolio}(this, interactive_plot = TRUE, ...)
+\method{plotCapital}{modelPortfolio}(this, ...)
 }
 \arguments{
 \item{this}{modelStrategy}

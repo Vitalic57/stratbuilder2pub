@@ -12,9 +12,10 @@ plotPnL(this, ...)
 \method{plotPnL}{modelStrategy}(this, type = "money", comOn = TRUE,
   leg = "all", graph_type = "ggplot2", each_year = FALSE,
   adjust = FALSE, return_type = "plot", cutoff = FALSE,
-  start_date = NULL, end_date = NULL, on_percentage = FALSE, ...)
+  start_date = NULL, end_date = NULL, on_percentage = FALSE,
+  interactive_plot = FALSE, ...)
 
-\method{plotPnL}{list}(this, legend = TRUE, ...)
+\method{plotPnL}{list}(this, legend = TRUE, interactive_plot = FALSE, ...)
 
 \method{plotPnL}{modelPortfolio}(this, ...)
 }
@@ -45,6 +46,8 @@ will be summed, if it is equal to 'sep', then pnl among legs will be plotted}
 \item{end_date}{date type, example: end_date='2018-01-01'}
 
 \item{on_percentage}{logical, if TRUE then on plot will be in percentage}
+
+\item{interactive_plot}{logical, if it is TRUE and graph_type == 'ggplot2', plot will be interactive}
 
 \item{legend}{logical, if true then legend will be printed on the plot}
 }
