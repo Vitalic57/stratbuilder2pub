@@ -39,6 +39,7 @@ modelStrategy <- function(){
   rules_norm_ind <- numeric()
   data_from_user <- list()
   paramsets <- list()
+  paramsets[[1]] <- list(constraints = list(), distributions = list())
   backtests <- list()
   pps <- list()
   vars <- list()

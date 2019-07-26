@@ -90,21 +90,93 @@ addRule(this,
 )
 ```
 
-At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`.
+At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. If we want to wait for a day after closing of trade, then you can call `setWaitAfterClose(this, TRUE)`.
 ```{r, warning = FALSE, message = FALSE}
 data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
 setUserData(this, Ad(data))
+setWaitAfterClose(this, TRUE)
 setMoney(this, 100000)
 ```
 
-Now evaluate model. Evaluation will have been done on the server. Client and server connect via ssh. All statistics of evaluated model will be inserted to your object after evaluation ends.
+Now evaluate model. Evaluation will be done on the server. Client and server connect via ssh. All statistics of evaluated model will be inserted to your object `this` after evaluation ends.
 ```{r}
 performServer(this)
 ```
 
-After completion of evalution you can get results of strategy as PnL plot.
+## Reports
+
+After completion of evalution you can get results of strategy. It is important to know how strategy is performing and how stable it can make profit. When you look at PnL graph you can undestand almost everything about your strategy. 
+
+The first plot is profit and loss graph. It shows cost of all instruments and cash on your account at every moment through period of backtest. 
 ```{r, warning = FALSE, message = FALSE, fig.width = 6}
 plotPnL(this)
 ```
 
+The second graph is about how much money your strategy uses.
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotCapital(this)
+```
 
+You can see that there are multiple separeted lines. Every line is responsible for a single trade, of course if some time was between openning and closing trades. The next graph was made to demonstrate performance of every trade in one plot. Each triangle is a trade. If it is green, then the trade is positive, else it is negative. X axis shows absolute value of pnl for trades and Y axis is the maximum amount of loss that was available while a trade was open. And you can change Y axis to MFE that means the maximum amount of profit that was available while a trade was open.
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotReturns(this, "MAE")
+```
+
+You can get inforamation for each trade in format of table with help of `getReportTrades` command.
+```{r}
+head(getReportTrades(this))
+```
+
+And tables of statistics. Every statistic described in help, just enter `?getReportStrategy` or `?getReportCalendar`. The first report has 
+results for whole period of backtesting, the second report -- for every year.
+```{r}
+getReportStrategy(this)
+getReportCalendar(this)
+```
+
+## Optimization
+
+The backtester provide tools for brute force optimization. For example, we can optimize window of moving averages. All available fields for optimazation can be seen via `?addDistribution`.
+
+```{r}
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(n = seq(10, 100, 10)), 
+                label = 'ema.n')
+```
+
+This function has multiple arguments. Component.type is a place from where variable come. Component.label is a name of specific component. It is needed if there were two or more indicators and you want to point one of them. Variable is a list that stores your distribution. In this example we want to choose window, name of this argument is `n`, so in the list we should write `n` as a name of a list's cell. Label is just a name of your distribution. This name can be used in `addDistributionConstraint` function. If your distributions should have conditions on each other, then you can write them in it. Also our indicator has another argument `name`. That argument contains function, that creates indicator. In addDistribution we can iterate over diffrent functions.
+
+```{r}
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(name = c(EMA, SMA, DEMA)), 
+                label = 'ema.name')
+```
+
+To erase old distributions you can call `deleteParamset` function.
+
+To start iteration you need to call `applyParamsetServer` function. It has `start_date` and `end_date` arguments, they indicate date of start and date of end for backtesting. If they are missed, then backtest will be done on the whole period of data.  Also there is `nsamples` argument. It indicates how many samples from your distributions to select.
+
+```{r}
+applyParamsetServer(this, 
+                    nsamples = 5,
+                    start_date = '2011-01-01',
+                    end_date = '2017-01-01',
+                    seed = 42)
+```
+
+After completion of this procedure you can get results of backtesting this samples. The first part of this table consist of columns with values of distributions, other columns is statistics from `getReportStrategy`.
+
+```{r}
+getBacktestResults(this)
+```
+
+With help of library `dplyr` you can sort, filter, add new columns to that table and then select best parameters. The first column is index of sample.  You can evaluate strategy with specific index, then parameters by this index will be inserted to your strategy.
+
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+performServer(this, paramset.index = 5)
+plotPnL(this)
+```
