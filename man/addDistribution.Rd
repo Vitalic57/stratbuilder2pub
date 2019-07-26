@@ -20,9 +20,9 @@ addDistribution(this, paramset.label, component.type, component.label,
 \arguments{
 \item{this}{model}
 
-\item{paramset.label}{character, label of paramset}
+\item{paramset.label}{character, label of paramset, this argument can be missed}
 
-\item{component.type}{character, one of rule, indicator, params, lookback, lookforward, beta_fun}
+\item{component.type}{character, one of the followng names: rule, indicator, params, lookback, lookforward, beta_fun}
 
 \item{component.label}{character, name of component, argument 'as' is resposible for that. 
 If component.type is equal to one of lookback, lookforward, beta_fun, then this argument should be missed}
@@ -38,10 +38,8 @@ This method add the same distribution to each model in list
 }
 \examples{
 \dontrun{
-addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
-        lookback = 100)
+addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb')
 addDistribution(this,
-    paramset.label = paramset,
     component.type = 'indicator',
     component.label = 'bb',
     variable = list(sd = seq(0.5,3,0.05)),
@@ -56,11 +54,8 @@ addRule(this, as = 'bb_up_dn',
      type = 'enter',
      args = list(n = 0.005),
      side = -1,
-     oco = 'short',
-     osFun = stratbuilder2pub:::sameMoneyOs,
-     osFun_args = alist(amount = 5000000))
+     oco = 'short')
 addDistribution(this,
-    paramset.label = paramset,
     component.type = 'rule',
     component.label = 'bb_up_dn',
     variable = list(n = seq(0.005,0.03,0.002)),

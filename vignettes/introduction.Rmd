@@ -1,0 +1,267 @@
+---
+title: "Introduction to stratbuilder2pub"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to stratbuilder2pub}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, echo = FALSE, message = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+options(tibble.print_min = 4L, tibble.print_max = 4L)
+library(stratbuilder2pub)
+library(TTR)
+library(quantmod)
+```
+
+
+When backtesting the model you must:
+
+* Describe what you want to do
+
+* Write a program for executing it
+
+* Get results and analyze model's statistics
+
+With package `stratbuilder2pub` you can do it easy:
+
+* We provide tools for creating model from wide variety of models
+
+* Your program will have clear interface
+
+* You will get statistics in form of tables and graphs
+
+This document introduces you basic set of tools of this package.
+
+## The First Model
+
+Let's create simple mean reverting strategy using technical indicators from package `TTR`. If asset is more then EMA (Exponential moving average), then open short position, if asset is less then EMA, then close short position and open long position. 
+
+So, firstly, create an empty model.
+
+```{r}
+this <- modelStrategy()
+```
+
+Backtester use inner names. One of them is `spread`. It is central element of every model. It is dynamically recalculated and equals to 
+linear combintaion of columns of subset of rows of predefined table. If only one asset is used in model, then spread usually will be equal to close or adjusted prices. 
+
+In our model `spread` will be equal to adjusted prices of asset, that we will determine later. Now we need to define indicators, that will be used in backtest. As mentioned above we want to use Exponential Moving Average of adjusted prices, for this `TTR` has function `EMA`. It has 2 arguments x and n. x responsible for timeseriries to filter and n for window. As we want to use `spread` as x and it is indefinite at this step, we will use `quote` function for making possible to substitute `spread` to `EMA` when it will be evaluated. `args` argument contains function in name cell and its argumens in other cells. `as` argument is the name of indicator. This name can be used later in other indicators and rules.
+```{r}
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+```
+
+So, we defined our first indicator, now let's create rules for enter to position and exit from it. Start with enter to short position. Name this rule as "short_enter" in `as` argument. In `condition` argument we must write logical expression indicating when condition is working. For our strategy it is simply `spread > ema`. In this place we do not have to use `quote` function, just write a condition. `type` argument must be on of "enter" or "exit", specifying enter to position or exiting from it. In our setting it is "enter". As we want to short asset `side` argument will be assigned to -1. And the last argument `oco` is neccessary when we want close position we point out that `oco` and strategy will exit from position if it was opened with rule with that `oco`.
+```{r}
+addRule(this, 
+        as = 'short_enter', 
+        condition = spread > ema, 
+        type = 'enter', 
+        side = -1,
+        oco = 'short' 
+)
+```
+
+Now add rule for exiting from short position when spread will be less then its ema. In that type of rule we don't need `side` argument and we should specify right `oco`.
+```{r}
+addRule(this,
+        as = 'short_exit', 
+        condition = spread < ema, 
+        type = 'exit',
+        oco = 'short' 
+)
+```
+
+For long position we should add analogious rules. Note that `side` is equal to 1 now and we use another `oco`. 
+```{r}
+addRule(this, 
+        as = 'long_enter', 
+        condition = spread < ema,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+)
+addRule(this, 
+        as = 'long_exit',
+        condition = spread > ema,
+        type = 'exit',
+        oco = 'long'
+)
+```
+
+At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. If we want to wait for a day after closing of trade, then you can call `setWaitAfterClose(this, TRUE)`.
+```{r, warning = FALSE, message = FALSE}
+data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
+setUserData(this, Ad(data))
+setWaitAfterClose(this, TRUE)
+setMoney(this, 100000)
+```
+
+Now evaluate model. Evaluation will be done on the server. Client and server connect via ssh. All statistics of evaluated model will be inserted to your object `this` after evaluation ends.
+```{r}
+performServer(this)
+```
+
+## Reports
+
+After completion of evalution you can get results of strategy. It is important to know how strategy is performing and how stable it can make profit. When you look at PnL graph you can undestand almost everything about your strategy. 
+
+The first plot is profit and loss graph. It shows cost of all instruments and cash on your account at every moment through period of backtest. 
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotPnL(this)
+```
+
+The second graph is about how much money your strategy uses.
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotCapital(this)
+```
+
+You can see that there are multiple separeted lines. Every line is responsible for a single trade, of course if some time was between openning and closing trades. The next graph was made to demonstrate performance of every trade in one plot. Each triangle is a trade. If it is green, then the trade is positive, else it is negative. X axis shows absolute value of pnl for trades and Y axis is the maximum amount of loss that was available while a trade was open. And you can change Y axis to MFE that means the maximum amount of profit that was available while a trade was open.
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+plotReturns(this, "MAE")
+```
+
+You can get inforamation for each trade in format of table with help of `getReportTrades` command.
+```{r}
+head(getReportTrades(this))
+```
+
+And tables of statistics. Every statistic described in help, just enter `?getReportStrategy` or `?getReportCalendar`. The first report has 
+results for whole period of backtesting, the second report -- for every year.
+```{r}
+getReportStrategy(this)
+getReportCalendar(this)
+```
+
+## Optimization
+
+The backtester provide tools for brute force optimization. For example, we can optimize window of moving averages. All available fields for optimazation can be seen via `?addDistribution`.
+
+```{r}
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(n = seq(10, 100, 10)), 
+                label = 'ema.n')
+```
+
+This function has multiple arguments. Component.type is a place from where variable come. Component.label is a name of specific component. It is needed if there were two or more indicators and you want to point one of them. Variable is a list that stores your distribution. In this example we want to choose window, name of this argument is `n`, so in the list we should write `n` as a name of a list's cell. Label is just a name of your distribution. This name can be used in `addDistributionConstraint` function. If your distributions should have conditions on each other, then you can write them in it. Also our indicator has another argument `name`. That argument contains function, that creates indicator. In addDistribution we can iterate over diffrent functions.
+
+```{r}
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(name = c(EMA, SMA, DEMA)), 
+                label = 'ema.name')
+```
+
+To erase old distributions you can call `deleteParamset` function.
+
+To start iteration you need to call `applyParamsetServer` function. It has `start_date` and `end_date` arguments, they indicate date of start and date of end for backtesting. If they are missed, then backtest will be done on the whole period of data.  Also there is `nsamples` argument. It indicates how many samples from your distributions to select.
+
+```{r}
+applyParamsetServer(this, 
+                    nsamples = 5,
+                    start_date = '2011-01-01',
+                    end_date = '2017-01-01',
+                    seed = 42)
+```
+
+After completion of this procedure you can get results of backtesting this samples. The first part of this table consist of columns with values of distributions, other columns is statistics from `getReportStrategy`. 
+
+```{r}
+getBacktestResults(this)
+```
+
+With help of library `dplyr` you can sort, filter, add new columns to that table and then select best parameters. Also you can use `View` function to see table in full screen. The first column is index of sample.  You can evaluate strategy with specific index, then parameters by this index will be inserted to your strategy.
+
+```{r, warning = FALSE, message = FALSE, fig.width = 6}
+performServer(this,
+              paramset.index = 9, 
+              start_date = '2011-01-01',
+              end_date = '2017-01-01')
+getReportStrategy(this)
+plotPnL(this)
+```
+
+
+This is the end of instroduction. Thank you for reading. For convinience the full code of the vignette is below.
+```{r, eval=FALSE}
+library(stratbuilder2pub)
+library(TTR)
+library(quantmod)
+this <- modelStrategy()
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+addRule(this, 
+        as = 'short_enter', 
+        condition = spread > ema, 
+        type = 'enter', 
+        side = -1,
+        oco = 'short' 
+)
+addRule(this,
+        as = 'short_exit', 
+        condition = spread < ema, 
+        type = 'exit',
+        oco = 'short' 
+)
+addRule(this, 
+        as = 'long_enter', 
+        condition = spread < ema,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+)
+addRule(this, 
+        as = 'long_exit',
+        condition = spread > ema,
+        type = 'exit',
+        oco = 'long'
+)
+
+data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
+setUserData(this, Ad(data))
+setWaitAfterClose(this, TRUE)
+setMoney(this, 100000)
+
+performServer(this)
+
+plotPnL(this)
+
+plotCapital(this)
+
+plotReturns(this, "MAE")
+
+head(getReportTrades(this))
+
+getReportStrategy(this)
+getReportCalendar(this)
+
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(n = seq(10, 100, 10)), 
+                label = 'ema.n')
+
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'ema', 
+                variable = list(name = c(EMA, SMA, DEMA)), 
+                label = 'ema.name')
+
+applyParamsetServer(this, 
+                    nsamples = 5,
+                    start_date = '2011-01-01',
+                    end_date = '2017-01-01',
+                    seed = 42)
+
+getBacktestResults(this) 
+
+performServer(this,
+              paramset.index = 9, 
+              start_date = '2011-01-01',
+              end_date = '2017-01-01')
+getReportStrategy(this)
+plotPnL(this)
+```
