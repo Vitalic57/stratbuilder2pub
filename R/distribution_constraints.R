@@ -3,8 +3,8 @@
 #' Add distribution
 #'
 #' @param this model
-#' @param paramset.label character, label of paramset
-#' @param component.type character, one of rule, indicator, params, lookback, lookforward, beta_fun
+#' @param paramset.label character, label of paramset, this argument can be missed
+#' @param component.type character, one of the followng names: rule, indicator, params, lookback, lookforward, beta_fun
 #' @param component.label character, name of component, argument 'as' is resposible for that. 
 #' If component.type is equal to one of lookback, lookforward, beta_fun, then this argument should be missed
 #' @param variable list with only one element, for example list(n = 1:10)
@@ -24,10 +24,8 @@ addDistribution <- function(this,
 #' @export
 #' @examples
 #' \dontrun{
-#' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb',
-#'         lookback = 100)
+#' addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 20, sd = 1), as = 'bb')
 #' addDistribution(this,
-#'     paramset.label = paramset,
 #'     component.type = 'indicator',
 #'     component.label = 'bb',
 #'     variable = list(sd = seq(0.5,3,0.05)),
@@ -42,11 +40,8 @@ addDistribution <- function(this,
 #'      type = 'enter',
 #'      args = list(n = 0.005),
 #'      side = -1,
-#'      oco = 'short',
-#'      osFun = stratbuilder2pub:::sameMoneyOs,
-#'      osFun_args = alist(amount = 5000000))
+#'      oco = 'short')
 #' addDistribution(this,
-#'     paramset.label = paramset,
 #'     component.type = 'rule',
 #'     component.label = 'bb_up_dn',
 #'     variable = list(n = seq(0.005,0.03,0.002)),
@@ -63,6 +58,9 @@ addDistribution.modelStrategy <- function(this,
                                           label
 ){
   e <- this$thisEnv
+  if(missing(paramset.label)){
+    paramset.label <- 1
+  }
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
@@ -168,8 +166,8 @@ addDistribution.modelStrategy <- function(this,
                 component.label = component.label,
                 variable = variable)
   }
-  if(!(paramset.label %in% names(e$paramsets))){
-      e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
+  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label)){
+    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
 }
@@ -251,7 +249,10 @@ addDistributionConstraint.modelStrategy <- function(this,
                                                     label
 ){
   e <- this$thisEnv
-  if(!(paramset.label %in% names(e$paramsets))){
+  if(missing(paramset.label)){
+    paramset.label <- 1
+  }
+  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label)){
     stop('no such a paramset.label in paramsets')
   }else{
     if(!missing(label)){
@@ -297,8 +298,11 @@ deleteParamset.modelStrategy <- function(this,
                                          paramset.label
 ){
   e <- this$thisEnv
+  if(missing(paramset.label)){
+    paramset.label <- 1
+  }
   if(paramset.label %in% names(e$paramsets)){
-    e$paramsets[[paramset.label]] <- NULL
+    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
 }
 
