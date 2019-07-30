@@ -127,21 +127,24 @@ addRule.modelStrategy <- function(this,
                                   osFun_args = alist(amount = getMoney(this)),
                                   pathwise = FALSE
 ){
-  if(all(c('enter','exit') != type)){
-    stop('wrong type! It must be enter or exit')
+  if(missing(type)){
+    type <- 'none'
+  }
+  if(all(c('enter','exit', 'none') != type)){
+    stop('wrong type! It must be enter or exit or none')
   }
   if(missing(side)){
-    if(type != 'exit'){
+    if(type == 'enter'){
       stop("please provide side of rule, it must be 1 or -1")
     }else{
       side <- 0
     }
-  }else if(all(c(1,-1) != side)){
-    stop('wrong type! It must be 1 or -1')
+  }else if(all(c(1,-1) != side) && type != 'none'){
+    stop('wrong side! It must be 1 or -1')
   }
   e <- this$thisEnv
   if(missing(as)){
-    as <- paste0('rule', length(e[['rules']]) + 1)
+    as <- paste0('rule_', length(e$rules) + 1)
   }
   as <- gsub('\\.','_',as)
   if(type == 'enter'){
@@ -155,7 +158,7 @@ addRule.modelStrategy <- function(this,
                           osFun_args = osFun_args,
                           pathwise = pathwise
     )
-  }else if(type == 'exit'){
+  }else if(type %in% c('exit', 'none')){
     e$rules[[as]] <- list(condition = substitute(condition),
                           as = as,
                           args = args,
