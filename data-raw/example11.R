@@ -54,7 +54,6 @@ length(data)
                        }) %>%
                        Reduce('cbind', .) %>%
                        coredata
-                     #print(head(modelD[['RSI']] ))
                    })
                  ))
   this$thisEnv$betaData <- 'RSI'

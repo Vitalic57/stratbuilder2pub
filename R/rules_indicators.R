@@ -29,8 +29,8 @@ addIndicator <- function(this, args, as, lookback, ...){
 addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
   e <- this$thisEnv
   if(missing(lookback)){
+    lookback <- 0
     for(name in names(args)){
-      lookback <- 0
       if(is.numeric(args[[name]])[1] && length(args[[name]]) == 1){
         lookback <- max(lookback, args[[name]])
       }
@@ -38,6 +38,9 @@ addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
   }
   if(getMaxLookback(this) < lookback){
     setMaxLookback(this, lookback)
+  }
+  if(missing(as)){
+    as <- paste0('indicator', length(e[['indicators']]) + 1)
   }
   as <- gsub('\\.','_',as)
   e$indicators[[as]] <- c(list(args = args,
@@ -137,6 +140,9 @@ addRule.modelStrategy <- function(this,
     stop('wrong type! It must be 1 or -1')
   }
   e <- this$thisEnv
+  if(missing(as)){
+    as <- paste0('rule', length(e[['rules']]) + 1)
+  }
   as <- gsub('\\.','_',as)
   if(type == 'enter'){
     e$rules[[as]] <- list(condition = substitute(condition),

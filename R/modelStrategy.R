@@ -447,6 +447,70 @@ setBetasInt.modelStrategy <- function(this, x){
 }
 
 
+#' Get/set name of table for calculating coefficients.
+#' 
+#' @param this modelStrategy
+#' @export
+#' @rdname getBetaData
+getBetaData <- function(this){
+  UseMethod('getBetaData', this)
+}
+
+#' @export
+#' @rdname getBetaData
+#' @method getBetaData modelStrategy
+getBetaData.modelStrategy <- function(this){
+  return(this$thisEnv$betaData)
+}
+
+
+#' @param x character, name of table in modelD object
+#' @export
+#' @rdname getBetaData
+setBetaData <- function(this, x){
+  UseMethod('setBetaData', this)
+}
+
+#' @export
+#' @rdname getBetaData
+#' @method setBetaData modelStrategy
+setBetaData.modelStrategy <- function(this, x){
+  this$thisEnv$betaData <- x
+}
+
+
+#' Get/set name of table for building spread.
+#' 
+#' @param this modelStrategy
+#' @export
+#' @rdname getSpreadData
+getSpreadData <- function(this){
+  UseMethod('getSpreadData', this)
+}
+
+#' @export
+#' @rdname getSpreadData
+#' @method getSpreadData modelStrategy
+getSpreadData.modelStrategy <- function(this){
+  return(this$thisEnv$spreadData)
+}
+
+
+#' @param x character, name of table in modelD object
+#' @export
+#' @rdname getSpreadData
+setSpreadData <- function(this, x){
+  UseMethod('setSpreadData', this)
+}
+
+#' @export
+#' @rdname getSpreadData
+#' @method setSpreadData modelStrategy
+setSpreadData.modelStrategy <- function(this, x){
+  this$thisEnv$spreadData <- x
+}
+
+
 #' Add user-defined objects to modelStrategy for future usage in backtest 
 #'
 #' @param this modelStrategy

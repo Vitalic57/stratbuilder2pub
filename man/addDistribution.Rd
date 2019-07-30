@@ -24,7 +24,7 @@ addDistribution(this, paramset.label, component.type, component.label, variable,
 
 \item{component.type}{character, one of the followng names: rule, indicator, params, lookback, lookforward, beta_fun}
 
-\item{component.label}{character, name of component, argument 'as' is resposible for that. 
+\item{component.label}{character, name of component, argument 'as' is resposible for that. You can write multiple labels. 
 If component.type is equal to one of lookback, lookforward, beta_fun, then this argument should be missed}
 
 \item{variable}{list with only one element, for example list(n = 1:10)}

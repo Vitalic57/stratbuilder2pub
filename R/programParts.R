@@ -46,6 +46,9 @@ addProgramPart.modelStrategy <- function(this,
                                       as,
                                       evolution = list()){
   e <- this$thisEnv
+  if(missing(as)){
+    as <- paste0('pp', length(e[['pps']]) + 1)
+  }
   e[['pps']][[as]] <- list(as        = as,
                             evolution = evolution)
 }

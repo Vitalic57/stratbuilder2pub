@@ -28,17 +28,17 @@ When backtesting the model you must:
 
 With package `stratbuilder2pub` you can do it easy:
 
-* We provide tools for creating model from wide variety of models
+* We provide tools for creating any midterm financial model
 
 * Your program will have clear interface
 
-* You will get statistics in form of tables and graphs
+* You will get statistics in form of tables and interactive graphs
 
 This document introduces you basic set of tools of this package.
 
 ## The First Model
 
-Let's create simple mean reverting strategy using technical indicators from package `TTR`. If asset is more then EMA (Exponential moving average), then open short position, if asset is less then EMA, then close short position and open long position. 
+Let's create simple mean reverting strategy using technical indicators from package `TTR`. Take two moving averages of adjusted close prices of asset. One of them will be with small window (fast ma), and one will be with big window (slow ma). If fast ma more than slow ma, than we should hold short position. If fast ma is less than slow ma, then we shoul hold long position.
 
 So, firstly, create an empty model.
 
@@ -46,19 +46,19 @@ So, firstly, create an empty model.
 this <- modelStrategy()
 ```
 
-Backtester use inner names. One of them is `spread`. It is central element of every model. It is dynamically recalculated and equals to 
-linear combintaion of columns of subset of rows of predefined table. If only one asset is used in model, then spread usually will be equal to close or adjusted prices. 
+Backtester use inner names. One of them is `spread`. It is central element of every model. For its definition firstly we should define table from that it will be calculated. Spread will be equal linier combination of columns of that table. To get coefficients of that combination we should define function that will calculate coefficients.  If only one asset is used in model, table usually equals to close or adjusted prices, function for coefficients will be always return 1, then spread usually equals to close or adjusted prices.
 
-In our model `spread` will be equal to adjusted prices of asset, that we will determine later. Now we need to define indicators, that will be used in backtest. As mentioned above we want to use Exponential Moving Average of adjusted prices, for this `TTR` has function `EMA`. It has 2 arguments x and n. x responsible for timeseriries to filter and n for window. As we want to use `spread` as x and it is indefinite at this step, we will use `quote` function for making possible to substitute `spread` to `EMA` when it will be evaluated. `args` argument contains function in name cell and its argumens in other cells. `as` argument is the name of indicator. This name can be used later in other indicators and rules.
+In our model `spread` will be equal to adjusted prices of asset, that we will determine later. Now we need to define indicators, that will be used in backtest. Let's use Exponential Moving Average as moving averages, for this `TTR` has function `EMA`. It has 2 arguments `x` and `n`. `x` responsible for timeseriries to filter and `n` for window. As we want to use `spread` as `x` and it is indefinite at this step, we will use `quote` function for making possible to substitute `spread` to `EMA` when it will be evaluated. `args` argument contains function in name cell and its argumens in other cells. `as` argument is the name of indicator. This name can be used later in other indicators and rules.
 ```{r}
-addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 20), as = 'fast_ma')
+addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'slow_ma')
 ```
 
-So, we defined our first indicator, now let's create rules for enter to position and exit from it. Start with enter to short position. Name this rule as "short_enter" in `as` argument. In `condition` argument we must write logical expression indicating when condition is working. For our strategy it is simply `spread > ema`. In this place we do not have to use `quote` function, just write a condition. `type` argument must be on of "enter" or "exit", specifying enter to position or exiting from it. In our setting it is "enter". As we want to short asset `side` argument will be assigned to -1. And the last argument `oco` is neccessary when we want close position we point out that `oco` and strategy will exit from position if it was opened with rule with that `oco`.
+So, we defined indicators, now let's create rules for enter to position and exit from it. Start with enter to short position. Name this rule as "short_enter" in `as` argument. In `condition` argument we must write logical expression indicating when condition is working. For our strategy it is `fast_ma > slow_ma`. As `fast_ma` and `slow_ma` are vectors we should use `&` operator not `&&`. In this place we do not have to use `quote` function, just write a condition. `type` argument must be on of "enter" or "exit", specifying enter to position or exiting from it. In our setting it is "enter". As we want to short asset `side` argument will be assigned to -1. And the last argument `oco` is neccessary when we want close position we point out that `oco` and strategy will exit from position if it was opened with rule with that `oco`.
 ```{r}
 addRule(this, 
         as = 'short_enter', 
-        condition = spread > ema, 
+        condition = fast_ma > slow_ma, 
         type = 'enter', 
         side = -1,
         oco = 'short' 
@@ -69,7 +69,7 @@ Now add rule for exiting from short position when spread will be less then its e
 ```{r}
 addRule(this,
         as = 'short_exit', 
-        condition = spread < ema, 
+        condition = !(fast_ma > slow_ma), 
         type = 'exit',
         oco = 'short' 
 )
@@ -79,24 +79,23 @@ For long position we should add analogious rules. Note that `side` is equal to 1
 ```{r}
 addRule(this, 
         as = 'long_enter', 
-        condition = spread < ema,
+        condition = fast_ma < slow_ma,
         type = 'enter',
         side = 1,
         oco = 'long'
 )
 addRule(this, 
         as = 'long_exit',
-        condition = spread > ema,
+        condition = !(fast_ma < slow_ma),
         type = 'exit',
         oco = 'long'
 )
 ```
 
-At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. If we want to wait for a day after closing of trade, then you can call `setWaitAfterClose(this, TRUE)`.
+At this step we almost completly describe strategy. It remains only to set amount of money and prices. For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. 
 ```{r, warning = FALSE, message = FALSE}
-data <- getSymbols('GAZP.ME', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
+data <- getSymbols('RSX', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
 setUserData(this, Ad(data))
-setWaitAfterClose(this, TRUE)
 setMoney(this, 100000)
 ```
 
@@ -148,24 +147,35 @@ The backtester provide tools for brute force optimization. For example, we can o
 ```{r}
 addDistribution(this, 
                 component.type = 'indicator', 
-                component.label = 'ema', 
-                variable = list(n = seq(10, 100, 10)), 
-                label = 'ema.n')
+                component.label = 'fast_ma', 
+                variable = list(n = seq(5, 50, 5)), 
+                label = 'fast.n')
+addDistribution(this, 
+                component.type = 'indicator', 
+                component.label = 'slow_ma', 
+                variable = list(n = seq(40, 150 , 10)), 
+                label = 'slow.n')
 ```
 
-This function has multiple arguments. Component.type is a place from where variable come. Component.label is a name of specific component. It is needed if there were two or more indicators and you want to point one of them. Variable is a list that stores your distribution. In this example we want to choose window, name of this argument is `n`, so in the list we should write `n` as a name of a list's cell. Label is just a name of your distribution. This name can be used in `addDistributionConstraint` function. If your distributions should have conditions on each other, then you can write them in it. Also our indicator has another argument `name`. That argument contains function, that creates indicator. In addDistribution we can iterate over diffrent functions.
+This function has multiple arguments. Component.type is a place from where variable come. There are multiple places where you can define variables and than iterate over them. Indicators is one of them. Component.label is a name of specific component. It is needed if there were two or more indicators and you want to point one of them. Variable is a list that stores your distribution. In this example we want to choose windows for indicators, name of this argument is `n`, so in the list we should write `n` as a name of a list's cell. Label is just a name of your distribution. This name can be used in `addDistributionConstraint` function. We can see that our distributions intersect and we want slow window to be more than short window. So we can write.
+
+```{r}
+addDistributionConstraint(this, 
+                          expr = fast.n < slow.n)
+```
+
+Also our indicator has argument `name`. That argument contains function, that creates indicator. In addDistribution we can iterate over diffrent functions too. And you can select multiple labels in `component.label` argument. So our indicators will have the same functions but with diffrent windows. `label` argument can be omitted if it is unnecessary. 
 
 ```{r}
 addDistribution(this, 
                 component.type = 'indicator', 
-                component.label = 'ema', 
-                variable = list(name = c(EMA, SMA, DEMA)), 
-                label = 'ema.name')
+                component.label = c('fast_ma', 'slow_ma'), 
+                variable = list(name = c(EMA, SMA, DEMA)))
 ```
 
 To erase old distributions you can call `deleteParamset` function.
 
-To start iteration you need to call `applyParamsetServer` function. It has `start_date` and `end_date` arguments, they indicate date of start and date of end for backtesting. If they are missed, then backtest will be done on the whole period of data.  Also there is `nsamples` argument. It indicates how many samples from your distributions to select.
+To start iteration you need to call `applyParamsetServer` function. It has `start_date` and `end_date` arguments, they indicate date of start and date of end of backtesting. If they are missed, then backtest will be done on the whole period of downloaded data.  Also there is `nsamples` argument. It indicates how many samples from your distributions to select.
 
 ```{r}
 applyParamsetServer(this, 
@@ -185,7 +195,7 @@ With help of library `dplyr` you can sort, filter, add new columns to that table
 
 ```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 performServer(this,
-              paramset.index = 9, 
+              paramset.index = 103, 
               start_date = '2011-01-01',
               end_date = '2017-01-01')
 getReportStrategy(this)
@@ -194,67 +204,206 @@ plotPnL(this, interactive_plot=FALSE)
 
 ## Multiple models
 
-What if you want to check your strategy on diffrent instruments? The package has an answer. Just create list of models. To do that you can make function that return model and insert diffrent data to diffrent objects.
+What if you want to check your strategy on diffrent instruments? The package has an answer. Just create list of models. To do that you can make function that return model and insert diffrent data to diffrent objects. Let's experiment with another realization of mean reverting strategy.
+We will use Bollinger's bands. `BBands` function from `TTR` can construct them. It returns table with multiple columns. So we will use notation `bb[,'pctB']`. 
 
-```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
-createModel <- function(){
+The strategy 
+
+open long:
+* %B > -1 and
+* previous %B < -1 and
+* %B < 0
+
+close long:
+* %B > 0 or
+* unrealized profit and loss > 0.0025 * initial money
+
+open short:
+* %B < 1 and
+* previous %B > 1 and
+* %B > 0
+
+close short:
+* %B < 0 or
+* unrealized profit and loss > 0.0025 * initial money
+
+As you can see some expressions do not depend on current state (path) and some are. For rules that depend on path we should specify pathwise = TRUE. These rules will be executed on each step of this backtest, others will be executed once per recalculation of spread. For cumputation of current unrealized profit and loss we use `sum(unrealized_money_last)`. Initial money can be taken from `getMoney(this)`.  We used `Lag` function to get previous values, it useful for comparing values ahead of or behind the current values.
+
+```{r}
+createMeanRevertingModel <- function(){
   this <- modelStrategy()
-  addIndicator(this, args = list(name = EMA, x = quote(spread), n = 100), as = 'ema')
+  addIndicator(this, args = list(name = BBands, HLC = quote(spread), n = 100, sd = 0.5), as = 'bb')
   addRule(this, 
-        as = 'short_enter', 
-        condition = spread > ema, 
-        type = 'enter', 
-        side = -1,
-        oco = 'short' 
+          condition = bb[,'pctB'] > -1 & 
+            Lag(bb[,'pctB'] < -1) &
+            bb[,'pctB'] < 0,
+          type = 'enter',
+          side = 1,
+          oco = 'long'
+  )
+  addRule(this, 
+          condition = bb[,'pctB'] > 0,
+          type = 'exit',
+          oco = 'long'
+  )
+  
+  addRule(this, 
+          condition = bb[,'pctB'] < 1 & 
+            Lag(bb[,'pctB'] > 1) &
+            bb[,'pctB'] > 0 ,
+          type = 'enter',
+          side = -1,
+          oco = 'short'
   )
   addRule(this,
-        as = 'short_exit', 
-        condition = spread < ema, 
-        type = 'exit',
-        oco = 'short' 
+          condition = bb[,'pctB'] < 0,
+          type = 'exit',
+          oco = 'short'
   )
+  
   addRule(this, 
-        as = 'long_enter', 
-        condition = spread < ema,
-        type = 'enter',
-        side = 1,
-        oco = 'long'
+          condition = sum(unrealized_money_last) > 0.0025 * getMoney(this),
+          type = 'exit',
+          pathwise = TRUE,
+          oco = 'short'
   )
-  addRule(this, 
-        as = 'long_exit',
-        condition = spread > ema,
-        type = 'exit',
-        oco = 'long'
+  addRule(this,
+          condition = sum(unrealized_money_last) > 0.0025 * getMoney(this),
+          type = 'exit',
+          pathwise = TRUE,
+          oco = 'long'
   )
-  setWaitAfterClose(this, TRUE)
   setMoney(this, 100000)
   return(this)
 }
 
-stocks <- c("GAZP.ME", "SBER.ME", "LKOH.ME", "ROSN.ME", "NVTK.ME")
+stocks <- c("EWW", "EWC", "EWQ", "EWU", "EWG", "EWI", "RSX", "EWH", "SPY",
+            "MCHI", "EWY", "EWJ", "EWZ", "EWP", "EZA", "EWS", "EWA", "INDA")
 data <- lapply(stocks, function(x){
   getSymbols(x, from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE) %>% Ad
 }) %>% set_names(stocks)
 
 models <- list()
 for(x in stocks){
-  models[[x]] <- createModel()
+  models[[x]] <- createMeanRevertingModel()
   setUserData(models[[x]], data[[x]])
 }
+```
 
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 performServer(models)
 getReportStrategy(models)
 plotPnL(models, interactive_plot=FALSE)
 ```
 
-Most of all reporting, optimization and performing functions working with list as with modelStrategy. 
-
-If we have list of models then we can create portfolio of models. Backtests will be summed inside it and plotPnL will draw summed profit and loss graph.
+If we have list of models then we can create portfolio of models. Backtests will be summed inside it and plotPnL will draw summed profit and loss graph. Most of all reporting, optimization and performing functions working with list and modelPortfolio as well as with modelStrategy. 
 ```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
 portfolio <- modelPortfolio(models)
 performServer(portfolio)
 getReportStrategy(portfolio)
 plotPnL(portfolio, interactive_plot=FALSE)
+```
+
+
+## Pair strategy
+
+Let's move on. We saw that discussed mean reverting strategy does not work well with considered assets. We will give a try for pair of them. We will create spread. As we mentioned above we should define a table. It will be adjusted prices. Then we should define function that will calculate coefficients. This function will take as argument this table and should return number of assets to buy and sell. This numbers may not be integers, backtester will round them by itself. Also we should define how many rows of this table to use. To do that there is a function `setLookback`. Let's use 2 years of previosly seen data, it is approximately 500 points. And we should say to model how often recalculate coefficients. `setLookforward` function is responsible for that. Let's use 10 points. By defualt if position was opened and we are at last point of lookforward period, then spread will be calculated with the same coefficients and then will be recalculculated after closing of position. To turn off this option you can use `setIgnorePosition(this, TRUE)`. We will use previous function for creating the model and just add the rule for creating coefficients.
+
+```{r}
+this <- createMeanRevertingModel()
+setLookback(this, 500)
+setLookForward(this, 10)
+setBeta(this, function(data, ...){ # dots are requared arguments, data is a matrix, that includes lookback + 1 rows
+    # Here we define how we will calculate coefficients
+    # We will do that with help of linear regression
+    colnames(data) <-  c('x', 'y')
+    
+    # define model
+    model <- lm(y~x, data.frame(data))
+    
+    # get coefs
+    beta <- c(1, -coefficients(model)[2])
+    
+    # return coefs, program automatically round them, you can cancel this behavior with function setBetasInt(this, FALSE),
+    # but you have to round them by youself, if you don't do that, program will work incorrectly
+    return(beta)
+}) 
+```
+
+Now we should add data to our model. We can add data in format of list of xts tables.
+
+```{r}
+pair <- c("EWH", "EWS")
+setUserData(this, data[pair])
+```
+
+Let's evaluate the model and see the results.
+
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
+performServer(this)
+getReportStrategy(this)
+plotPnL(this, interactive_plot=FALSE)
+```
+
+## Basket of assets
+
+Let's backtest such a strategy that buys asset for half of money with the lowest value of RSI oscillator and sells asset for other half of money with the highest value of RSI. RSI will be calculated from adjusted close prices.
+In the previous example we used setBeta for calculating coefficients for 10 steps ahead. Now we will use it just for 1 step and will set ignoring position after end of period. Rule for this strategy will be as simple as possible -- always TRUE.
+
+```{r}
+this <- modelStrategy() 
+setLookback(this, 1)
+setLookForward(this, 1) 
+setIgnorePosition(this, TRUE) 
+addRule(this, as = 'long', 
+        condition = TRUE,
+        type = 'enter',
+        side = 1,
+        oco = 'long'
+)
+```
+
+Now it's time to present function `addProgramPart`. It serves us for additing your code into backtester. There are many places where you can add code. For now we need place, where data tables are defined. We need to calculate RSI. In the backtester as mentioned before there are inner variables. One of them is `modelD`. It is an environment and it stores tables of data. In the cell `data_raw` it has downloaded data that we passed to our strategy object. So we need create new data table, we call it "RSI", and make it equal to RSI applied to every column of "data_raw" cell of object `modelD`. We will use this table in `setBeta` function, so we should write `setBetaData(this, 'RSI')`. After that "RSI" table will be passed to setBeta for getting coefficients.
+ 
+```{r}
+addProgramPart(this, 
+               evolution = list(
+                 data = quote({
+                   modelD[['RSI']] <- apply(modelD[['data_raw']], 2, RSI, n = 20) 
+                 })
+               ))
+setBetaData(this, 'RSI')
+```
+
+Almost done. It only remains to determine function in `setBeta`. And we can make force coefficients to not be in amount of assets, but in amount of money for each asset with help of  `setBetasByMoney(this, TRUE)`.
+```{r}
+setBeta(this, function(data, ...){ 
+  # data here is subset of rows of modelD[['RSI']]
+  # we need only the last row
+  data <- as.numeric(tail(data, 1) )
+  
+  # sort the values.
+  ord <- order(data)
+  
+  # create array of coefficients
+  beta <- numeric(length(data))
+  
+  # assign 1 to asset with the lowest RSI 
+  beta[head(ord, 1)] <- 1
+  
+  # assign -1 to asset with the highest RSI 
+  beta[tail(ord, 1)] <- -1
+  return(beta)
+}) 
+setBetasByMoney(this, TRUE)
+```
+
+Let's evaluate the model
+```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
+setUserData(this, data)
+performServer(this)
+getReportStrategy(this)
+plotPnL(this, interactive_plot=FALSE)
 ```
 
 This is the end of introduction. Thank you for reading. 

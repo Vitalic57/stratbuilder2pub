@@ -5,7 +5,7 @@
 #' @param this model
 #' @param paramset.label character, label of paramset, this argument can be missed
 #' @param component.type character, one of the followng names: rule, indicator, params, lookback, lookforward, beta_fun
-#' @param component.label character, name of component, argument 'as' is resposible for that. 
+#' @param component.label character, name of component, argument 'as' is resposible for that. You can write multiple labels. 
 #' If component.type is equal to one of lookback, lookforward, beta_fun, then this argument should be missed
 #' @param variable list with only one element, for example list(n = 1:10)
 #' @param label character, name for this distribution
@@ -61,17 +61,20 @@ addDistribution.modelStrategy <- function(this,
   if(missing(paramset.label)){
     paramset.label <- 1
   }
+  if(missing(label)){
+    label <- paste0('distribution', length(e$paramsets[[paramset.label]][['distributions']]) + 1)
+  }
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
-                             if(!(component.label %in% names(getRules(this, recalc = TRUE)))){
+                             if(!all(component.label %in% names(getRules(this, recalc = TRUE)))){
                                return()
                              }
                              'rules'
                            },
                            indicator =,
                            indicators = {
-                             if(!(component.label %in% names(getIndicators(this)))){
+                             if(!all(component.label %in% names(getIndicators(this)))){
                                return()
                              }
                              'indicators'
@@ -85,7 +88,7 @@ addDistribution.modelStrategy <- function(this,
                            # },
                            pm =,
                            pms = {
-                             if(!(component.label %in% names(getPM(this)))){
+                             if(!all(component.label %in% names(getPM(this)))){
                                return()
                              }
                              'pms'
@@ -252,15 +255,18 @@ addDistributionConstraint.modelStrategy <- function(this,
   if(missing(paramset.label)){
     paramset.label <- 1
   }
+  if(missing(label)){
+    label <- paste0('constraint', length(e$paramsets[[paramset.label]][['constraints']]) + 1)
+  }
   if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label)){
     stop('no such a paramset.label in paramsets')
   }else{
-    if(!missing(label)){
-      e$paramsets[[paramset.label]][['constraints']][[label]] <- list(expr = substitute(expr))
-    }else{
-      len <- length(e$paramsets[[paramset.label]][['constraints']])
-      e$paramsets[[paramset.label]][['constraints']][[len + 1]] <- list(expr = substitute(expr))
-    }
+    #if(!missing(label)){
+    e$paramsets[[paramset.label]][['constraints']][[label]] <- list(expr = substitute(expr))
+    # }else{
+    #   len <- length(e$paramsets[[paramset.label]][['constraints']])
+    #   e$paramsets[[paramset.label]][['constraints']][[len + 1]] <- list(expr = substitute(expr))
+    # }
 
   }
 }
