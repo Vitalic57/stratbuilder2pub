@@ -67,7 +67,7 @@ addDistribution.modelStrategy <- function(this,
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
-                             if(!all(component.label %in% names(getRules(this, recalc = TRUE)))){
+                             if(!all(component.label %in% names(getRules(this, recalc = TRUE, pathwise = NULL)))){
                                return()
                              }
                              'rules'
