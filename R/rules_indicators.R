@@ -209,29 +209,8 @@ getRules <- function(this, pathwise = FALSE, recalc = FALSE){
 #' @export
 #' @rdname getRules
 #' @method getRules modelStrategy
-getRules.modelStrategy <- function(this, pathwise = FALSE, recalc = FALSE){
-  if(length(pathwise) == 0){
-    return(this$thisEnv$rules)
-  }else{
-    if(recalc){
-      p <- numeric()
-      np <- numeric()
-      for(i in seq_along(this$thisEnv$rules)){
-        if(this$thisEnv$rules[[i]]$pathwise){
-          p[length(p) + 1] <- i
-        }else{
-          np[length(np) + 1] <- i
-        }
-      }
-      this$thisEnv$rules_path_ind <- p
-      this$thisEnv$rules_norm_ind <- np
-    }
-    if(pathwise){
-      return(this$thisEnv$rules[this$thisEnv$rules_path_ind])
-    }else{
-      return(this$thisEnv$rules[this$thisEnv$rules_norm_ind])
-    }
-  }
+getRules.modelStrategy <- function(this){
+  return(this$thisEnv$rules)
 }
 
 

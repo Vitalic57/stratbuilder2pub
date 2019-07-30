@@ -67,7 +67,8 @@ addDistribution.modelStrategy <- function(this,
   component.type <- switch(component.type,
                            rule = ,
                            rules ={
-                             if(!all(component.label %in% names(getRules(this, recalc = TRUE, pathwise = NULL)))){
+                             if(!all(component.label %in% names(getRules(this)))){
+                               warning('No such component.type in rules')
                                return()
                              }
                              'rules'
@@ -75,6 +76,7 @@ addDistribution.modelStrategy <- function(this,
                            indicator =,
                            indicators = {
                              if(!all(component.label %in% names(getIndicators(this)))){
+                               warning('No such component.type in indicators')
                                return()
                              }
                              'indicators'
@@ -89,6 +91,7 @@ addDistribution.modelStrategy <- function(this,
                            pm =,
                            pms = {
                              if(!all(component.label %in% names(getPM(this)))){
+                               warning('No such component.type in position managers')
                                return()
                              }
                              'pms'
