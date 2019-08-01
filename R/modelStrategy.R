@@ -39,7 +39,7 @@ modelStrategy <- function(){
   rules_norm_ind <- numeric()
   data_from_user <- list()
   paramsets <- list()
-  paramsets[[1]] <- list(constraints = list(), distributions = list())
+  #paramsets[[1]] <- list(constraints = list(), distributions = list())
   backtests <- list()
   pps <- list()
   vars <- list()
@@ -390,7 +390,7 @@ setMaxLookback <- function(this, x){
 #' @method setMaxLookback modelStrategy
 setMaxLookback.modelStrategy <- function(this,x){
   e <- this$thisEnv
-  e$maxLookback <- x
+  e$maxLookback <- ceiling(x)
 }
 
 

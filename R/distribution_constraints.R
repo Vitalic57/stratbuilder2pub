@@ -172,7 +172,7 @@ addDistribution.modelStrategy <- function(this,
                 component.label = component.label,
                 variable = variable)
   }
-  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label)){
+  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label) || length(e$paramsets) == 0){
     e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
@@ -310,8 +310,8 @@ deleteParamset.modelStrategy <- function(this,
   if(missing(paramset.label)){
     paramset.label <- 1
   }
-  if(paramset.label %in% names(e$paramsets)){
-    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
+  if(paramset.label %in% names(e$paramsets) || is.numeric(paramset.label)){
+    e$paramsets[[paramset.label]] <- NULL
   }
 }
 

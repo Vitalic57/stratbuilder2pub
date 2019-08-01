@@ -5,16 +5,12 @@
 \alias{getRules.modelStrategy}
 \title{Get inforamtion about rules in the model}
 \usage{
-getRules(this, pathwise = FALSE, recalc = FALSE)
+getRules(this)
 
-\method{getRules}{modelStrategy}(this, pathwise = FALSE, recalc = FALSE)
+\method{getRules}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}
-
-\item{pathwise}{logical, if TRUE only pathwise rules will be returned}
-
-\item{recalc}{logical, if TRUE then rules will be recalculated}
 }
 \value{
 list of inforamation

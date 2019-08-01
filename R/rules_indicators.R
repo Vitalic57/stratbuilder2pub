@@ -196,13 +196,11 @@ getIndicators.modelStrategy <- function(this){
 #' Get inforamtion about rules in the model
 #'
 #' @param this modelStrategy
-#' @param pathwise logical, if TRUE only pathwise rules will be returned
-#' @param recalc logical, if TRUE then rules will be recalculated
 #'
 #' @return list of inforamation
 #' @export
 #' @rdname getRules
-getRules <- function(this, pathwise = FALSE, recalc = FALSE){
+getRules <- function(this){
   UseMethod('getRules', this)
 }
 
