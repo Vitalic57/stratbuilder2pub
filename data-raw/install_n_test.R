@@ -11,7 +11,7 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.12')
+lines[ind] <- paste0('Version: ', '1.3.13')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')

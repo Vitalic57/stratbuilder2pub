@@ -57,6 +57,7 @@ addDistribution.modelStrategy <- function(this,
                                           variable,
                                           label
 ){
+  #print('here')
   e <- this$thisEnv
   if(missing(paramset.label)){
     paramset.label <- 1
@@ -134,6 +135,7 @@ addDistribution.modelStrategy <- function(this,
                            })
   #print(variable[[1]])
   if(is.list(variable[[1]]) && any(sapply(variable[[1]], is.function))){
+      #print(1)
       ee <- new.env()
       q <- substitute(variable)[[-1]]
       #print(q)
@@ -157,8 +159,10 @@ addDistribution.modelStrategy <- function(this,
                 env = ee,
                 variable = nms)
   } else  if (is.function(variable[[1]])) {
+    #print(2)
       ee <- new.env()
       func_name <- deparse(substitute(variable)[[-1]])
+      print(func_name)
       assign(func_name, variable[[1]], envir = ee)
       func_name <- list(func_name)
       names(func_name) <- names(variable)
@@ -168,6 +172,7 @@ addDistribution.modelStrategy <- function(this,
                 variable = func_name)
       
   } else {
+    #print(3)
       l <- list(component.type = component.type,
                 component.label = component.label,
                 variable = variable)

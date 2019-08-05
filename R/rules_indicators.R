@@ -272,6 +272,7 @@ removeIndicator.modelStrategy <- function(this, name){
 #' @param lookback numeric, periods of time for calculation
 #' @param names character vector, names of indicators to include in.
 #' @param ... params
+#' @param as character, name of set of indicators
 #' 
 #' @export
 #' @rdname addIndicators
