@@ -260,3 +260,37 @@ removeIndicator.modelStrategy <- function(this, name){
 }
 
 
+
+#' Add multiple indicators to strategy
+#'
+#' These indicators will be calculated each time when spread updates coefficients
+#' indicators must return data.frame or matrix or array
+#'
+#' @param this model
+#' @param expr expression
+#' @param args list, arguments of expression
+#' @param lookback numeric, periods of time for calculation
+#' @param names character vector, names of indicators to include in.
+#' @param ... params
+#' 
+#' @export
+#' @rdname addIndicators
+#' @method addIndicators modelStrategy
+addIndicators.modelStrategy <- function(this, expr, names, as, lookback = 0, args = list(), ...){
+  e <- this$thisEnv
+  
+  if(getMaxLookback(this) < lookback){
+    setMaxLookback(this, lookback)
+  }
+  if(missing(as)){
+    as <- paste0('indicator', length(e[['indicators']]) + 1)
+  }
+  as <- gsub('\\.','_',as)
+  e$indicators[[as]] <- c(list(args = args,
+                               as = as,
+                               lookback = lookback,
+                               names = names,
+                               expr = rlang::enexpr(expr)), list(...))
+}
+
+

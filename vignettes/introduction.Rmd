@@ -26,7 +26,7 @@ When backtesting the model you must:
 
 * Get results and analyze the model's statistics
 
-With package `stratbuilder2pub` you can do it easy:
+With package `stratbuilder2pub` you can do it easily:
 
 * We provide tools for creating any midterm financial model
 
@@ -38,7 +38,7 @@ This document introduces to you basic set of tools of this package.
 
 ## The First Model
 
-Let's create a simple mean-reverting strategy using technical indicators from package `TTR`. Take two moving averages of adjusted close prices of an asset. One of them will be with a small window (fast ma), and one will be with a big window (slow ma). If fast ma bigger than slow ma, than we should hold the short position. If fast ma is less than slow ma, then we should hold the long position. And we will not trade against the long trend, we will define it through very slow ma(moving average with big window).
+Let's create a simple mean-reverting strategy using technical indicators from package `TTR`. Take two moving averages of adjusted close prices of an asset. One of them will be with a small window (fast ma), and one will be with a big window (slow ma). If fast ma is bigger than slow ma, than we should hold the short position. If fast ma is less than slow ma, then we should hold the long position. And we will not trade against the long trend, we will define it through very slow ma(moving average with big window).
 
 So, firstly, create an empty model.
 
@@ -89,7 +89,7 @@ addRule(this,
 )
 ```
 
-At this step we almost completly describe strategy. It remains only to set amount of money and prices. Money have the same currency as used data. Data in multiple currencies is not supported now, but there are ways to overcome this issue. As we will use data in USD we forget about this.  For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. 
+At this step we almost completly describe strategy. It remains only to set amount of money and prices. Money is expressed in the same currency as the used data. Data in multiple currencies is not supported now, but there are ways to overcome this issue. As we will use data in USD we forget about this.  For downloading data we will use `quantmod`. In this strategy we only use adjusted prices, so in `setUserData` the second argument is equal to `Ad(data)`. 
 ```{r, warning = FALSE, message = FALSE}
 data <- getSymbols('RSX', from = Sys.Date() - 365 * 10, src = 'yahoo', auto.assign = FALSE)
 setUserData(this, Ad(data))
@@ -103,7 +103,7 @@ performServer(this)
 
 ## Reports
 
-After completion of evaluation you can get results of the strategy. It is important to know how strategy is performing and how stable it can make a profit. When you look at the PnL graph you can understand almost everything about your strategy. 
+After completion of evaluation you can get results of the strategy. It is important to know how strategy is performing and how stably it can make a profit. When you look at the PnL graph you can understand almost everything about your strategy. 
 
 The first plot is the profit and loss graph. It shows the cost of all instruments plus cash on your account at every moment through a period of backtesting. 
 ```{r, warning = FALSE, message = FALSE, fig.width=12, fig.height=6}
@@ -224,7 +224,7 @@ close short when:
 * %B < 0 or
 * unrealized profit and loss > 0.0025 * initial money
 
-As you can see some expressions do not depend on the current state (path) and some are. For rules that depend on the path we should specify pathwise = TRUE. These rules will be executed on each step of this backtest, others will be executed once per recalculation of spread. For computation of current unrealized profit and loss, we use `sum(unrealized_money_last)`. Initial money can be taken from `getMoney(this)`.  We used `Lag` function to get previous values, it is useful for comparing values ahead of or behind the current values.
+As you can see some expressions do not depend on the current state (path) and some do. For rules that depend on the path we should specify pathwise = TRUE. These rules will be executed on each step of this backtest, others will be executed once per recalculation of spread. For computation of current unrealized profit and loss, we use `sum(unrealized_money_last)`. Initial money can be taken from `getMoney(this)`.  We used `Lag` function to get previous values, it is useful for comparing values ahead of or behind the current values.
 
 ```{r}
 createMeanRevertingModel <- function(){

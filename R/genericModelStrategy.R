@@ -25,7 +25,11 @@ setBetasByMoney <- function(this, x, price){
 }
 
 
-
+#' @export
+#' @rdname addIndicators
+addIndicators <- function(this, ...){
+  UseMethod('addIndicators', this)
+}
 
 
 
