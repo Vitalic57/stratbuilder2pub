@@ -1,7 +1,7 @@
 Meta
-doc
+data-raw
 .Rproj.user
 *.Rproj
 .Rhistory
-.RData
+*.RData
 
