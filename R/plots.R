@@ -756,22 +756,24 @@ plotStrategy.modelStrategy <- function(this,
 #' Plot interactive distribution params
 #'
 #' @param this it is Strategy
-#' @param ... params for shinyApp or paramset.index
-PlotShiny <- function(this, 
+#' @rdname plotShiny
+#' @param ... params for shinyApp
+plotShiny <- function(this, 
                          ...){
-  UseMethod('PlotShiny', this)
+  UseMethod('plotShiny', this)
 }
 
 
 
 #' @param paramset name of paramset 
-#' @param ... params for shinyApp
-#' 
+#' @param session object of class ssh_session
 #' @return
 #' @export
 #'
 #' @examples
-PlotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
+#' @rdname plotShiny
+#' @method plotShiny modelStrategy
+plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   if(missing(session)){
     session <- .env[['session']]
   }
@@ -805,7 +807,6 @@ PlotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   e <- rlang::call2(shiny::sidebarPanel, !!!slider)
   
   ui <- shiny::fluidPage(
-    shiny::titlePanel("Hello, Vitaliy!"),
     shiny::sidebarLayout(
       eval(e),
       shiny::mainPanel(
@@ -849,3 +850,4 @@ PlotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   shiny::shinyApp(ui = ui, server = server, ...)
   
 }
+
