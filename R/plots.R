@@ -757,9 +757,9 @@ plotStrategy.modelStrategy <- function(this,
 #'
 #' @param this it is Strategy
 #' @param ... params for shinyApp or paramset.index
-Shiny_plot <- function(this, 
+PlotShiny <- function(this, 
                          ...){
-  UseMethod('Shiny_plot', this)
+  UseMethod('PlotShiny', this)
 }
 
 
@@ -771,7 +771,7 @@ Shiny_plot <- function(this,
 #' @export
 #'
 #' @examples
-Shiny_plot.modelStrategy <- function(this,session, paramset = 1, ...){
+PlotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   if(missing(session)){
     session <- .env[['session']]
   }
