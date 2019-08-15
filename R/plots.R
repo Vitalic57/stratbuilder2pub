@@ -756,6 +756,7 @@ plotStrategy.modelStrategy <- function(this,
 #' Plot interactive distribution params
 #'
 #' @param this it is Strategy
+#' @param ... params for shinyApp or paramset.index
 Shiny_plot <- function(this, 
                          ...){
   UseMethod('Shiny_plot', this)
@@ -770,7 +771,10 @@ Shiny_plot <- function(this,
 #' @export
 #'
 #' @examples
-Shiny_plot.modelStrategy <- function(this, paramset = 1, ...){
+Shiny_plot.modelStrategy <- function(this,session, paramset = 1, ...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
   distribution <- this$thisEnv$paramsets[[paramset]]$distributions
   distribution_length <- length(distribution)
   distribution_names <- names(distribution)
@@ -786,27 +790,27 @@ Shiny_plot.modelStrategy <- function(this, paramset = 1, ...){
     }
   }
   for (i in number_columns){
-    e <- expr(sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+    e <- expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
                           min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
                           value = distribution[[!!i]]$variable[[1]][2], step = distribution[[!!i]]$variable[[1]][2] - 
                             distribution[[!!i]]$variable[[1]][1]))
     slider <- c(slider, e)
   }
   for (i in char_columns){
-    e <- expr(selectInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+    e <- expr(shiny::selectInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
                           choices = distribution[[!!i]]$variable[[1]]))
     slider <- c(slider, e)
   }
   slider
-  e <- call2(sidebarPanel, !!!slider)
+  e <- rlang::call2(shiny::sidebarPanel, !!!slider)
   
-  ui <- fluidPage(
-    titlePanel("Hello, Vitaliy!"),
-    sidebarLayout(
+  ui <- shiny::fluidPage(
+    shiny::titlePanel("Hello, Vitaliy!"),
+    shiny::sidebarLayout(
       eval(e),
-      mainPanel(
-        plotOutput('plot'),
-        tableOutput("values1")
+      shiny::mainPanel(
+        shiny::plotOutput('plot'),
+        shiny::tableOutput("values1")
       )
     )
   )
@@ -817,7 +821,7 @@ Shiny_plot.modelStrategy <- function(this, paramset = 1, ...){
     
     this$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
     
-    Update <- reactive({
+    Update <- shiny::reactive({
       for (i in distribution_names){
         this$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
       }
@@ -825,7 +829,7 @@ Shiny_plot.modelStrategy <- function(this, paramset = 1, ...){
       this
     })
     
-    sliderValues1 <- reactive({
+    sliderValues1 <- shiny::reactive({
       x <- getReportStrategy(Update())
       nms <- rownames(x)
       data.frame(nms[1:9],as.numeric(x[1:9]),nms[10:18],as.numeric(x[10:18]), nms[19:27],as.numeric(x[19:27])) 
@@ -833,15 +837,15 @@ Shiny_plot.modelStrategy <- function(this, paramset = 1, ...){
     })
     
     
-    output$plot <- renderPlot({
+    output$plot <- shiny::renderPlot({
       plotPnL(Update())
     })
     
-    output$values1 <- renderTable({
+    output$values1 <- shiny::renderTable({
       sliderValues1()
     }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
     
   }
-  shinyApp(ui = ui, server = server, ...)
+  shiny::shinyApp(ui = ui, server = server, ...)
   
 }
