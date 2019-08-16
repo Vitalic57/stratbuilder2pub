@@ -767,3 +767,108 @@ plotStrategy.modelStrategy <- function(this,
   plotly::subplot( graph, nrows = (length(beta)+1), shareX = TRUE, shareY = TRUE)
 }
 
+
+
+
+
+
+
+
+#' Plot interactive distribution params
+#'
+#' @param this it is Strategy
+#' @rdname plotShiny
+#' @param ... params for shinyApp
+plotShiny <- function(this, 
+                         ...){
+  UseMethod('plotShiny', this)
+}
+
+
+
+#' @param paramset name of paramset 
+#' @param session object of class ssh_session
+#' @return
+#' @export
+#'
+#' @examples
+#' @rdname plotShiny
+#' @method plotShiny modelStrategy
+plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  distribution <- this$thisEnv$paramsets[[paramset]]$distributions
+  distribution_length <- length(distribution)
+  distribution_names <- names(distribution)
+  slider = c()
+  number_columns <- c()
+  char_columns <- c()
+  for (i in 1:distribution_length){
+    if (is.numeric(distribution[[i]]$variable[[1]][1])){
+      number_columns <- c(number_columns,i)
+    }
+    else{
+      char_columns <- c(char_columns,i)
+    }
+  }
+  for (i in number_columns){
+    e <- expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                          min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
+                          value = distribution[[!!i]]$variable[[1]][2], step = distribution[[!!i]]$variable[[1]][2] - 
+                            distribution[[!!i]]$variable[[1]][1]))
+    slider <- c(slider, e)
+  }
+  for (i in char_columns){
+    e <- expr(shiny::selectInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                          choices = distribution[[!!i]]$variable[[1]]))
+    slider <- c(slider, e)
+  }
+  slider
+  e <- rlang::call2(shiny::sidebarPanel, !!!slider)
+  
+  ui <- shiny::fluidPage(
+    shiny::sidebarLayout(
+      eval(e),
+      shiny::mainPanel(
+        shiny::plotOutput('plot'),
+        shiny::tableOutput("values1")
+      )
+    )
+  )
+  
+  unique_name = "gvajelsg,kAS:jgkihseKvgfaljgfovhrsjijoAKLF;CLAWEPG"
+  
+  server <- function(input, output) {
+    
+    this$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
+    
+    Update <- shiny::reactive({
+      for (i in distribution_names){
+        this$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
+      }
+      performServer(this,session, paramset.index = c(1), paramset.label = c(unique_name))
+      this
+    })
+    
+    sliderValues1 <- shiny::reactive({
+      x <- getReportStrategy(Update())
+      nms <- rownames(x)
+      data.frame(nms[1:9],as.numeric(x[1:9]),nms[10:18],as.numeric(x[10:18]), nms[19:27],as.numeric(x[19:27])) 
+      #getReportStrategy(this)
+    })
+    
+    
+    output$plot <- shiny::renderPlot({
+      plotPnL(Update())
+    })
+    
+    output$values1 <- shiny::renderTable({
+      sliderValues1()
+    }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
+    
+  }
+  shiny::shinyApp(ui = ui, server = server, ...)
+  
+}
+
