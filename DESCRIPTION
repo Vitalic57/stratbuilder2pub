@@ -23,6 +23,8 @@ SystemRequirements:
 Encoding: UTF-8
 LazyData: true
 Imports:
+    shiny,
+    rlang,
     zoo,
     ggplot2,
     ssh,
