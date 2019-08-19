@@ -812,19 +812,38 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
       char_columns <- c(char_columns,i)
     }
   }
+  min_date <- min(index(this$thisEnv$data_from_user))
+  max_date <- max(index(this$thisEnv$data_from_user))
+  e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
+                               min = min_date, max = max_date, 
+                               value = c(min_date,max_date), step = 1))
+  slider <- c(slider, e)
   for (i in number_columns){
-    e <- expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
-                          min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
-                          value = distribution[[!!i]]$variable[[1]][2], step = distribution[[!!i]]$variable[[1]][2] - 
-                            distribution[[!!i]]$variable[[1]][1]))
+    if (distribution[[i]]$component.type == 'indicators'){
+      label <- distribution[[i]]$component.label
+      name <- names(distribution[[i]]$variable)
+      e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                                   min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
+                                   value = this$thisEnv$indicators[[!!label]]$args[[!!name]], step = distribution[[!!i]]$variable[[1]][2] - 
+                                     distribution[[!!i]]$variable[[1]][1]))
+    } 
+    if (distribution[[i]]$component.type == 'params'){
+      name <- names(distribution[[i]]$variable)
+      e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                                   min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
+                                   value = this$thisEnv$params$rules[[!!name]], step = distribution[[!!i]]$variable[[1]][2] - 
+                                     distribution[[!!i]]$variable[[1]][1]))
+    } 
+    
     slider <- c(slider, e)
   }
   for (i in char_columns){
     e <- expr(shiny::selectInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
-                          choices = distribution[[!!i]]$variable[[1]]))
+                                 choices = distribution[[!!i]]$variable[[1]]))
     slider <- c(slider, e)
   }
-  slider
+  e <- rlang::expr(shiny::checkboxInput("checkbox", "report", value = TRUE))
+  slider <- c(slider, e)
   e <- rlang::call2(shiny::sidebarPanel, !!!slider)
   
   ui <- shiny::fluidPage(
@@ -842,20 +861,22 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   server <- function(input, output) {
     
     this$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
-    
     Update <- shiny::reactive({
       for (i in distribution_names){
         this$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
       }
-      performServer(this,session, paramset.index = c(1), paramset.label = c(unique_name))
+      performServer(this,session, paramset.index = c(1), paramset.label = c(unique_name), 
+                    start_date = input[['date']][1], end_date = input[['date']][2], report = input[['checkbox']][1])
       this
     })
     
     sliderValues1 <- shiny::reactive({
       x <- getReportStrategy(Update())
       nms <- rownames(x)
-      data.frame(nms[1:9],as.numeric(x[1:9]),nms[10:18],as.numeric(x[10:18]), nms[19:27],as.numeric(x[19:27])) 
-      #getReportStrategy(this)
+      if (input[['checkbox']][1]){
+        return(data.frame(nms[1:9],as.numeric(x[1:9]),nms[10:18],as.numeric(x[10:18]), nms[19:27],as.numeric(x[19:27])))
+      }
+      data.frame()
     })
     
     
