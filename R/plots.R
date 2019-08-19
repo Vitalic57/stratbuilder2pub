@@ -824,7 +824,6 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
                           choices = distribution[[!!i]]$variable[[1]]))
     slider <- c(slider, e)
   }
-  slider
   e <- rlang::call2(shiny::sidebarPanel, !!!slider)
   
   ui <- shiny::fluidPage(
