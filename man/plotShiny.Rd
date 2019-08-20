@@ -7,7 +7,9 @@
 \usage{
 plotShiny(this, ...)
 
-\method{plotShiny}{modelStrategy}(this, session, paramset = 1, ...)
+\method{plotShiny}{modelStrategy}(this, session, paramset = 1,
+  delite_save = 0, start_date = "1900-01-01",
+  end_date = "2999-01-01", ...)
 }
 \arguments{
 \item{this}{it is Strategy}
@@ -17,6 +19,12 @@ plotShiny(this, ...)
 \item{session}{object of class ssh_session}
 
 \item{paramset}{name of paramset}
+
+\item{delite_save}{please use 1, if you want delite save strategy}
+
+\item{start_date}{initial start date}
+
+\item{end_date}{initial stop date}
 }
 \description{
 Plot interactive distribution params
