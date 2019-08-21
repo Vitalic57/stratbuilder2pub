@@ -608,3 +608,19 @@ getBetasByMoney.modelStrategy <- function(this){
 }
 
 
+#' Return Saved Models
+#'
+#' @param this modelStrategy
+#' @export
+#' @rdname getSavedModels
+getSavedModels <- function(this){
+  UseMethod('getSavedModels', this)
+}
+
+#' @export
+#' @rdname getSavedModels
+#' @method getSavedModels modelStrategy
+getSavedModels.modelStrategy <- function(this){
+  this$thisEnv$save_strategy
+}
+

@@ -724,10 +724,10 @@ plotStrategy.modelStrategy <- function(this,
   tryCatch({
     eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
   }, error = function(e){
+    print(e)
     stop('You are using illegal arguments')
     return()
   })
-  
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
@@ -779,6 +779,7 @@ plotStrategy.modelStrategy <- function(this,
 #' @param this it is Strategy
 #' @rdname plotShiny
 #' @param ... params for shinyApp
+#' @export
 plotShiny <- function(this, 
                          ...){
   UseMethod('plotShiny', this)
@@ -788,16 +789,35 @@ plotShiny <- function(this,
 
 #' @param paramset name of paramset 
 #' @param session object of class ssh_session
+#' @param delete_save logical, please use TRUE, if you want delite save strategy
+#' @param start_date character, initial start date, example: start_date = "2010-01-01"
+#' @param end_date  character, initial stop date,  example: end_date = "2010-01-01"
 #' @return
 #' @export
-#'
 #' @examples
 #' @rdname plotShiny
 #' @method plotShiny modelStrategy
-plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
+plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FALSE, start_date = '1900-01-01', end_date = '2999-01-01',...){
   if(missing(session)){
     session <- .env[['session']]
   }
+  if (delete_save)
+  {
+    this$thisEnv[['save_strategy']] <- c()
+  }
+  clone <- function(this, ...){
+    e <-  this$thisEnv %>%
+      ls %>%
+      setdiff(., c('backtests', 'data_from_user')) %>%
+      mget(.,envir = this$thisEnv) %>%
+      as.environment
+    parent.env(e) <- parent.frame()
+    e$data_from_user <- this$thisEnv$data_from_user
+    e$me$thisEnv <- e
+    e$thisEnv <- e
+    return(e$me)
+  }
+  this_2 <- clone(this)
   distribution <- this$thisEnv$paramsets[[paramset]]$distributions
   distribution_length <- length(distribution)
   distribution_names <- names(distribution)
@@ -812,29 +832,42 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
       char_columns <- c(char_columns,i)
     }
   }
-  min_date <- min(index(this$thisEnv$data_from_user))
-  max_date <- max(index(this$thisEnv$data_from_user))
+  min_date <- head(index(this$thisEnv$data_from_user), 1)
+  max_date <- tail(index(this$thisEnv$data_from_user), 1)
+  value <- c()
   e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
                                min = min_date, max = max_date, 
-                               value = c(min_date,max_date), step = 1))
+                               value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
   slider <- c(slider, e)
   for (i in number_columns){
     if (distribution[[i]]$component.type == 'indicators'){
       label <- distribution[[i]]$component.label
       name <- names(distribution[[i]]$variable)
-      e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
-                                   min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
-                                   value = this$thisEnv$indicators[[!!label]]$args[[!!name]], step = distribution[[!!i]]$variable[[1]][2] - 
-                                     distribution[[!!i]]$variable[[1]][1]))
+      value <- this$thisEnv$indicators[[label]]$args[[name]]
     } 
     if (distribution[[i]]$component.type == 'params'){
       name <- names(distribution[[i]]$variable)
-      e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
-                                   min = min(distribution[[!!i]]$variable[[1]]), max = max(distribution[[!!i]]$variable[[1]]), 
-                                   value = this$thisEnv$params$rules[[!!name]], step = distribution[[!!i]]$variable[[1]][2] - 
-                                     distribution[[!!i]]$variable[[1]][1]))
-    } 
-    
+      label <- distribution[[i]]$component.label
+      value <- this$thisEnv$params[[label]][[name]]
+    }
+    if (distribution[[i]]$component.type == 'lookback'){
+      value <- this$thisEnv$lookback
+    }
+    if (distribution[[i]]$component.type == 'lookforward'){
+      value <- this$thisEnv$lookForward
+      if (value == Inf){
+        value <- 0
+      }
+    }
+    if (distribution[[i]]$component.type == 'rule'){
+      label <- distribution[[i]]$component.label
+      name <- names(distribution[[i]]$variable)
+      value <- this$thisEnv$rules[[label]]$args[[name]]
+    }
+    e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                                        min = min(distribution[[!!i]]$variable[[1]],!!value), max = max(distribution[[!!i]]$variable[[1]],!!value), 
+                                        value = !!value, step = distribution[[!!i]]$variable[[1]][2] - 
+                                          distribution[[!!i]]$variable[[1]][1]))
     slider <- c(slider, e)
   }
   for (i in char_columns){
@@ -844,14 +877,24 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   }
   e <- rlang::expr(shiny::checkboxInput("checkbox", "report", value = TRUE))
   slider <- c(slider, e)
+  e <- rlang::expr(shiny::actionButton("action", "Action"))
+  slider <- c(slider, e)
   e <- rlang::call2(shiny::sidebarPanel, !!!slider)
   
   ui <- shiny::fluidPage(
     shiny::sidebarLayout(
       eval(e),
       shiny::mainPanel(
-        shiny::plotOutput('plot'),
-        shiny::tableOutput("values1")
+        shiny::tabsetPanel(
+          shiny::tabPanel("PnL",
+                  shiny::plotOutput('plot'),
+                  shiny::tableOutput("values1")
+          ),
+          shiny::tabPanel("Strategy",
+                  plotly::plotlyOutput('plot_2'),
+                  shiny::tableOutput("values2")
+          )
+        )
       )
     )
   )
@@ -859,15 +902,14 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
   unique_name = "gvajelsg,kAS:jgkihseKvgfaljgfovhrsjijoAKLF;CLAWEPG"
   
   server <- function(input, output) {
-    
-    this$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
+    this_2$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
     Update <- shiny::reactive({
       for (i in distribution_names){
-        this$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
+        this_2$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
       }
-      performServer(this,session, paramset.index = c(1), paramset.label = c(unique_name), 
+      performServer(this_2,session, paramset.index = 1, paramset.label = unique_name, 
                     start_date = input[['date']][1], end_date = input[['date']][2], report = input[['checkbox']][1])
-      this
+      this_2
     })
     
     sliderValues1 <- shiny::reactive({
@@ -878,13 +920,25 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, ...){
       }
       data.frame()
     })
-    
-    
-    output$plot <- shiny::renderPlot({
+    shiny::observeEvent(input$action, {
+      if (input[["action"]][[1]]){
+        this$thisEnv[['save_strategy']][[length(this$thisEnv[['save_strategy']]) + 1]] <- this_2
+      }
+    })
+      output$plot <- shiny::renderPlot({
       plotPnL(Update())
+    })
+      
+      output$plot_2 <- plotly::renderPlotly({
+      p <- plotStrategy(Update())
+      p
     })
     
     output$values1 <- shiny::renderTable({
+      sliderValues1()
+    }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
+    
+    output$values2 <- shiny::renderTable({
       sliderValues1()
     }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
     
