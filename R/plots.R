@@ -758,6 +758,7 @@ plotStrategy.modelStrategy <- function(this,
 #' @param this it is Strategy
 #' @rdname plotShiny
 #' @param ... params for shinyApp
+#' @export
 plotShiny <- function(this, 
                          ...){
   UseMethod('plotShiny', this)
