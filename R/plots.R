@@ -607,7 +607,6 @@ plotCapital.modelStrategy <- function(this,
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
-  print(1)
   if (!is.null(start_date)){
     range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
   }
@@ -768,19 +767,19 @@ plotShiny <- function(this,
 
 #' @param paramset name of paramset 
 #' @param session object of class ssh_session
-#' @param delite_save please use 1, if you want delite save strategy
-#' @param start_date initial start date
-#' @param end_date initial stop date
+#' @param delete_save logical type, please use TRUE, if you want delite save strategy
+#' @param start_date as.character type, initial start date, example: start_date = "2010-01-01"
+#' @param end_date  as.character type, initial stop date,  example: end_date = "2010-01-01"
 #' @return
 #' @export
 #' @examples
 #' @rdname plotShiny
 #' @method plotShiny modelStrategy
-plotShiny.modelStrategy <- function(this,session, paramset = 1, delite_save = 0, start_date = '1900-01-01', end_date = '2999-01-01',...){
+plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FALSE, start_date = '1900-01-01', end_date = '2999-01-01',...){
   if(missing(session)){
     session <- .env[['session']]
   }
-  if (delite_save)
+  if (delete_save)
   {
     this$thisEnv[['save_strategy']] <- c()
   }
@@ -811,8 +810,8 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delite_save = 0,
       char_columns <- c(char_columns,i)
     }
   }
-  min_date <-  min(index(this$thisEnv$data_from_user))
-  max_date <-  max(index(this$thisEnv$data_from_user))
+  min_date <- head(index(this$thisEnv$data_from_user), 1)
+  max_date <- tail(index(this$thisEnv$data_from_user), 1)
   value <- c()
   e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
                                min = min_date, max = max_date, 
