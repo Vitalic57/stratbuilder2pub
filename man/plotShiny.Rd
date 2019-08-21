@@ -8,7 +8,7 @@
 plotShiny(this, ...)
 
 \method{plotShiny}{modelStrategy}(this, session, paramset = 1,
-  delite_save = 0, start_date = "1900-01-01",
+  delete_save = FALSE, start_date = "1900-01-01",
   end_date = "2999-01-01", ...)
 }
 \arguments{
@@ -20,11 +20,11 @@ plotShiny(this, ...)
 
 \item{paramset}{name of paramset}
 
-\item{delite_save}{please use 1, if you want delite save strategy}
+\item{delete_save}{logical, please use TRUE, if you want delite save strategy}
 
-\item{start_date}{initial start date}
+\item{start_date}{character, initial start date, example: start_date = "2010-01-01"}
 
-\item{end_date}{initial stop date}
+\item{end_date}{character, initial stop date,  example: end_date = "2010-01-01"}
 }
 \description{
 Plot interactive distribution params

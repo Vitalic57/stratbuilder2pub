@@ -5,14 +5,12 @@
 \alias{getSavedModels.modelStrategy}
 \title{Return Saved Models}
 \usage{
-getSavedModels(this, ...)
+getSavedModels(this)
 
-\method{getSavedModels}{modelStrategy}(this, ...)
+\method{getSavedModels}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}
-
-\item{...}{Prosto tak}
 }
 \description{
 Return Saved Models
