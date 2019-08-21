@@ -768,9 +768,9 @@ plotShiny <- function(this,
 
 #' @param paramset name of paramset 
 #' @param session object of class ssh_session
-#' @param delete_save logical type, please use TRUE, if you want delite save strategy
-#' @param start_date as.character type, initial start date, example: start_date = "2010-01-01"
-#' @param end_date  as.character type, initial stop date,  example: end_date = "2010-01-01"
+#' @param delete_save logical, please use TRUE, if you want delite save strategy
+#' @param start_date character, initial start date, example: start_date = "2010-01-01"
+#' @param end_date  character, initial stop date,  example: end_date = "2010-01-01"
 #' @return
 #' @export
 #' @examples
@@ -886,7 +886,7 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
       for (i in distribution_names){
         this_2$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
       }
-      performServer(this_2,session, paramset.index = c(1), paramset.label = c(unique_name), 
+      performServer(this_2,session, paramset.index = 1, paramset.label = unique_name, 
                     start_date = input[['date']][1], end_date = input[['date']][2], report = input[['checkbox']][1])
       this_2
     })
