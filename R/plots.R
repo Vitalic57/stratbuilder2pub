@@ -42,7 +42,7 @@
 
 
 
-#' Plot change of pnl through backtest period
+#' Plot change of pnl through backtesting period
 #'
 #' @param this modelStrategy
 #' @param ... params
