@@ -1,77 +1,24 @@
-# 
-#  Plot graph maximum/minimum pnl in trade vs realized pnl
-# 
-#  @param report data.frame, must contain 3 columns 'MAE.with.com', 'MFE.with.com', 'pnl.sum.adj'. 
-# It can be report of trades, returned from simulation
-#  @param type character, 'MFE' or 'MAE'
-# 
-#  @return ggplot
-#  @export
-# plotReturns <- function(report, type = 'MAE'){
-#   switch(type,
-#          MAE=,
-#          min=,
-#          loss=,
-#          maxloss={
-#            var <- 'MAE.with.com'
-#          },
-#          MFE=,
-#          max=,
-#          profit=,
-#          maxprofit={
-#            var <- 'MFE.with.com'
-#          }
-#   )
-#   rets <- 'pnl.sum.adj'
-#   df <- report[,c(rets,var)]
-#   colnames(df) <- c('rets','var')
-#   p <- ggplot(df, aes(abs(rets),var, group = rets < 0 )) +
-#     geom_point(aes(col = rets < 0, shape = rets  < 0) , size = 3) +
-#     #geom_point(aes(colour = rets > 0)) +
-#     #scale_shape(solid = FALSE) +
-#     scale_shape_manual(values=c(24,25)) +
-#     scale_color_manual(values=c('green','red')) +
-#     geom_abline(intercept = 1, linetype = 'dotted') +
-#     theme_bw() +
-#     theme(legend.position="none") +
-#     labs(y = paste(strsplit(var,'\\.')[[1]][1]),
-#          x = paste0(strsplit(rets,'\\.')[[1]][1],'s')) +
-#     ggtitle(paste(strsplit(var,'\\.')[[1]][1] ,'vs', paste0(strsplit(rets,'\\.')[[1]][1],'s') ) )
-#   return(p)
-# }
 
-
-
-#' Plot change of pnl through backtest period
+#' Plots change of pnl through backtest period
 #'
 #' @param this modelStrategy
-#' @param ... params
-#' @export
-#' @rdname plotPnL
-plotPnL <- function(this, 
-                    ...){
-  UseMethod('plotPnL', this)
-}
-
 #' @param type character, one of c('money','trades','percents')
-#'
-#' @param leg numeric/character, number of leg, if it is equal to 'all' or 'sum', then all pnl among all legs
+#' @param from character, name of folder in backtests
+#' @param leg numeric/character, number or numbers of legs, if it is equal to 'all' or 'sum', then all pnl among all legs
 #' will be summed, if it is equal to 'sep', then pnl among legs will be plotted
 #' @param graph_type character, ggplot2 or xts 
 #' @param each_year logical, if TRUE, then each graph will start with 0 each year
 #' @param adjust logical, if TRUE, then values will be divided by getMoney(this)
+#' @param ... params
 #' @param comOn bool, if true then commission will be included in the 'trades' graph
 #' @param return_type character, plot or data
-#' @param start_date date type, example: start_date='2008-01-01'
-#' @param end_date date type, example: end_date='2018-01-01'
-#' @param cutoff logical, if TRUE then on plot will be horizonal line indicating when model was created
-#' @param on_percentage logical, if TRUE then on plot will be in percentage
-#' @param interactive_plot logical, if it is TRUE and graph_type == 'ggplot2', plot will be interactive
+#' @param cutoff logical, if true then vertical line will plotted on graph where model was created 
+#'
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelStrategy
 plotPnL.modelStrategy <- function(this, 
-                                  type = 'money', 
+                                  type = 'money',
                                   comOn = TRUE, 
                                   leg = 'all', 
                                   graph_type = 'ggplot2',
@@ -79,28 +26,16 @@ plotPnL.modelStrategy <- function(this,
                                   adjust = FALSE,
                                   return_type = 'plot',
                                   cutoff = FALSE,
-                                  start_date = NULL,
-                                  end_date = NULL,
-                                  on_percentage = FALSE,
-                                  interactive_plot = FALSE,
                                   ...){
-  from <- 'base'
+  from = 'base'
   e <- this$thisEnv$backtests[[from]]
+  legs <- leg
+  leg <- legs[1]
   switch(type,
          money = {
            dates <- getDateByIndex(this)
-           if (!is.null(start_date)){
-              range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
-           }
-           else{
-              range_start <- e$activeField['start']
-           }
-           if(!is.null(end_date)){
-              range_end <- min(e$activeField['end'], sum(dates < end_date))
-           }
-           else{
-             range_end <- e$activeField['end']
-           }
+           range_start <- e$activeField['start']
+           range_end <- e$activeField['end']
            if(range_start > range_end){
              stop("start > end")
            }
@@ -109,10 +44,11 @@ plotPnL.modelStrategy <- function(this,
            if(leg %in% c('all', 'sum')){
              df <- cbind( 
                data.frame(date=dates), 
-               data.frame(PnL = (init_money + apply(e$results$unrealized_money + e$results$realized_money +  
-                                                     apply( (1 - comOn) * e$results$commissions_table, 2, cumsum), 1, sum))/ max(1,e$results$money[range_start,]*on_percentage))
+               data.frame(PnL = init_money + apply(e$results$unrealized_money + e$results$realized_money +  
+                                                     apply( (1 - comOn) * e$results$commissions_table, 2, cumsum), 1, sum))
              )[range,]
            }else if(is.numeric(leg)){ 
+             leg <- legs
              df <- cbind(
                data.frame(date=dates), 
                data.frame(PnL = init_money + e$results$unrealized_money[,leg] + e$results$realized_money[,leg] +
@@ -124,7 +60,7 @@ plotPnL.modelStrategy <- function(this,
                data.frame(date=dates), 
                data.frame(init_money + e$results$unrealized_money + e$results$realized_money +  
                             apply( (1 - comOn) * e$results$commissions_table, 2, cumsum)) %>%
-                 set_colnames(colnames(getModelD(this)$data_diff))
+                 set_colnames(colnames(getModelD(this)$data_raw))
              )[range,]
            }
            if(adjust){
@@ -157,7 +93,7 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df, 'date')
-               p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+               p <- ggplot(newdf,aes(x=date, y=value, color = variable) ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by date")
                if(each_year){
                  p <- p + geom_vline(xintercept=last_dates, linetype=4, colour="red")
@@ -166,15 +102,13 @@ plotPnL.modelStrategy <- function(this,
                  p <- p + geom_vline(xintercept=as.numeric(this$thisEnv$created), linetype=4, colour="green")
                }
                if(leg != 'sep'){
-                 p <- p + scale_color_manual(
+                 p + scale_color_manual(
                    values = c(
                      PnL = 'darkblue'
                    )) + theme(legend.position="none")
+               }else{
+                 p 
                }
-               if(interactive_plot){
-                 return(plotly::ggplotly(p))
-               }
-               return(p)
                
                
              }else{
@@ -215,7 +149,7 @@ plotPnL.modelStrategy <- function(this,
            
            if(leg == 'sep'){
              df <- data.frame(pnl) %>% 
-               set_colnames(colnames(getModelD(this)$data_diff)) %>%
+               set_colnames(colnames(getModelD(this)$data_raw)) %>%
                dplyr::mutate(index = 1:nrow(pnl))
            }else{
              df <- data.frame(PnL = pnl, index = 1:length(pnl))
@@ -224,18 +158,16 @@ plotPnL.modelStrategy <- function(this,
            if(return_type == 'plot'){
              if(graph_type == 'ggplot2'){
                newdf <- reshape2::melt(df,'index')
-               p <- ggplot(newdf, aes_string(x= "index", y = "value", color = "variable") ) +
+               p <- ggplot(newdf, aes(x= index, y = value, color = variable) ) +
                  geom_line() + theme_bw() + ggtitle("PnL money by trade")
                if(leg != 'sep'){
-                 p <- p + scale_color_manual(
+                 p + scale_color_manual(
                    values = c(
                      PnL = 'darkblue'
                    )) + theme(legend.position="none")
+               }else{
+                 p
                }
-               if(interactive_plot){
-                 return(plotly::ggplotly(p))
-               }
-               return(p)
                
              }else{
                plot(df[,-ncol(df)], type = 'l', main = 'PnL', ylab = 'money', xlab = 'trades')
@@ -245,59 +177,26 @@ plotPnL.modelStrategy <- function(this,
            }
            
          }
-         # percents_money =,
-         # percents =,
-         # returns =,
-         # money_percents =,
-         # rets = {
-         #   rets <- e$results$money/Lag(e$results$money,1) - 1
-         #   range_start <- e$activeField['start']
-         #   range_end <- e$activeField['end']
-         #   if(range_start > range_end){
-         #     stop("start > end")
-         #   }
-         #   range <- range_start:range_end
-         #   rets <- rets[range]
-         #   rets[1] <- 0
-         #   dates <- getDateByIndex(this, range)
-         #   df <- cbind(data.frame(date=dates),data.frame(PnL = cumsum(rets)))
-         #   newdf <- reshape2::melt(df,'date')
-         #   ggplot(newdf,aes(x=date,y=value,color = variable) ) +
-         #     geom_line() + theme_bw() + theme(legend.position="none") +
-         #     scale_color_manual(
-         #       values = c(
-         #         PnL = 'darkblue'
-         #       ))+
-         #     ggtitle("PnL cumulative sum of returns")
-         # }
   )
 }
 
 #' Plot drawdowns
 #'
 #' @param this modelStrategy
+#' @param from character, name of backtest
+#' @param return_type character, plot or data
+#' @param graph_type character, ggplot2 or xts
 #' @param ... params
 #'
 #' @return ggplot/xts
-#' @export
-#' @rdname plotDrawdowns
-plotDrawdowns <- function(this,
-                          ...){
-  UseMethod('plotDrawdowns', this)
-}
-
-#' @param return_type character, plot or data
-#' @param graph_type character, ggplot2 or xts
-#' @param interactive_plot logical, if graph_type == 'ggplot2' and this option is TRUE, then plot will be interactive
 #' @export
 #' @rdname plotDrawdowns
 #' @method plotDrawdowns modelStrategy
 plotDrawdowns.modelStrategy <- function(this,
                                         return_type = 'plot',
                                         graph_type = 'ggplot2',
-                                        interactive_plot = FALSE,
                                         ...){
-  from <- 'base'
+  from = 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
   range_start <- e$activeField['start']
@@ -313,17 +212,13 @@ plotDrawdowns.modelStrategy <- function(this,
   if(return_type == 'plot'){
     if(graph_type == 'ggplot2'){
       newdf <- reshape2::melt(df, 'date')
-      p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
+      ggplot(newdf,aes(x=date, y=value, color = variable) ) +
         geom_line() + theme_bw() + theme(legend.position="none") +
         scale_color_manual(
           values = c(
             PnL = 'darkblue'
           ))+
         ggtitle("Drawdowns by date")
-      if(interactive_plot){
-        return(plotly::ggplotly(p))
-      }
-      return(p)
     }else{
       plot(xts(df[,'PnL'], df[,'date']), format.labels = '%Y-%m-%d', main = 'PnL', ylab = 'money')
     }
@@ -336,22 +231,17 @@ plotDrawdowns.modelStrategy <- function(this,
 #'
 #' @param this modelStrategy 
 #' @param type character, MAE or MFE
-#' @param interactive_plot logical, if it is TRUE, then plot will be interactive
+#' @param from character, name of backtest
 #'
 #' @return ggplot
 #' @export
 #' @rdname plotReturns
-plotReturns <- function(this, type = 'MAE', interactive_plot=FALSE){
-  UseMethod('plotReturns', this)
-}
-
-#' @export
-#' @rdname plotReturns
 #' @method plotReturns modelStrategy
-plotReturns.modelStrategy <- function(this, type = 'MAE', interactive_plot=FALSE){
-  e <- this$thisEnv$backtests[['base']]
+plotReturns.modelStrategy <- function(this, type = 'MAE'){
+  from = 'base'
+  e <- this$thisEnv$backtests[[from]]
   report <- getReportTrades(this) %>%
-    dplyr::mutate(ind = 1:(dplyr::n()))
+    dplyr::mutate(ind = 1:dplyr::n())
   rets <- 'pnl.sum.adj'
   switch(type,
          MAE=,
@@ -382,9 +272,6 @@ plotReturns.modelStrategy <- function(this, type = 'MAE', interactive_plot=FALSE
     labs(y = paste(strsplit(var,'\\.')[[1]][1]),
          x = paste0(strsplit(rets,'\\.')[[1]][1],'s')) +
     ggtitle(paste(strsplit(var,'\\.')[[1]][1] ,'vs', paste0(strsplit(rets,'\\.')[[1]][1],'s') ) )
-  if(interactive_plot){
-    return(plotly::ggplotly(p))
-  }
   return(p)
   
 }
@@ -392,20 +279,16 @@ plotReturns.modelStrategy <- function(this, type = 'MAE', interactive_plot=FALSE
 
 #' Plot pnl in month-year matrix
 #'
-#' @param ... params
 #' @param this modelStrategy
+#' @param from character, name of backtest
+#' @param compounded logical, compounded returns to use or not
+#' @param ... params
 #'
 #' @export
 #' @rdname plotCalendar
-plotCalendar <- function(this, ...){
-  UseMethod('plotCalendar', this)
-}
-
-#' @export
-#' @param compounded logical, compounded returns to use or not
-#' @rdname plotCalendar
 #' @method plotCalendar modelStrategy
 plotCalendar.modelStrategy <- function(this, compounded = FALSE, ...){
+  from = 'base'
   M <- apply.monthly(getPnL(this), FUN = function(x){
     if(compounded){
       (tail(x, 1)[[1]] - head(x, 1)[[1]]) / head(x, 1)[[1]] * 100
@@ -475,135 +358,7 @@ plotCalendar.xts <- function(this, ...){
 
 
 
-#' @param legend logical, if true then legend will be printed on the plot
-#' @export
-#' @rdname plotPnL
-#' @method plotPnL list
-plotPnL.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
-  args <- list(...)
-  args['leg'] <- 'sum'
-  df <- lapply(this, function(x){
-    do.call('plotPnL', args = c(list("this" = x, "return_type" = 'data'), args))
-    #plotPnL(x, return_type = 'data', ...)
-  }) %>%  
-    Reduce('cbind', .) %>%
-    {
-      if(!is.null(names(this))){
-        set_colnames(., names(this))
-      }else{
-        set_colnames(., paste0('Strategy', seq_len(length(this)))) 
-      }
-    }
-  dates <- index(df)
-  df <- data.frame(coredata(df)) %>%
-    dplyr::mutate(date = dates)
-  newdf <- reshape2::melt(df, 'date')
-  
-  p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-    geom_line() + theme_bw() + 
-    ggtitle("PnL money by date")
-  if(!legend){
-    p <- p + theme(legend.position="none")
-  }
-  if(interactive_plot){
-    return(plotly::ggplotly(p))
-  }
-  return(p)
-}
-
-
-
-
-#' @param legend logical, if true then legend will be printed on the plot
-#' @export
-#' @rdname plotDrawdowns
-#' @method plotDrawdowns list
-plotDrawdowns.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
-  df <- lapply(this, function(x){
-    plotDrawdowns(x, return_type = 'data', ...)
-  }) %>%  
-    Reduce('cbind', .) %>%
-    {
-      if(!is.null(names(this))){
-        set_colnames(., names(this))
-      }else{
-        . 
-      }
-    }
-  dates <- index(df)
-  df <- data.frame(coredata(df)) %>%
-    dplyr::mutate(date = dates)
-  newdf <- reshape2::melt(df, 'date')
-  
-  p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-    geom_line() + theme_bw() + 
-    ggtitle("Drawdowns by date")
-  if(!legend){
-    p <- p + theme(legend.position="none")
-  }
-  if(interactive_plot){
-    return(plotly::ggplotly(p))
-  }
-  return(p)
-}
-
-
-
-
-
-#' @export
-#' @rdname plotPnL
-#' @method plotPnL modelPortfolio
-plotPnL.modelPortfolio <- function(this, ...){
-  dots <- list(...)
-  # if('legend' %in% names(dots)){
-  #   dots[['legend']] <- NULL
-  # }
-  if ('leg' %in% names(dots)){
-    if (is.numeric(dots[['leg']])){
-      dots[['this']] <- this$thisEnv$models[[dots[['leg']]]]
-      do.call("plotPnL.modelStrategy", args=dots)
-    }else if(dots[['leg']] == 'sep'){
-      dots[['this']] <- this$thisEnv$models
-      dots[['legend']] <- T
-      do.call("plotPnL.list", args=dots)
-    }else {dots[['this']] <- this
-    do.call("plotPnL.modelStrategy", args=dots)
-    }
-  }
-  else{
-    dots[['this']] <- this
-    do.call("plotPnL.modelStrategy", args=dots)
-  }
-}
-
-
-
-#' @export
-#' @rdname plotCalendar
-#' @method plotCalendar modelPortfolio
-plotCalendar.modelPortfolio <- function(this, ...){
-  plotCalendar.modelStrategy(this, ...)
-}
-
-
-
-#' @export
-#' @rdname plotDrawdowns
-#' @method plotDrawdowns modelPortfolio
-plotDrawdowns.modelPortfolio <- function(this, ...){
-  dots <- list(...)
-  if('legend' %in% names(dots)){
-    dots[['legend']] <- NULL
-  }
-  dots[['this']] <- this
-  do.call("plotDrawdowns.modelStrategy", args=dots)
-}
-
-
 #' Plot Capital of strategy
-#' 
-#' 
 #' 
 #' 
 #' @param this modelStrategy
@@ -611,13 +366,16 @@ plotDrawdowns.modelPortfolio <- function(this, ...){
 #' @export
 #' @rdname plotCapital
 plotCapital <- function(this, 
-                    ...){
+                        ...){
   UseMethod('plotCapital', this)
 }
 
-#' @param interactive_plot, logical, use FALSE if you want to disable the interactive graph
-#' @param start_date date type, example: start_date='2008-01-01'
-#' @param end_date date type, example: end_date='2018-01-01'
+#' @param start_date Date / character, example: start_date='2008-01-01'
+#' @param interactive_plot logical, if it is TRUE then plot will be intercative
+#' @param leg numeric / character, numeric is responsible for capital by legs, character can be "all" then capital will be summed or it can be "sep" then 
+#' capital will be plotted for each leg
+#' @param end_date Date / character, example: end_date='2018-01-01'
+#'
 #' @export
 #' @rdname plotCapital
 #' @method plotCapital modelStrategy
@@ -625,7 +383,8 @@ plotCapital.modelStrategy <- function(this,
                                       interactive_plot = TRUE,
                                       start_date = NULL,
                                       end_date = NULL,
-                                  ...){
+                                      leg = 'all',
+                                      ...){
   from <- 'base'
   e <- this$thisEnv$backtests[[from]]
   dates <- getDateByIndex(this)
@@ -645,15 +404,37 @@ plotCapital.modelStrategy <- function(this,
     stop("start > end")
   }
   range <- range_start:range_end
-  x <- this$thisEnv$backtests$base$results$money_in_pos
-  x[x == 0] <- NA
+  legs <- leg
+  leg <- legs[1]
+  if(leg == 'all'){
+    x <- this$thisEnv$backtests$base$results$money_in_pos
+    x[x == 0] <- NA
+  }else if(leg == 'sep'){
+    x <- this$thisEnv$backtests$base$results$money_in_pos_leg 
+    x[x == 0] <- NA
+  }else if(is.numeric(leg)){
+    x <- this$thisEnv$backtests$base$results$money_in_pos_leg[,legs] 
+    x[x == 0] <- NA
+  }
+  
   df <- cbind( 
     data.frame(date=dates), 
-    data.frame(Money_ = x)
+    data.frame(Money = x)
   )[range,]
+  if(leg == 'sep'){
+    colnames(df) <- c('date', colnames(getModelD(this)$data_raw))
+  }else if(is.numeric(leg)){
+    colnames(df) <- c('date', colnames(getModelD(this)$data_raw)[legs])
+  }
   newdf <- reshape2::melt(df, 'date')
   p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-    geom_line() + theme_bw() + ggtitle("Money in position") + theme(legend.position = "none")
+    geom_line() + theme_bw() + ggtitle("Money in position") #+ theme(legend.position = "none")
+  if(leg != 'sep'){
+    p + scale_color_manual(
+      values = c(
+        PnL = 'darkblue'
+      )) + theme(legend.position="none")
+  }
   if(interactive_plot){
     return(plotly::ggplotly(p))
   }
@@ -664,10 +445,11 @@ plotCapital.modelStrategy <- function(this,
 #' @rdname plotCapital
 #' @method plotCapital modelPortfolio
 plotCapital.modelPortfolio <- function(this,#interactive_plot = TRUE,
-                                      ...){
+                                       ...){
   dots <- list(...)
   #dots[['interactive_plot']]<-interactive_plot
   dots[['this']] <- this
+  aggregate_prepared_models(this, ...)
   do.call("plotCapital.modelStrategy", args=dots)
 }
 
@@ -681,7 +463,7 @@ plotCapital.modelPortfolio <- function(this,#interactive_plot = TRUE,
 #' @export
 #' @rdname plotStrategy
 plotStrategy <- function(this, 
-                        ...){
+                         ...){
   UseMethod('plotStrategy', this)
 }
 
@@ -707,14 +489,12 @@ plotStrategy.modelStrategy <- function(this,
     reports <- reports[reports$date.start > start_date,]
     side <- reports$side
     range_start <- max(e$activeField['start'],  sum(dates < start_date) + 1)
-  }
-  else{
+  }else{
     range_start <- e$activeField['start']
   }
   if(!is.null(end_date)){
     range_end <- min(e$activeField['end'], sum(dates < end_date))
-  }
-  else{
+  }else{
     range_end <- e$activeField['end']
   }
   if(range_start > range_end){
@@ -722,8 +502,11 @@ plotStrategy.modelStrategy <- function(this,
   }
   range <- range_start:range_end
   tryCatch({
-    eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv)
+    with(this$thisEnv, tmp <- new.env())
+    eval(this$thisEnv$pps[[1]]$evolution$data, envir = this$thisEnv$tmp)
+    this$thisEnv$tmp <- NULL
   }, error = function(e){
+    print(e)
     stop('You are using illegal arguments')
     return()
   })
@@ -732,6 +515,11 @@ plotStrategy.modelStrategy <- function(this,
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
   p1 <- ggplot(df, aes_string("date", 'spread')) + geom_line(size = 0.4)
+  increasings <- (Diff(e$results$positions_mult) > 0 & sign(e$results$positions_mult * Lag(e$results$positions_mult)) > 0 &
+                    (e$results$positions_side * Lag(e$results$positions_side)) > 0)[range,]
+  if (TRUE %in% increasings){
+    p1 <- p1 + geom_point(data = df[increasings,], aes_string("date", 'spread'), color='yellow', size = 1.5)
+  }
   if (length(stop) != 0){
     p1 <- p1 + geom_point(data = df[df$date %in% stop,], aes_string("date", 'spread'),  color='blue', size = 2)
   }
@@ -741,6 +529,7 @@ plotStrategy.modelStrategy <- function(this,
   if (TRUE %in% (side<0)){
     p1 <- p1 + geom_point(data = df[df$date %in% start,][side<0,], aes_string("date", 'spread'), shape = 25, color='red', size = 2)
   }
+  
   p1 <- plotly::ggplotly( p1 ,dynamicTicks = TRUE)
   if (!multi_plot){
     return(p1)
@@ -750,8 +539,13 @@ plotStrategy.modelStrategy <- function(this,
   for (i in 1:length(beta)){
     df <- cbind( 
       data.frame(date=dates), 
-      data.frame(PnL = this$thisEnv$data_from_user)[,i])[range,] %>%set_colnames(c('date',paste0("price_leg_",as.character(i))))
+      data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]])[,i])[range,] %>%set_colnames(c('date',paste0("price_leg_",as.character(i))))
     p1 <- ggplot(df, aes_string("date", paste0("price_leg_", as.character(i)))) + geom_line(size = 0.4)
+    increasings <- (Diff(e$results$positions_mult) > 0 & sign(e$results$positions_mult * Lag(e$results$positions_mult)) > 0 &
+                      (e$results$positions_side * Lag(e$results$positions_side)) > 0)[range,]
+    if (TRUE %in% increasings){
+      p1 <- p1 + geom_point(data = df[increasings,], aes_string("date", 'spread'), color='yellow', size = 1.5)
+    }
     if (length(stop) != 0){
       p1 <- p1 + geom_point(data = df[df$date %in% stop,], aes_string("date", paste0("price_leg_" ,as.character(i))), color='blue', size = 2)
     }
@@ -766,4 +560,289 @@ plotStrategy.modelStrategy <- function(this,
   
   plotly::subplot( graph, nrows = (length(beta)+1), shareX = TRUE, shareY = TRUE)
 }
+
+
+
+#' Plot interactive distribution params
+#'
+#' @param this it is Strategy
+#' @rdname plotShiny
+#' @param ... params for shinyApp
+#' @export
+
+#' @param paramset name of paramset 
+#' @param session object of class ssh_session
+#' @param delete_save logical, please use TRUE, if you want delite save strategy
+#' @param start_date character, initial start date, example: start_date = "2010-01-01"
+#' @param end_date  character, initial stop date,  example: end_date = "2010-01-01"
+#' @return
+#' @export
+#' @examples
+#' @rdname plotShiny
+#' @method plotShiny modelStrategy
+plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FALSE, start_date = '1900-01-01', end_date = '2999-01-01',...){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  if (delete_save)
+  {
+    this$thisEnv[['save_strategy']] <- c()
+  }
+  clone <- function(this, ...){
+    e <-  this$thisEnv %>%
+      ls %>%
+      setdiff(., c('backtests', 'data_from_user')) %>%
+      mget(.,envir = this$thisEnv) %>%
+      as.environment
+    parent.env(e) <- parent.frame()
+    e$data_from_user <- this$thisEnv$data_from_user
+    e$me$thisEnv <- e
+    e$thisEnv <- e
+    return(e$me)
+  }
+  this_2 <- clone(this)
+  distribution <- this$thisEnv$paramsets[[paramset]]$distributions
+  distribution_length <- length(distribution)
+  distribution_names <- names(distribution)
+  slider = c()
+  number_columns <- c()
+  char_columns <- c()
+  for (i in 1:distribution_length){
+    if (is.numeric(distribution[[i]]$variable[[1]][1])){
+      number_columns <- c(number_columns,i)
+    }
+    else{
+      char_columns <- c(char_columns,i)
+    }
+  }
+  min_date <- head(index(this$thisEnv$data_from_user), 1)
+  max_date <- tail(index(this$thisEnv$data_from_user), 1)
+  value <- c()
+  e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
+                                      min = min_date, max = max_date, 
+                                      value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
+  slider <- c(slider, e)
+  for (i in number_columns){
+    if (distribution[[i]]$component.type == 'indicators'){
+      label <- distribution[[i]]$component.label
+      name <- names(distribution[[i]]$variable)
+      value <- this$thisEnv$indicators[[label]]$args[[name]]
+    } 
+    if (distribution[[i]]$component.type == 'params'){
+      name <- names(distribution[[i]]$variable)
+      label <- distribution[[i]]$component.label
+      value <- this$thisEnv$params[[label]][[name]]
+    }
+    if (distribution[[i]]$component.type == 'lookback'){
+      value <- this$thisEnv$lookback
+    }
+    if (distribution[[i]]$component.type == 'lookforward'){
+      value <- this$thisEnv$lookForward
+      if (value == Inf){
+        value <- 0
+      }
+    }
+    if (distribution[[i]]$component.type == 'rule'){
+      label <- distribution[[i]]$component.label
+      name <- names(distribution[[i]]$variable)
+      value <- this$thisEnv$rules[[label]]$args[[name]]
+    }
+    e <- rlang::expr(shiny::sliderInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                                        min = min(distribution[[!!i]]$variable[[1]],!!value), max = max(distribution[[!!i]]$variable[[1]],!!value), 
+                                        value = !!value, step = distribution[[!!i]]$variable[[1]][2] - 
+                                          distribution[[!!i]]$variable[[1]][1]))
+    slider <- c(slider, e)
+  }
+  for (i in char_columns){
+    e <- expr(shiny::selectInput(inputId = distribution_names[!!i], label = distribution_names[!!i], 
+                                 choices = distribution[[!!i]]$variable[[1]]))
+    slider <- c(slider, e)
+  }
+  e <- rlang::expr(shiny::checkboxInput("checkbox", "report", value = TRUE))
+  slider <- c(slider, e)
+  e <- rlang::expr(shiny::actionButton("action", "Action"))
+  slider <- c(slider, e)
+  e <- rlang::call2(shiny::sidebarPanel, !!!slider)
+  
+  ui <- shiny::fluidPage(
+    shiny::sidebarLayout(
+      eval(e),
+      shiny::mainPanel(
+        shiny::tabsetPanel(
+          shiny::tabPanel("PnL",
+                          shiny::plotOutput('plot'),
+                          shiny::tableOutput("values1")
+          ),
+          shiny::tabPanel("Strategy",
+                          plotly::plotlyOutput('plot_2'),
+                          shiny::tableOutput("values2")
+          )
+        )
+      )
+    )
+  )
+  
+  unique_name = "gvajelsg,kAS:jgkihseKvgfaljgfovhrsjijoAKLF;CLAWEPG"
+  
+  server <- function(input, output) {
+    this_2$thisEnv$paramsets[[unique_name]] <- this$thisEnv$paramsets[[1]]
+    Update <- shiny::reactive({
+      for (i in distribution_names){
+        this_2$thisEnv$paramsets[[unique_name]]$distributions[[i]]$variable[[1]] <- input[[i]]
+      }
+      performServer(this_2,session, paramset.index = 1, paramset.label = unique_name, 
+                    start_date = input[['date']][1], end_date = input[['date']][2], report = input[['checkbox']][1])
+      this_2
+    })
+    
+    sliderValues1 <- shiny::reactive({
+      x <- getReportStrategy(Update())
+      nms <- rownames(x)
+      if (input[['checkbox']][1]){
+        return(data.frame(nms[1:9],as.numeric(x[1:9]),nms[10:18],as.numeric(x[10:18]), nms[19:27],as.numeric(x[19:27])))
+      }
+      data.frame()
+    })
+    shiny::observeEvent(input$action, {
+      if (input[["action"]][[1]]){
+        this$thisEnv[['save_strategy']][[length(this$thisEnv[['save_strategy']]) + 1]] <- this_2
+      }
+    })
+    output$plot <- shiny::renderPlot({
+      plotPnL(Update())
+    })
+    
+    output$plot_2 <- plotly::renderPlotly({
+      p <- plotStrategy(Update())
+      p
+    })
+    
+    output$values1 <- shiny::renderTable({
+      sliderValues1()
+    }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
+    
+    output$values2 <- shiny::renderTable({
+      sliderValues1()
+    }, width = '100%', colnames = FALSE, na = '', striped = TRUE)
+    
+  }
+  shiny::shinyApp(ui = ui, server = server, ...)
+  
+}
+
+#' Draws 5-D graph with axis x,y,size,color,symbol, which are contained in data.frame 
+#' 
+#' @param df data.frame
+#' @param x character/expression type, axis x, default NULL
+#' @param y character/expression type, axis y, default NULL
+#' @param size character/expression type, axis size, default NULL
+#' @param color character/expression type, axis color, default NULL
+#' @param symbol character/expression type, axis symbol, default NULL
+#' @param size_scale numeric type, point size, default 20
+#' @param omitcols character vector, names of columns that should be omitted 
+#' @return plot_ly object
+#' @export
+#' @rdname plotTable
+plotTable <- function(df, x=NULL, y=NULL ,size=NULL, color=NULL, symbol=NULL, size_scale = 20, omitcols = NULL){
+  for(xx in omitcols){
+    if(xx %in% colnames(df)){
+      df[[xx]] <- NULL
+    }
+  }
+  x <- rlang::enexpr(x)
+  y <- rlang::enexpr(y)
+  size <- rlang::enexpr(size)
+  color <- rlang::enexpr(color)
+  symbol <- rlang::enexpr(symbol)
+  if(is.character(x)){
+    x <- as.symbol(x)
+  }
+  if(is.character(y)){
+    y <- as.symbol(y)
+  }
+  if(is.character(color)){
+    color <- as.symbol(color)
+  }
+  if(is.character(size)){
+    size <- as.symbol(size)
+  }
+  if(is.character(symbol)){
+    symbol <- as.symbol(symbol)
+  }
+  if(is.null(size)){
+    size <- NULL
+    sizeref <- NULL
+  }else{
+    sizeref <- call('~', rlang::expr(2.0 * max(!!size) / (!!size_scale)**2 ))
+  }
+  if(is.null(symbol)){
+    symbol <- NULL
+  }else{
+    if (length(unique(df[[as.character(symbol)]])) > 6){
+      stop("The shape palette can deal with a maximum of 6 discrete values because more than 6 becomes difficult to discriminate")
+    }
+    symbol <- call("~",call("factor",rlang::expr(!!symbol)))
+  }
+  if(is.null(color)){
+    color <- NULL
+  }else{
+    color <- call("~",rlang::expr(!!color))
+  }
+  
+  q <- rlang::call2('paste', "<br>",!!!sapply(names(df), function(x){c(paste("<br>",x,":"),as.symbol(x))}))
+  expr <- rlang::call2(quote(plotly::plot_ly), data = quote(df), x = call("~", x),
+                       y = call("~", y),
+                       color = color, hoverinfo = "text",
+                       text = call("~", q), symbol = symbol, type = "scatter",
+                       mode = "markers",
+                       marker = rlang::call2("list",
+                                             size = call("~", size),
+                                             opacity = 0.5,
+                                             sizemin = 2,
+                                             sizemode = 'area',
+                                             sizeref = sizeref))
+  #print(expr)
+  eval(expr)
+}
+
+
+
+#' Draws 5-D graph with axis x,y,size,color,symbol, which are contained in data.frame 
+#' 
+#' @param df data.frame
+#' @param x character/expression type, axis x, default "sharpe.ann"
+#' @param y character/expression type, axis y, default "sortino.ann"
+#' @param size character/expression type, axis size, default NULL
+#' @param color character/expression type, axis color, default NULL
+#' @param symbol character/expression type, axis symbol, default NULL
+#' @param omitcols character vector, names of columns that should be omitted 
+#' @param size_scale numeric type, point size, default 20
+#'
+#' @return plot_ly object
+#' @export
+#' @rdname plotParamset
+#' @method plotParamset data.frame
+plotParamset.data.frame <- function(df, x = "sharpe.ann", y = "return.pos.drawdown", size = NULL, 
+                                    color = "trades.year", symbol = NULL, size_scale = 20, 
+                                    omitcols = c("median", "max.loose", "max.win", "in.pos.positive", "straight.t")){
+  cl <- rlang::call2('plotTable', !!!rlang::enexprs(df=df, x=x, y=y, size=size, color=color, symbol=symbol, 
+                                                    size_scale=size_scale, omitcols=omitcols))
+  #print(cl)
+  eval(cl)
+}
+
+#' Plot backtests results in 5-D graph
+#'
+#' @param this modelStrategy
+#' @param ... params
+#'
+#' @return plot_ly object
+#' @export
+#' @rdname plotParamset
+#' @method plotParamset modelStrategy
+plotParamset.modelStrategy <- function(this, ...){
+  cl <- rlang::call2('plotParamset.data.frame', df=quote(getBacktestResults(this)), !!!rlang::enexprs(...))
+  eval(cl)
+}
+
 

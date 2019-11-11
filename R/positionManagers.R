@@ -39,20 +39,28 @@ addPM.modelStrategy <- function(this,
                                 oco = "base",
                                 args = list()
 ){
-  e <- this$thisEnv
-  as <- gsub('\\.','_',as)
-  e$positionManagers[[as]] <- list(
-    as = as,
-    increase = increase,
-    decrease = decrease,
-    rebalance = rebalance,
-    change = change,
-    close = close,
-    oco = oco,
-    args = args
-  )
+    e <- this$thisEnv
+    if(missing(as)){
+        as <- paste0('x', length(e$positionManagers) + 1)
+    }
+    as <- gsub('\\.','_',as)
+    if(missing(oco)){
+        oco <- as
+    }
+    e$positionManagers[[as]] <- list(
+        as = as,
+        increase = quote_list(rlang::enexpr(increase), parent.frame()),
+        decrease = quote_list(rlang::enexpr(decrease), parent.frame()),
+        rebalance = quote_list(rlang::enexpr(rebalance), parent.frame()),
+        change = quote_list(rlang::enexpr(change), parent.frame()),
+        close = quote_list(rlang::enexpr(close), parent.frame()),
+        oco = oco,
+        args = args
+    )
+    if(!is.null(rule_name)){
+        e$positionManagers[[as]][['rule_name']] <- rule_name
+    }
 }
-
 
 #' Return all position managers blocks
 #' 

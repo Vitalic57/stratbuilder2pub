@@ -14,10 +14,9 @@ setCommission <- function(this, q){
 #' @rdname setCommission
 #' @method setCommission modelStrategy
 setCommission.modelStrategy <- function(this, q){
-  if(is.language(q)){
+    q <- rlang::enexpr(q)
+    if(as.character(q[[1]]) == 'quote'){
+        q <- eval(q)
+    }
     this$thisEnv$commssion_quote <- q
-  }else{
-    warning('q must be quote')
-  }
 }
-
