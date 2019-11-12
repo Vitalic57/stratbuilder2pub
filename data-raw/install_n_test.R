@@ -11,7 +11,7 @@ ind <- which(grepl('Version: ', lines))[1]
 line <- lines[ind]
 cur_version <- strsplit(line, ':')[[1]][2] 
 print(cur_version)
-lines[ind] <- paste0('Version: ', '1.3.13')
+lines[ind] <- paste0('Version: ', '1.3.14')
 writeLines(lines, 'DESCRIPTION')
 
 setwd('/home/vitaly/Documents/stratbuilder2pub')
@@ -53,7 +53,7 @@ ssh::scp_upload(session, '/home/vitaly/Documents/stratbuilder2pub/data-raw/examp
 ssh::scp_upload(session, '/home/vitaly/Documents/models/Sentiment/Data/sber_result_table_1.xlsx', '/usr/share/backtest/main')
 
 
-session <- ssh_connect('test_backtest_user@142.93.143.142', keyfile = '/home/vitaly/Documents/ilia')
+session <- ssh::ssh_connect('test_backtest_user@142.93.143.142', keyfile = '/home/vitaly/Documents/ilia')
 session <- ssh_connect('svetlana@142.93.143.142', keyfile = '/home/vitaly/Documents/models/Sentiment/sveta')
 
 
@@ -66,8 +66,6 @@ peek_examples(session)
 
 download_examples(session)
 
-
-stratbuilder2pub::update_package('test_backtest_user@142.93.143.142', '/home/vitaly/.ssh/ilia')
 
 #devtools::install_local('/home/vitaly/Documents/aaa/stratbuilder2pub', force = TRUE)
 
