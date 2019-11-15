@@ -203,6 +203,19 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 }
 
 
+
+#' Set rule for calculating spread.
+#'
+#' @param this modelStrategy
+#' @param fun function, it calculates coefs for spread
+#' @param args list, arguments in setBeta function
+#' @export
+#' @rdname setBeta
+setBeta <- function(this, fun, args = NULL){
+    UseMethod('setBeta', this)
+}
+
+
 #' Set rule for calculating spread.
 #'
 #' @param this modelStrategy
