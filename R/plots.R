@@ -603,7 +603,6 @@ plotStrategy.modelStrategy <- function(this,
     stop('You are using illegal arguments')
     return()
   })
-  
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
@@ -727,8 +726,8 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
   max_date <- tail(index(this$thisEnv$data_from_user), 1)
   value <- c()
   e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
-                                      min = min_date, max = max_date, 
-                                      value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
+                               min = min_date, max = max_date, 
+                               value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
   slider <- c(slider, e)
   for (i in number_columns){
     if (distribution[[i]]$component.type == 'indicators'){
