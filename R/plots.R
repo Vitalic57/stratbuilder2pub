@@ -612,6 +612,16 @@ plotStrategy.modelStrategy <- function(this,
 
 
 
+#' Plot interactive distribution params
+#'
+#' @param this it is Strategy
+#' @rdname plotShiny
+#' @param ... params for shinyApp
+#' @export
+plotShiny <- function(this, 
+                      ...){
+    UseMethod('plotShiny', this)
+}
 
 
 
@@ -622,12 +632,6 @@ plotStrategy.modelStrategy <- function(this,
 #' @rdname plotShiny
 #' @param ... params for shinyApp
 #' @export
-plotShiny <- function(this, 
-                         ...){
-  UseMethod('plotShiny', this)
-}
-
-
 
 #' @param paramset name of paramset 
 #' @param session object of class ssh_session
@@ -729,12 +733,12 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
       shiny::mainPanel(
         shiny::tabsetPanel(
           shiny::tabPanel("PnL",
-                  shiny::plotOutput('plot'),
-                  shiny::tableOutput("values1")
+                          shiny::plotOutput('plot'),
+                          shiny::tableOutput("values1")
           ),
           shiny::tabPanel("Strategy",
-                  plotly::plotlyOutput('plot_2'),
-                  shiny::tableOutput("values2")
+                          plotly::plotlyOutput('plot_2'),
+                          shiny::tableOutput("values2")
           )
         )
       )
@@ -767,11 +771,11 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
         this$thisEnv[['save_strategy']][[length(this$thisEnv[['save_strategy']]) + 1]] <- this_2
       }
     })
-      output$plot <- shiny::renderPlot({
+    output$plot <- shiny::renderPlot({
       plotPnL(Update())
     })
-      
-      output$plot_2 <- plotly::renderPlotly({
+    
+    output$plot_2 <- plotly::renderPlotly({
       p <- plotStrategy(Update())
       p
     })
