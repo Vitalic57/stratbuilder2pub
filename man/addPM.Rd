@@ -3,28 +3,28 @@
 \name{addPM}
 \alias{addPM}
 \alias{addPM.modelStrategy}
-\title{Creater for position manager.}
+\title{Creator for position manager.}
 \usage{
-addPM(this, as, increase = list(cond = quote(FALSE), expr = quote({ })),
-  decrease = list(cond = quote(FALSE), expr = quote({ })),
-  rebalance = list(cond = quote(FALSE), expr = quote({ })),
-  change = list(cond = quote(FALSE), expr = quote({ })), close = list(cond =
-  quote(FALSE)), oco = "base", args = list())
+addPM(this, ...)
 
-\method{addPM}{modelStrategy}(this, as, increase = list(cond = quote(FALSE),
-  expr = quote({ })), decrease = list(cond = quote(FALSE), expr = quote({ })),
-  rebalance = list(cond = quote(FALSE), expr = quote({ })),
-  change = list(cond = quote(FALSE), expr = quote({ })), close = list(cond =
-  quote(FALSE)), oco = "base", args = list())
+\method{addPM}{modelStrategy}(this, as, increase = list(cond =
+  quote(FALSE), expr = quote({ })), decrease = list(cond = quote(FALSE),
+  expr = quote({ })), rebalance = list(cond = quote(FALSE), expr =
+  quote({ })), change = list(cond = quote(FALSE), expr = quote({ })),
+  close = list(cond = quote(FALSE)), oco, args = list(),
+  rule_name = NULL, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
+
+\item{...}{params}
 
 \item{as}{character, name}
 
 \item{increase}{list, the first argument is resposible for condition when this rule will work,
 the second argument is expression that must calculate size of position(mult_delta)(how many spreads it needs to be bought).
-In another words the last row must contain 'mult_delta <- ...'}
+In another words the last row must contain 'mult_delta <- ...'. Or you could define 'money' variable. It should be equal to
+current amount of money in position after execution of the rule.}
 
 \item{decrease}{list, see increase, in expr quote beta_new must be defined}
 
@@ -37,7 +37,10 @@ In another words the last row must contain 'mult_delta <- ...'}
 \item{oco}{charcter, name of namespace}
 
 \item{args}{list, arguments of that manager}
+
+\item{rule_name}{character, if it is determined, then this manager will be addicted to rule by this name and
+params of this rule will be applied.}
 }
 \description{
-Creater for position manager.
+Creator for position manager.
 }

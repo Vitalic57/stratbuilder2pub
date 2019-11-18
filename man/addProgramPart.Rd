@@ -5,16 +5,18 @@
 \alias{addProgramPart.modelStrategy}
 \title{Adds variables to strategy}
 \usage{
-addProgramPart(this, as, evolution = list())
+addProgramPart(this, as, evolution, ...)
 
-\method{addProgramPart}{modelStrategy}(this, as, evolution = list())
+\method{addProgramPart}{modelStrategy}(this, as, evolution = list(), ...)
 }
 \arguments{
 \item{this}{modelStrategy}
 
 \item{as}{character, name}
 
-\item{evolution}{list, name of each element is the place where code will be executed, and value is quoted expression
+\item{evolution}{list, name of each element is the place where code will be executed, and value is quoted expression}
+
+\item{...}{callbacks
 There are multiple places where you can add your code :
 i. full name / short name -- description. 
 

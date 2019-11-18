@@ -7,7 +7,8 @@
 \usage{
 setBeta(this, fun, args = NULL)
 
-\method{setBeta}{modelStrategy}(this, fun, args = NULL)
+\method{setBeta}{modelStrategy}(this, fun, args = NULL, lookback,
+  by_money)
 }
 \arguments{
 \item{this}{modelStrategy}
@@ -15,7 +16,19 @@ setBeta(this, fun, args = NULL)
 \item{fun}{function, it calculates coefs for spread}
 
 \item{args}{list, arguments in setBeta function}
+
+\item{lookback}{numeric, lookback for calculating coefficients, how many periods should be in data}
+
+\item{by_money}{logical, if it is TRUE then coefficients will be interpreted as money position in instruments, else in pieces}
+
+\item{this}{modelStrategy}
+
+\item{fun}{function / numeric vector, it calculates coefs for spread}
+
+\item{args}{list/NULL, default arguments for fun}
 }
 \description{
+Set rule for calculating spread.
+
 Set rule for calculating spread.
 }
