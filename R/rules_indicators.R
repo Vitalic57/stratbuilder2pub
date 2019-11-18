@@ -1,3 +1,48 @@
+try_eval_list <- function(args, env){
+    res <- list()
+    if(length(args) > 1){
+        nms <- names(args)
+        for(i in 2:length(args)){
+            res[[nms[i]]] <- tryCatch({
+                eval(args[[i]], envir = env)
+            }, error = function(e){
+                args[[i]]
+            }
+            )
+        }
+    }
+    return(res)
+}
+
+quote_list <- function(args, env=NULL){
+    res <- list()
+    if(length(args) > 0){
+        nms <- names(args)
+        if(!is.null(nms)){
+            for(i in 1:length(args)){
+                if(nms[i] == ""){
+                    next
+                }
+                if(is.call(args[[i]]) && as.character(args[[i]][[1]]) == "quote" || is.symbol(args[[i]])){
+                    res[[nms[i]]] <- eval(args[[i]], envir = env)
+                }else{
+                    res[[nms[i]]] <- args[[i]]
+                }
+            }
+        }
+        
+    }
+    return(res)
+}
+
+unquote <- function(x){
+    x <- rlang::enexpr(x)
+    if(is.symbol(x) || as.character(x[[1]]) == 'quote'){
+        eval(x, envir = parent.frame())
+    }else{
+        x
+    }
+}
 
 
 #' Adds indicators to strategy
@@ -27,25 +72,31 @@ addIndicator <- function(this, args, as, lookback, ...){
 #' @rdname addIndicator
 #' @method addIndicator modelStrategy
 addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
-  e <- this$thisEnv
-  if(missing(lookback)){
-    lookback <- 0
-    for(name in names(args)){
-      if(is.numeric(args[[name]])[1] && length(args[[name]]) == 1){
-        lookback <- max(lookback, args[[name]])
-      }
+    #in dots:
+    # plot -- main or new tab for graphic
+    # columns -- which columns should be plotted
+    # col -- colour of lines
+    args <- try_eval_list(rlang::enexpr(args), env = parent.frame())
+    
+    e <- this$thisEnv
+    lookback <- rlang::enexpr(lookback)
+    if(missing(lookback)){
+        res <- 0
+        for(name in names(args)){
+            if(is.numeric(args[[name]])[1] && length(args[[name]]) == 1){
+                if(args[[name]] > res){
+                    lookback <- parse(text=name)[[1]]
+                    res <- args[[name]]
+                }
+            }
+        }
+    }else if(is.character(lookback)){
+        lookback <- parse(text=lookback)[[1]]
     }
-  }
-  if(getMaxLookback(this) < lookback){
-    setMaxLookback(this, lookback)
-  }
-  if(missing(as)){
-    as <- paste0('indicator', length(e[['indicators']]) + 1)
-  }
-  as <- gsub('\\.','_',as)
-  e$indicators[[as]] <- c(list(args = args,
-                               as = as,
-                               lookback = lookback),list(...))
+    as <- gsub('\\.','_',as)
+    e$indicators[[as]] <- c(list(args = args,
+                                 as = as,
+                                 lookback = lookback),list(...))
 }
 
 
@@ -58,31 +109,44 @@ addIndicator.modelStrategy <- function(this, args, as, lookback, ...){
 #' Conditions will be calculated and then action will be done according to type. osFun arg is needed for definition of 
 #' how much money you want to invest in enter type rules. 
 #'
-#' @param this model
+#' @param this modelStrategy
 #' @param condition expression, it must use name of indicators and local args
 #' @param as character, local name of rule
 #' @param args list, arguments that can be used in condition
 #' @param type character, type must be enter or exit
-#' @param side numeric, 1 or -1, this parameter should be specified only for enter type rules
+#' @param side numeric, 1 or -1
 #' @param oco character, environment of rule
 #' @param osFun function that calculates how many units of spread should be bought or sold
 #' @param osFun_args alist of args of osFun function
-#' @param pathwise logical, if it is FALSE, then calculation of rules  will be performed on the tables once per 
-#' computation of coefficients and condition should return logical vector, 
-#' otherwise calculation of rules will be performed on each iteration and condition should return logical scalar
-#' 
+#' @param pathwise logical, if it is FALSE, then calculation of rules and variables will be performed on the tables once per 
+#' computation of coefficients, otherwise calculation of rules and variables will be performed on the scalars on each iteration
+#' @param money numeric / expression, how much money should be in position after execution of rule. 
+#' Position manager will be added for correcting positions at every step
+#' @param money_const numeric / expression, the same as money, but without Position manager
+#' @param betas numeric / expression, number of instruments to buy and sell, position manager will be added 
+#' @param betas_const numeric / expression, the same as betas, but without position manager
+#' @param by_money logical, if it is TRUE then expression in betas argument will be interpreted as money positions in instruments, else positions will be in pieces
+#' @param ... params
+#'
 #' @export
 #' @rdname addRule
-addRule <- function(this,
-                    condition, 
-                    as, 
-                    args = list(),
-                    type, 
-                    side, 
-                    oco = 'base',  
-                    osFun = sameMoneyOs, 
-                    osFun_args = alist(amount = getMoney(this)),
-                    pathwise = FALSE){
+addRule <- function(this, 
+                  condition, 
+                  as, 
+                  args = list(),
+                  type, 
+                  side, 
+                  oco = 'base',  
+                  osFun = sameMoneyOs, 
+                  osFun_args = alist(amount = getMoney(this)),
+                  pathwise = FALSE,
+                  money,
+                  money_const,
+                  betas,
+                  betas_const,
+                  by_money = TRUE,
+                  ...
+){
   UseMethod('addRule', this)
 }
 
@@ -116,7 +180,10 @@ addRule <- function(this,
 #' }
 #' @rdname addRule
 #' @method addRule modelStrategy
-addRule.modelStrategy <- function(this,
+
+
+
+addRule.modelStrategy <- function(this, 
                                   condition, 
                                   as, 
                                   args = list(),
@@ -125,50 +192,96 @@ addRule.modelStrategy <- function(this,
                                   oco = 'base',  
                                   osFun = sameMoneyOs, 
                                   osFun_args = alist(amount = getMoney(this)),
-                                  pathwise = FALSE
+                                  pathwise = FALSE,
+                                  money,
+                                  money_const,
+                                  betas,
+                                  betas_const,
+                                  by_money = TRUE,
+                                  ...
 ){
-  if(missing(type)){
-    type <- 'none'
-  }
-  if(all(c('enter','exit', 'none') != type)){
-    stop('wrong type! It must be enter or exit or none')
-  }
-  if(missing(side)){
-    if(type == 'enter'){
-      stop("please provide side of rule, it must be 1 or -1")
-    }else{
-      side <- 0
+    if(missing(type)){
+        type <- 'enter'
     }
-  }else if(all(c(1,-1) != side) && type != 'none'){
-    stop('wrong side! It must be 1 or -1')
-  }
-  e <- this$thisEnv
-  if(missing(as)){
-    as <- paste0('rule_', length(e$rules) + 1)
-  }
-  as <- gsub('\\.','_',as)
-  if(type == 'enter'){
-    e$rules[[as]] <- list(condition = substitute(condition),
-                          as = as,
-                          args = args,
-                          type = type,
-                          side = side,
-                          oco = oco,
-                          osFun = osFun,
-                          osFun_args = osFun_args,
-                          pathwise = pathwise
-    )
-  }else if(type %in% c('exit', 'none')){
-    e$rules[[as]] <- list(condition = substitute(condition),
-                          as = as,
-                          args = args,
-                          type = type,
-                          side = side,
-                          oco = oco,
-                          pathwise = pathwise
-    )
-  }
-  
+    if(all(c('enter','exit') != type)){
+        stop('wrong type! It must be enter or exit')
+    }
+    if(missing(side)){
+        if(type == 'enter'){
+            stop("please provide side of rule, it must be 1 or -1")
+        }else{
+            side <- 0
+        }
+    }else if(all(c(1,-1) != side) && type != 'none'){
+        stop('wrong side! It must be 1 or -1')
+    }
+    e <- this$thisEnv
+    if(missing(as)){
+        as <- paste0('rule_', length(e$rules) + 1)
+    }
+    as <- gsub('\\.','_',as)
+    if(missing(oco) && type == 'enter'){
+        oco <- as
+    }
+    
+    if(as %in% names(e$rules)){
+        if('pm' %in% e$rules[[as]]){
+            this$thisEnv$positionManagers[[e$rules[[as]][['pm']]]] <- NULL
+        }
+    }
+    if(type == 'enter'){
+        if(oco == 'all'){
+            stop("Oco can't be equal to all when type is enter")
+        }
+        e$rules[[as]] <- list(condition = substitute(condition),
+                              as = as,
+                              args = args,
+                              type = type,
+                              side = side,
+                              oco = oco,
+                              osFun = osFun,
+                              osFun_args = osFun_args,
+                              pathwise = pathwise
+        )
+        if(!missing(money_const)){
+            e$rules[[as]][['money_const']] <- rlang::enexpr(money_const)
+        }
+        if(!missing(betas_const)){
+            e$rules[[as]][['betas_const']] <- rlang::enexpr(betas_const)
+            e$rules[[as]][['by_money']] <- by_money
+        }
+        if(!missing(money) || !missing(betas)){
+            pm_name <- paste0('pm', length(getPM(this)))
+            e$rules[[as]][['pm']] <- pm_name
+            reb_q <- rlang::call2("list", cond = rlang::expr(rule_enter == !!as))
+            if(!missing(money)){
+                reb_q[['money']] <- rlang::enexpr(money)
+                if(missing(money_const)){
+                    e$rules[[as]][['money_const']] <- 0
+                }
+            }
+            if(!missing(betas)){
+                reb_q[['betas']] <- rlang::enexpr(betas)
+                reb_q[['by_money']] <- by_money
+            }
+            addPM(this,
+                  oco = oco,
+                  as = pm_name,
+                  rebalance = !!reb_q,
+                  rule_name = as
+            )
+        }
+        
+    }else if(type  == 'exit'){
+        e$rules[[as]] <- list(condition = substitute(condition),
+                              as = as,
+                              args = args,
+                              type = type,
+                              side = side,
+                              oco = oco,
+                              pathwise = pathwise
+        )
+    }
 }
 
 
@@ -295,3 +408,24 @@ addIndicators.modelStrategy <- function(this, expr, names, as, lookback = 0, arg
 }
 
 
+
+quote_list <- function(args, env=NULL){
+    res <- list()
+    if(length(args) > 0){
+        nms <- names(args)
+        if(!is.null(nms)){
+            for(i in 1:length(args)){
+                if(nms[i] == ""){
+                    next
+                }
+                if(is.call(args[[i]]) && as.character(args[[i]][[1]]) == "quote" || is.symbol(args[[i]])){
+                    res[[nms[i]]] <- eval(args[[i]], envir = env)
+                }else{
+                    res[[nms[i]]] <- args[[i]]
+                }
+            }
+        }
+        
+    }
+    return(res)
+}

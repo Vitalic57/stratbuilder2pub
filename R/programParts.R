@@ -3,6 +3,7 @@
 #' @param this modelStrategy
 #' @param as character, name
 #' @param evolution list, name of each element is the place where code will be executed, and value is quoted expression
+#' @param ... callbacks
 #' There are multiple places where you can add your code :
 #' i. full name / short name -- description. 
 #' 
@@ -35,22 +36,24 @@
 #' @rdname addProgramPart
 addProgramPart <- function(this,
                            as,
-                           evolution = list()){
+                           evolution, ...){
   UseMethod('addProgramPart', this)
 }
 
 #' @export
 #' @rdname addProgramPart
 #' @method addProgramPart modelStrategy
-addProgramPart.modelStrategy <- function(this,
-                                      as,
-                                      evolution = list()){
-  e <- this$thisEnv
-  if(missing(as)){
-    as <- paste0('pp', length(e[['pps']]) + 1)
-  }
-  e[['pps']][[as]] <- list(as        = as,
-                            evolution = evolution)
+addProgramPart.modelStrategy <- function(this, as,  evolution = list(), ...){
+    e <- this$thisEnv
+    if(missing(as)){
+        as <- paste0('pp', length(e[['pps']]) + 1)
+    }
+    #print(rlang::enexprs(...))
+    x <- quote_list(rlang::enexprs(...), parent.frame())
+    #print(x)
+    evolution <- quote_list(rlang::enexpr(evolution), parent.frame())
+    evolution <- c(evolution, x)
+    e[['pps']][[as]] <- list(as = as, evolution = evolution)
 }
 
 #' Get list of variables(program parts)
