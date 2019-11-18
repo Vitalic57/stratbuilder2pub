@@ -559,7 +559,6 @@ plotStrategy.modelStrategy <- function(this,
     stop('You are using illegal arguments')
     return()
   })
-  
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
@@ -613,6 +612,10 @@ plotStrategy.modelStrategy <- function(this,
 
 
 
+
+
+
+
 #' Plot interactive distribution params
 #'
 #' @param this it is Strategy
@@ -620,19 +623,11 @@ plotStrategy.modelStrategy <- function(this,
 #' @param ... params for shinyApp
 #' @export
 plotShiny <- function(this, 
-                      ...){
-    UseMethod('plotShiny', this)
+                         ...){
+  UseMethod('plotShiny', this)
 }
 
 
-
-
-#' Plot interactive distribution params
-#'
-#' @param this it is Strategy
-#' @rdname plotShiny
-#' @param ... params for shinyApp
-#' @export
 
 #' @param paramset name of paramset 
 #' @param session object of class ssh_session
@@ -683,8 +678,8 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
   max_date <- tail(index(this$thisEnv$data_from_user), 1)
   value <- c()
   e <- rlang::expr(shiny::sliderInput(inputId = 'date', label = 'date', 
-                                      min = min_date, max = max_date, 
-                                      value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
+                               min = min_date, max = max_date, 
+                               value = c(max(min_date, as.Date(start_date)),min(max_date, as.Date(end_date)), step = 1)))
   slider <- c(slider, e)
   for (i in number_columns){
     if (distribution[[i]]$component.type == 'indicators'){
@@ -734,12 +729,12 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
       shiny::mainPanel(
         shiny::tabsetPanel(
           shiny::tabPanel("PnL",
-                          shiny::plotOutput('plot'),
-                          shiny::tableOutput("values1")
+                  shiny::plotOutput('plot'),
+                  shiny::tableOutput("values1")
           ),
           shiny::tabPanel("Strategy",
-                          plotly::plotlyOutput('plot_2'),
-                          shiny::tableOutput("values2")
+                  plotly::plotlyOutput('plot_2'),
+                  shiny::tableOutput("values2")
           )
         )
       )
@@ -772,11 +767,11 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
         this$thisEnv[['save_strategy']][[length(this$thisEnv[['save_strategy']]) + 1]] <- this_2
       }
     })
-    output$plot <- shiny::renderPlot({
+      output$plot <- shiny::renderPlot({
       plotPnL(Update())
     })
-    
-    output$plot_2 <- plotly::renderPlotly({
+      
+      output$plot_2 <- plotly::renderPlotly({
       p <- plotStrategy(Update())
       p
     })
