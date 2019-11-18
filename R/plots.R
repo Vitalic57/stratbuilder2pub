@@ -559,7 +559,6 @@ plotStrategy.modelStrategy <- function(this,
     stop('You are using illegal arguments')
     return()
   })
-  
   df <- cbind( 
     data.frame(date=dates), 
     data.frame(PnL = this$thisEnv$modelD[[this$thisEnv$spreadData]] %*% cbind(this$thisEnv$beta_fun())))[range,] %>%set_colnames(c('date','spread'))
