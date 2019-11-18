@@ -278,6 +278,29 @@ ssh_info <- function(session){
 }
 
 
+#' Interrupt simulation on the server
+#'
+#' @param session ssh_session
+#' @param verbose logical, print message or not
+#'
+#' @export
+interruptSimulation <- function(session, verbose=TRUE){
+  if(missing(session)){
+    session <- .env[['session']]
+  }
+  file_path <- file.path(tempdir(), 'keyboardInterrupt.txt')
+  file.create(file_path)
+  tryCatch({
+    x <- capture.output(ssh::scp_upload(session, file_path))
+    if(verbose){
+      cat("Simulation interrupted")
+    }
+  }, error = function(e){
+    print(e)
+  })
+}
+
+
 .env <- new.env()
 
 #' Connect to server
@@ -296,110 +319,7 @@ ssh_connect <- function(host, keyfile = NULL, passwd = askpass::askpass, verbose
 }
 
 
-
-# get_results <- function(session, reports, verbose=FALSE){
-# 
-#   # wait for results--------------------------
-#   files_path <- file.path(tempdir())
-#   
-#   vec_cond <- logical(0)
-#   vec_names <- c(pnl = 'pnl.png', strategy = 'report.RDS', calendar = 'report2.RDS', trades = 'trades.RDS')
-#   vec_cond['pnl'] <- 'plot' %in% reports
-#   vec_cond['strategy'] <-  'strategy' %in% reports
-#   vec_cond['calendar'] <-  'calendar' %in% reports
-#   vec_cond['trades'] <-  'trades' %in% reports
-#   t <- Sys.time()
-#   if(verbose){
-#     cat('Before cycle of getting results\n')
-#   }
-#   while(TRUE){
-#     x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
-#     res <- any(vec_names[vec_cond] %in% x)
-#     Sys.sleep(1)
-#     if(verbose && Sys.time() - t > 10){
-#       cat('simulation in progress\n')
-#       cat('current data in last results:')
-#       cat(capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results')))
-#       cat('\n')
-#       t <- Sys.time()
-#     }
-#     if(res){
-#       break
-#     }
-#   }
-#   if(verbose){
-#     cat('Results got\n')
-#   }
-#   # available results
-#   x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
-#   vec_avail <- vec_names[vec_cond] %in% x
-#   names(vec_avail) <- names(vec_names[vec_cond])
-#   
-#   if(verbose){
-#     cat('Before downloading results\n')
-#   }
-#   # download results -------------------
-#   if(verbose){
-#     print('vec_names:')
-#     print(vec_names)
-#     print('vec_cond:')
-#     print(vec_cond)
-#     print('vec_avail:')
-#     print(vec_avail)
-#     print('files_path:')
-#     print(files_path)
-#     
-#   }
-#   
-#   x <- sapply(seq_along(vec_names), function(i){
-#     x <- names(vec_names)[i]
-#     if(vec_cond[x] && vec_avail[x]){
-#       if(verbose){
-#         print(paste0('try to download: ', paste0('last_results/', vec_names[x])))
-#       }
-#       scp_download(session, paste0('last_results/', vec_names[x]), files_path, verbose = TRUE)
-#       if(verbose){
-#         print('downloaded')
-#       }
-#     }
-#   })
-#   if(verbose){
-#     cat('Files of results downloaded\n')
-#   }
-#   
-#   # show results ----------------------------------------
-#   results <- list()
-#   x <- sapply(2:4, function(i){
-#     x <- names(vec_names)[i]
-#     if(vec_cond[x] && vec_avail[x]){
-#       txt_path <- file.path(files_path, vec_names[x])
-#       results[[length(results) + 1]] <<- readRDS(txt_path)
-#       file.remove(txt_path)
-#     }
-#   })
-#   if(verbose){
-#     cat('Reports downloaded\n')
-#   }
-#   
-#   if(vec_cond['pnl'] && vec_avail['pnl']){
-#     png_path <- file.path(files_path, 'pnl.png')
-#     # image <- imager::load.image(png_path)
-#     # imager:::plot.cimg(image, axes = FALSE)
-#     img <- png::readPNG(png_path)
-#     grid::grid.raster(img)
-#     file.remove(png_path)
-#     Sys.sleep(1)
-#     if(verbose){
-#       cat('Image downloaded')
-#     }
-#   }
-#   
-#   return(results)
-# }
-
-
 get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
-  Sys.sleep(0.5)
   reports <- 'strategy'
   # wait for results--------------------------
   files_path <- file.path(tempdir())
@@ -407,25 +327,40 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
   vec_cond <- logical(0)
   vec_names <- c(strategy = 'report.RDS')
   vec_cond['strategy'] <-  TRUE
-  t <- Sys.time()
-  if(verbose){
-    cat('Before cycle of getting results\n')
-  }
-  while(TRUE){
-    x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
-    res <- any(vec_names[vec_cond] %in% x)
-    Sys.sleep(1)
-    if(verbose && Sys.time() - t > 10){
-      cat('simulation in progress\n')
-      cat('current data in last results:')
-      cat(capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results')))
-      cat('\n')
+  tryCatch({
+      Sys.sleep(0.5)
+      
       t <- Sys.time()
+      if(verbose){
+        cat('Before cycle of getting results\n')
+      }
+  
+      while(TRUE){
+        x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+        res <- any(vec_names[vec_cond] %in% x)
+        Sys.sleep(1)
+        if(verbose && Sys.time() - t > 10){
+          cat('simulation in progress\n')
+          cat('current data in last results:')
+          cat(capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results')))
+          cat('\n')
+          t <- Sys.time()
+        }
+        if(res){
+          break
+        }
+      }
+    },
+    finally = {
+      x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+      res <- any(vec_names[vec_cond] %in% x)
+      if(!res){
+        interruptSimulation(session, verbose = FALSE)
+        stop('Simulation interrupted')
+      }
     }
-    if(res){
-      break
-    }
-  }
+  )
+  
   if(verbose){
     cat('Results have been gotten\n')
   }

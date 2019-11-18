@@ -203,6 +203,7 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 }
 
 
+
 #' Set rule for calculating spread.
 #'
 #' @param this modelStrategy
@@ -211,24 +212,43 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 #' @export
 #' @rdname setBeta
 setBeta <- function(this, fun, args = NULL){
-  UseMethod('setBeta', this)
+    UseMethod('setBeta', this)
 }
 
+
+#' Set rule for calculating spread.
+#'
+#' @param this modelStrategy
+#' @param fun function / numeric vector, it calculates coefs for spread
+#' @param args list/NULL, default arguments for fun
+#' @param lookback numeric, lookback for calculating coefficients, how many periods should be in data
+#' @param by_money logical, if it is TRUE then coefficients will be interpreted as money position in instruments, else in pieces
+#'
 #' @export
 #' @rdname setBeta
 #' @method setBeta modelStrategy
-setBeta.modelStrategy <- function(this, fun, args = NULL){
-  if(missing(fun)){
-    stop("Please provide name or fun argument")
-  }else if(!missing(fun)){
-    this$thisEnv$beta_fun_force <- FALSE
-    e <- this$thisEnv
-    if(!is.null(args)){
-      formals(fun) <- modify.args(formals(fun), args)
+setBeta.modelStrategy <- function(this, fun, args = NULL, lookback, by_money){
+    if(missing(fun)){
+        stop("Please provide fun argument")
+    }else if(!missing(fun)){
+        if(!missing(lookback)){
+            setLookback(this, lookback)
+        }
+        if(!missing(by_money)){
+            setBetasByMoney(this, by_money)
+        }
+        if(is.numeric(fun)){
+            fun <- pryr::partial(function(w, ...) return(w), w = fun, .lazy = FALSE)
+        }
+        e <- this$thisEnv
+        if(!is.null(args)){
+            formals(fun) <- modify.args(formals(fun), args)
+        }
+        e$beta_fun <- fun
+        e$beta_fun_init <- fun
     }
-    e$beta_fun <- fun
-  }
 }
+
 
 #' Set amount of money, that we have at the beginning
 #'
