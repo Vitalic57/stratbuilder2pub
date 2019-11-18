@@ -7,11 +7,11 @@
 \alias{addDistribution.modelPortfolio}
 \title{Add distribution}
 \usage{
-addDistribution(this, paramset.label, component.type, component.label, variable,
-  label)
+addDistribution(this, paramset.label, component.type, component.label,
+  variable, label)
 
-\method{addDistribution}{modelStrategy}(this, paramset.label, component.type,
-  component.label, variable, label)
+\method{addDistribution}{modelStrategy}(this, paramset.label,
+  component.type, component.label, variable, label)
 
 \method{addDistribution}{list}(this, ...)
 
@@ -34,8 +34,6 @@ If component.type is equal to one of lookback, lookforward, beta_fun, then this 
 \item{...}{params for addDistribution}
 }
 \description{
-Add distribution
-
 This method add the same distribution to each model in list
 }
 \examples{

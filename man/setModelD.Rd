@@ -5,7 +5,6 @@
 \alias{setModelD.list}
 \alias{setModelD}
 \alias{setModelD.modelStrategy}
-\alias{setModelD.modelPortfolio}
 \title{Set modelData object to modelStrategy object}
 \usage{
 \method{setModelD}{modelPortfolio}(this, x, ...)

@@ -3,18 +3,22 @@
 \name{getPM}
 \alias{getPM}
 \alias{getPM.modelStrategy}
-\title{Return all position managers blocks}
+\title{Gets all position managers}
 \usage{
-getPM(this)
+getPM(this, recalc, ...)
 
-\method{getPM}{modelStrategy}(this)
+\method{getPM}{modelStrategy}(this, recalc = FALSE, ...)
 }
 \arguments{
-\item{this}{model}
+\item{this}{modelStrategy}
+
+\item{recalc}{logical}
+
+\item{...}{params}
 }
 \value{
 list
 }
 \description{
-Return all position managers blocks
+Gets all position managers
 }

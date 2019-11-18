@@ -138,5 +138,55 @@ deleteParamset.modelPortfolio <- function(this, ...){
 
 
 
+aggregate_prepared_models <- function(this, ...){
+    dots <- list(...)
+    if(length(this$thisEnv$backtests) == 0){
+        nms <- 'base'
+        if('from' %in% names(dots)){
+            nms <- dots[['from']]
+        }
+        aggregate_backtests(this, saveTo = nms)
+    }
+}
+
+
+#' @export
+#' @rdname plotPnL
+#' @method plotPnL modelPortfolio
+plotPnL.modelPortfolio <- function(this, ...){
+    dots <- list(...)
+    if('legend' %in% names(dots)){
+        dots[['legend']] <- NULL
+    }
+    dots[['this']] <- this
+    aggregate_prepared_models(this, ...)
+    do.call("plotPnL.modelStrategy", args=dots)
+}
+
+
+
+#' @export
+#' @rdname plotCalendar
+#' @method plotCalendar modelPortfolio
+plotCalendar.modelPortfolio <- function(this, ...){
+    aggregate_prepared_models(this, ...)
+    plotCalendar.modelStrategy(this, ...)
+}
+
+
+
+#' @export
+#' @rdname plotDrawdowns
+#' @method plotDrawdowns modelPortfolio
+plotDrawdowns.modelPortfolio <- function(this, ...){
+    dots <- list(...)
+    if('legend' %in% names(dots)){
+        dots[['legend']] <- NULL
+    }
+    dots[['this']] <- this
+    aggregate_prepared_models(this, ...)
+    do.call("plotDrawdowns.modelStrategy", args=dots)
+}
+
 
 

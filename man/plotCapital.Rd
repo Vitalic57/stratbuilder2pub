@@ -9,7 +9,7 @@
 plotCapital(this, ...)
 
 \method{plotCapital}{modelStrategy}(this, interactive_plot = TRUE,
-  start_date = NULL, end_date = NULL, ...)
+  start_date = NULL, end_date = NULL, leg = "all", ...)
 
 \method{plotCapital}{modelPortfolio}(this, ...)
 }
@@ -18,11 +18,14 @@ plotCapital(this, ...)
 
 \item{...}{params}
 
-\item{interactive_plot, }{logical, use FALSE if you want to disable the interactive graph}
+\item{interactive_plot}{logical, if it is TRUE then plot will be intercative}
 
-\item{start_date}{date type, example: start_date='2008-01-01'}
+\item{start_date}{Date / character, example: start_date='2008-01-01'}
 
-\item{end_date}{date type, example: end_date='2018-01-01'}
+\item{end_date}{Date / character, example: end_date='2018-01-01'}
+
+\item{leg}{numeric / character, numeric is responsible for capital by legs, character can be "all" then capital will be summed or it can be "sep" then 
+capital will be plotted for each leg}
 }
 \description{
 Plot Capital of strategy

@@ -7,14 +7,16 @@
 \usage{
 addRule(this, condition, as, args = list(), type, side, oco = "base",
   osFun = sameMoneyOs, osFun_args = alist(amount = getMoney(this)),
-  pathwise = FALSE)
+  pathwise = FALSE, money, money_const, betas, betas_const,
+  by_money = TRUE, ...)
 
 \method{addRule}{modelStrategy}(this, condition, as, args = list(), type,
-  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount =
-  getMoney(this)), pathwise = FALSE)
+  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount
+  = getMoney(this)), pathwise = FALSE, money, money_const, betas,
+  betas_const, by_money = TRUE, ...)
 }
 \arguments{
-\item{this}{model}
+\item{this}{modelStrategy}
 
 \item{condition}{expression, it must use name of indicators and local args}
 
@@ -24,7 +26,7 @@ addRule(this, condition, as, args = list(), type, side, oco = "base",
 
 \item{type}{character, type must be enter or exit}
 
-\item{side}{numeric, 1 or -1, this parameter should be specified only for enter type rules}
+\item{side}{numeric, 1 or -1}
 
 \item{oco}{character, environment of rule}
 
@@ -32,9 +34,21 @@ addRule(this, condition, as, args = list(), type, side, oco = "base",
 
 \item{osFun_args}{alist of args of osFun function}
 
-\item{pathwise}{logical, if it is FALSE, then calculation of rules  will be performed on the tables once per 
-computation of coefficients and condition should return logical vector, 
-otherwise calculation of rules will be performed on each iteration and condition should return logical scalar}
+\item{pathwise}{logical, if it is FALSE, then calculation of rules and variables will be performed on the tables once per 
+computation of coefficients, otherwise calculation of rules and variables will be performed on the scalars on each iteration}
+
+\item{money}{numeric / expression, how much money should be in position after execution of rule. 
+Position manager will be added for correcting positions at every step}
+
+\item{money_const}{numeric / expression, the same as money, but without Position manager}
+
+\item{betas}{numeric / expression, number of instruments to buy and sell, position manager will be added}
+
+\item{betas_const}{numeric / expression, the same as betas, but without position manager}
+
+\item{by_money}{logical, if it is TRUE then expression in betas argument will be interpreted as money positions in instruments, else positions will be in pieces}
+
+\item{...}{params}
 }
 \description{
 Conditions will be calculated and then action will be done according to type. osFun arg is needed for definition of 

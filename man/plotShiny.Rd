@@ -25,6 +25,10 @@ plotShiny(this, ...)
 \item{start_date}{character, initial start date, example: start_date = "2010-01-01"}
 
 \item{end_date}{character, initial stop date,  example: end_date = "2010-01-01"}
+
+\item{this}{it is Strategy}
+
+\item{...}{params for shinyApp}
 }
 \description{
 Plot interactive distribution params
