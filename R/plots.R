@@ -1,4 +1,10 @@
 
+#' @export
+#' @rdname plotPnL
+plotPnL <- function(this,...){
+    UseMethod('plotPnL', this)
+}
+
 #' Plots change of pnl through backtest period
 #'
 #' @param this modelStrategy
@@ -180,6 +186,24 @@ plotPnL.modelStrategy <- function(this,
   )
 }
 
+
+
+
+#' Plot drawdowns
+#'
+#' @param this modelStrategy
+#' @param ... params
+#'
+#' @return ggplot/xts
+#' @export
+#' @rdname plotDrawdowns
+plotDrawdowns <- function(this,
+                          ...){
+    UseMethod('plotDrawdowns', this)
+}
+
+
+
 #' Plot drawdowns
 #'
 #' @param this modelStrategy
@@ -226,6 +250,20 @@ plotDrawdowns.modelStrategy <- function(this,
     return(xts(df[,'PnL'], df[,'date']))
   }
 }
+
+
+
+#' @export
+#' @rdname plotReturns
+plotReturns <- function(this, type, from){
+    UseMethod('plotReturns', this)
+}
+
+
+
+
+
+
 
 #' Plot returns vs MAE/MFE
 #'
@@ -274,6 +312,19 @@ plotReturns.modelStrategy <- function(this, type = 'MAE'){
     ggtitle(paste(strsplit(var,'\\.')[[1]][1] ,'vs', paste0(strsplit(rets,'\\.')[[1]][1],'s') ) )
   return(p)
   
+}
+
+
+
+#' Plot pnl in month-year matrix
+#'
+#' @param ... params
+#' @param this modelStrategy
+#'
+#' @export
+#' @rdname plotCalendar
+plotCalendar <- function(this, ...){
+    UseMethod('plotCalendar', this)
 }
 
 
@@ -354,8 +405,6 @@ plotCalendar.xts <- function(this, ...){
                      is.corr = FALSE
   )
 }
-
-
 
 
 #' Plot Capital of strategy
@@ -563,6 +612,21 @@ plotStrategy.modelStrategy <- function(this,
 
 
 
+
+#' Plot interactive distribution params
+#'
+#' @param this it is Strategy
+#' @rdname plotShiny
+#' @param ... params for shinyApp
+#' @export
+plotShiny <- function(this, 
+                      ...){
+    UseMethod('plotShiny', this)
+}
+
+
+
+
 #' Plot interactive distribution params
 #'
 #' @param this it is Strategy
@@ -730,6 +794,13 @@ plotShiny.modelStrategy <- function(this,session, paramset = 1, delete_save = FA
   
 }
 
+
+
+
+
+
+
+
 #' Draws 5-D graph with axis x,y,size,color,symbol, which are contained in data.frame 
 #' 
 #' @param df data.frame
@@ -805,6 +876,19 @@ plotTable <- function(df, x=NULL, y=NULL ,size=NULL, color=NULL, symbol=NULL, si
   eval(expr)
 }
 
+#' Plot paramsets
+#'
+#' @param this modelStrategy
+#' @param ... params
+#'
+#' @return ggplot/xts
+#' @export
+#' @rdname plotParamset
+
+plotParamset <- function(this,
+                          ...){
+    UseMethod('plotParamset', this)
+}
 
 
 #' Draws 5-D graph with axis x,y,size,color,symbol, which are contained in data.frame 

@@ -36,7 +36,7 @@
 #' @rdname addProgramPart
 addProgramPart <- function(this,
                            as,
-                           evolution = list()){
+                           evolution, ...){
   UseMethod('addProgramPart', this)
 }
 

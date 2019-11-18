@@ -1,3 +1,48 @@
+try_eval_list <- function(args, env){
+    res <- list()
+    if(length(args) > 1){
+        nms <- names(args)
+        for(i in 2:length(args)){
+            res[[nms[i]]] <- tryCatch({
+                eval(args[[i]], envir = env)
+            }, error = function(e){
+                args[[i]]
+            }
+            )
+        }
+    }
+    return(res)
+}
+
+quote_list <- function(args, env=NULL){
+    res <- list()
+    if(length(args) > 0){
+        nms <- names(args)
+        if(!is.null(nms)){
+            for(i in 1:length(args)){
+                if(nms[i] == ""){
+                    next
+                }
+                if(is.call(args[[i]]) && as.character(args[[i]][[1]]) == "quote" || is.symbol(args[[i]])){
+                    res[[nms[i]]] <- eval(args[[i]], envir = env)
+                }else{
+                    res[[nms[i]]] <- args[[i]]
+                }
+            }
+        }
+        
+    }
+    return(res)
+}
+
+unquote <- function(x){
+    x <- rlang::enexpr(x)
+    if(is.symbol(x) || as.character(x[[1]]) == 'quote'){
+        eval(x, envir = parent.frame())
+    }else{
+        x
+    }
+}
 
 
 #' Adds indicators to strategy
