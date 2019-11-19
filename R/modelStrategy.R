@@ -211,7 +211,7 @@ setIgnorePosition.modelStrategy <- function(this, bool){
 #' @param args list, arguments in setBeta function
 #' @export
 #' @rdname setBeta
-setBeta <- function(this, fun, args = NULL){
+setBeta <- function(this, fun, args = NULL, lookback, by_money){
     UseMethod('setBeta', this)
 }
 

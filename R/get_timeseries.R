@@ -155,3 +155,34 @@ getCapital.modelPortfolio <- function(this,
   dots[['this']] <- this
   do.call("getCapital.modelStrategy", args=dots)
 }
+
+
+
+
+#' @export
+#' @rdname getTradingLog
+getTradingLog <- function(this, ...){
+    UseMethod('getTradingLog', this)
+}
+
+
+
+
+# Return data.frame containing columns: 
+# Date - position change date
+# Rule_name - name rule
+# Instrument - traiding instrument
+# Change_pos - position change number
+# Amount_pos - current position
+#' @return getTradingLog: data.frame 
+#' @export
+#' @rdname getTradingLog
+#' @method getTradingLog modelStrategy
+getTradingLog.modelStrategy <- function(this){
+    TradingLog <- this$thisEnv$backtests$base$results[["TradingLog"]]
+    l <- lapply(seq_along(TradingLog[[1]]), function(i) sapply(TradingLog, '[[', i))
+    df <- data.frame(l)
+    names(df) <- c("Date","Rule_name","Instrument","Change_pos","Amount_pos")
+    df
+}
+
