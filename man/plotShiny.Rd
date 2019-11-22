@@ -8,8 +8,8 @@
 plotShiny(this, ...)
 
 \method{plotShiny}{modelStrategy}(this, session, paramset = 1,
-  delete_save = FALSE, start_date = "1900-01-01",
-  end_date = "2999-01-01", ...)
+  delete_save = FALSE, start_date = "1900-01-01", end_date = "2999-01-01",
+  ...)
 }
 \arguments{
 \item{this}{it is Strategy}

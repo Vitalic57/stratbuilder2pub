@@ -7,8 +7,7 @@
 \usage{
 setBeta(this, fun, args = NULL, lookback, by_money)
 
-\method{setBeta}{modelStrategy}(this, fun, args = NULL, lookback,
-  by_money)
+\method{setBeta}{modelStrategy}(this, fun, args = NULL, lookback, by_money)
 }
 \arguments{
 \item{this}{modelStrategy}

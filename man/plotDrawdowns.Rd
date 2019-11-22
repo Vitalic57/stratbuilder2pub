@@ -3,6 +3,7 @@
 \name{plotDrawdowns.modelPortfolio}
 \alias{plotDrawdowns.modelPortfolio}
 \alias{plotDrawdowns}
+\alias{plotDrawdowns}
 \alias{plotDrawdowns.modelStrategy}
 \alias{plotDrawdowns.list}
 \title{Plot drawdowns}
@@ -16,8 +17,8 @@ plotDrawdowns(this, ...)
 \method{plotDrawdowns}{modelStrategy}(this, return_type = "plot",
   graph_type = "ggplot2", interactive_plot = FALSE, ...)
 
-\method{plotDrawdowns}{list}(this, legend = TRUE,
-  interactive_plot = FALSE, ...)
+\method{plotDrawdowns}{list}(this, legend = TRUE, interactive_plot = FALSE,
+  ...)
 }
 \arguments{
 \item{this}{modelStrategy}
