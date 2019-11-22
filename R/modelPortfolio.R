@@ -3,6 +3,7 @@
 #' @param ... list of models / model in each argument
 #' @param w numeric type, coefficients strategy in portfolio, example: w = c(1,2)
 #' @param money_function function type or const, three options are possible
+#' @param copy logical, if TRUE then method will copy all models passed to it
 #' 
 #' 1) money_function = A = const, all strategies will get A money
 #' 
@@ -14,7 +15,7 @@
 #' @return modelPortfolio object
 #' @export
 #'
-modelPortfolio <- function(..., w=NULL, money_function = NULL){
+modelPortfolio <- function(..., w=NULL, money_function = NULL, copy = TRUE){
     thisEnv <- environment()
     models <- list(...)
     if(length(models) == 1 && is.list(models[[1]]) && length(models[[1]]) > 1){
@@ -30,7 +31,9 @@ modelPortfolio <- function(..., w=NULL, money_function = NULL){
     }
     backtests <- list()
     Money <- as.numeric(sapply(models, function(x){x$thisEnv$money}))
-    models <- lapply(models, function(x){cloneStrategy(x)})
+    if(copy){
+        models <- lapply(models, function(x){cloneStrategy(x)})
+    }
     me <- list(thisEnv = thisEnv)
     ## Set the name for the class
     class(me) <- c("modelPortfolio")
