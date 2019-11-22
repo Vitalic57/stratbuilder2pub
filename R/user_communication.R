@@ -41,6 +41,7 @@ applyParamsetServer.modelStrategy <- function(this,
   this[['settings']] <- .settings
   # upload part  ---------------------------
   this[['version']] <- packageVersion('stratbuilder2pub')
+  deleteOldData(this)
   send_rdata(session, this)
   if(!('reload' %in% names(.settings) && .settings[['reload']])){
     this$thisEnv$data_changed <- FALSE
@@ -73,6 +74,7 @@ applyParamsetServer.list <- function(this,
     paramset.label <- names(this[[1]]$thisEnv$paramsets)[1]
   }
   this <- set_names_list(this)
+  deleteOldData(this)
   e <- new.env()
   e[['strategies']] <- this
   e[['user_args']] <- c(list(action = 'applyParamset',
@@ -141,6 +143,7 @@ performServer.modelStrategy <- function(this,
   if(verbose){
     cat('Before sending data\n')
   }
+  deleteOldData(this)
   send_rdata(session, this)
   if(verbose){
     cat('After sending data\n')
@@ -158,6 +161,33 @@ performServer.modelStrategy <- function(this,
 }
 
 
+#' Delete backtest data from model
+#'
+#' @param this model
+deleteOldData <- function(this){
+  UseMethod("deleteOldData", this)
+}
+
+#' @rdname deleteOldData
+#' @method deleteOldData modelStrategy
+deleteOldData.modelStrategy <- function(this){
+  this$thisEnv$modelD <- NULL
+  this$thisEnv$backtests <- NULL
+}
+
+#' @rdname deleteOldData
+#' @method deleteOldData list
+deleteOldData.list <- function(this){
+  for(el in this){
+    deleteOldData(el)
+  }
+}
+
+#' @rdname deleteOldData
+#' @method deleteOldData modelPortfolio
+deleteOldData.modelPortfolio <- function(this){
+  deleteOldData(this$thisEnv$models)
+}
 
 #' @return list
 #' @export
@@ -168,6 +198,7 @@ performServer.list <- function(this, session, verbose=FALSE, ...){
     session <- .env[['session']]
   }
   this <- set_names_list(this)
+  deleteOldData(this)
   e <- new.env()
   e[['strategies']] <- this
   e[['user_args']] <- c(list(...), list(action = 'perform'))
@@ -646,6 +677,7 @@ competeInContest <- function(this, contest, session, method, verbose){
   if(verbose){
     cat('Before sending rdata\n')
   }
+  deleteOldData(this)
   send_rdata(session, this)
   if(verbose){
     cat('After sending rdata\n')

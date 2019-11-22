@@ -7,13 +7,13 @@
 \usage{
 addRule(this, condition, as, args = list(), type, side, oco = "base",
   osFun = sameMoneyOs, osFun_args = alist(amount = getMoney(this)),
-  pathwise = FALSE, money, money_const, betas, betas_const,
-  by_money = TRUE, ...)
+  pathwise = FALSE, money, money_const, betas, betas_const, by_money = TRUE,
+  ...)
 
-\method{addRule}{modelStrategy}(this, condition, as, args = list(), type,
-  side, oco = "base", osFun = sameMoneyOs, osFun_args = alist(amount
-  = getMoney(this)), pathwise = FALSE, money, money_const, betas,
-  betas_const, by_money = TRUE, ...)
+\method{addRule}{modelStrategy}(this, condition, as, args = list(),
+  type = "enter", side = 1, oco, osFun = sameMoneyOs,
+  osFun_args = alist(amount = getMoney(this)), pathwise = FALSE, money,
+  money_const, betas, betas_const, by_money = TRUE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
