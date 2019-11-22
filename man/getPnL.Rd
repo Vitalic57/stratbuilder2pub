@@ -9,8 +9,8 @@
 \usage{
 getPnL(this, ...)
 
-\method{getPnL}{modelStrategy}(this, start_date = NULL,
-  end_date = NULL, comOn = TRUE, leg = "all", ...)
+\method{getPnL}{modelStrategy}(this, start_date = NULL, end_date = NULL,
+  comOn = TRUE, leg = "all", ...)
 
 \method{getPnL}{modelPortfolio}(this, ...)
 

@@ -7,8 +7,8 @@
 \usage{
 addIndicators(this, ...)
 
-\method{addIndicators}{modelStrategy}(this, expr, names, as,
-  lookback = 0, args = list(), ...)
+\method{addIndicators}{modelStrategy}(this, expr, names, as, lookback = 0,
+  args = list(), ...)
 }
 \arguments{
 \item{this}{model}

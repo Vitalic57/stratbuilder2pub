@@ -8,8 +8,8 @@
 \usage{
 getCapital(this, ...)
 
-\method{getCapital}{modelStrategy}(this, start_date = NULL,
-  end_date = NULL, ...)
+\method{getCapital}{modelStrategy}(this, start_date = NULL, end_date = NULL,
+  ...)
 
 \method{getCapital}{modelPortfolio}(this, ...)
 }

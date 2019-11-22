@@ -40,10 +40,6 @@ modelPortfolio <- function(...){
 performServer.modelPortfolio <- function(this, ...){
   this$thisEnv$data_changed <- TRUE#any(sapply(this$thisEnv$models, function(x) x$thisEnv$data_changed)) 
   x <- performServer.modelStrategy(this, ...)
-  # for(model in this$thisEnv$models){
-  #   model$thisEnv$data_changed <- FALSE
-  #   model$thisEnv$user_beta_table_changed <- FALSE
-  # }
   if(!is.null(x)){
     return(x)
   }

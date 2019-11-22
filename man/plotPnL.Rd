@@ -17,8 +17,7 @@ plotPnL(this, ...)
   start_date = NULL, end_date = NULL, on_percentage = FALSE,
   interactive_plot = FALSE, ...)
 
-\method{plotPnL}{list}(this, legend = TRUE, interactive_plot = FALSE,
-  ...)
+\method{plotPnL}{list}(this, legend = TRUE, interactive_plot = FALSE, ...)
 }
 \arguments{
 \item{this}{modelStrategy}
