@@ -1,34 +1,43 @@
 #' creates modelPortfolio object
 #'
-#' @param ... list or models, list of models
+#' @param ... list of models / model in each argument
+#' @param w numeric type, coefficients strategy in portfolio, example: w = c(1,2)
+#' @param money_function function type or const, three options are possible
+#' 
+#' 1) money_function = A = const, all strategies will get A money
+#' 
+#' 2) money_function = scalar function, all strategies will get money_function(start_money_in_strategy) money, example: min
+#' 
+#' 3) money_function = vector function, strategies[i] will get money_function(start_money_in_strategy)[i] money, example:
+#' function \{ 200 + start_money_in_strategy\}
 #'
 #' @return modelPortfolio object
 #' @export
 #'
-modelPortfolio <- function(...){
-  thisEnv <- environment()
-  models <- list(...)
-  if(length(models) == 1 && is.list(models[[1]]) && length(models[[1]]) > 1){
-    models <- models[[1]]
-  }
-  if(is.null(names(models))){
-    names(models) <- paste0('x', seq_len(length(models)))
-  }else{
-    if(any(names(models) == '')){
-      ind <- which(names(models) == '')
-      names(models)[ind] <- paste0('x', ind)
+modelPortfolio <- function(..., w=NULL, money_function = NULL){
+    thisEnv <- environment()
+    models <- list(...)
+    if(length(models) == 1 && is.list(models[[1]]) && length(models[[1]]) > 1){
+        models <- models[[1]]
     }
-  }
-  backtests <- list()
-  me <- list(thisEnv = thisEnv)
-  
-  
-  ## Set the name for the class
-  class(me) <- c("modelPortfolio")
-  
-  ## Define the value of the list within the current environment.
-  assign('this', me, envir=thisEnv)
-  return(me)
+    if(is.null(names(models))){
+        names(models) <- paste0('x', seq_len(length(models)))
+    }else{
+        if(any(names(models) == '')){
+            ind <- which(names(models) == '')
+            names(models)[ind] <- paste0('x', ind)
+        }
+    }
+    backtests <- list()
+    Money <- as.numeric(sapply(models, function(x){x$thisEnv$money}))
+    models <- lapply(models, function(x){cloneStrategy(x)})
+    me <- list(thisEnv = thisEnv)
+    ## Set the name for the class
+    class(me) <- c("modelPortfolio")
+    ## Define the value of the list within the current environment.
+    assign('this', me, envir=thisEnv)
+    setWeight(me, w = w, money_function = money_function)
+    return(me)
 }
 
 
@@ -188,5 +197,53 @@ plotDrawdowns.modelPortfolio <- function(this, ...){
     do.call("plotDrawdowns.modelStrategy", args=dots)
 }
 
+
+#' @export
+#' @rdname setWeight
+#' @params ... params 
+setWeight <- function(this, ...){
+    UseMethod('setWeight', this)
+}
+
+#' Set new weight for modelPortfolio object
+#'
+#' @export
+#' @param this modelPortfolio type
+#' @param w numeric type, coefficients strategy in portfolio, example: w = c(1,2)
+#' @param money_function function type or const, three options are possible
+#' 
+#' 1) money_function = A = const, all strategies will get A money
+#' 
+#' 2) money_function = scalar function, all strategies will get money_function(start_money_in_strategy) money, example: min
+#' 
+#' 3) money_function = vector function, strategies[i] will get money_function(start_money_in_strategy)[i] money, example:
+#' function \{ 200 + start_money_in_strategy\}
+#' 
+#' @rdname setWeight
+#' @method setWeight modelPortfolio
+setWeight.modelPortfolio <- function(this, w = NULL, money_function = NULL){
+    length_model <- length(this$thisEnv$models)
+    if (is.null(money_function)){
+        Money_f <-this$thisEnv$Money
+    }else{
+        if (is.numeric(money_function)){
+            Money_f <- numeric(length_model) + money_function
+        }else{
+            Money_f <- money_function(this$thisEnv$Money)
+            if (length(Money_f) == 1){
+                Money_f <- Money_f + numeric(length_model)
+            }
+        }
+    }
+    for (i in 1:length_model){
+        if (!is.null(w)){ 
+            setMoney(this$thisEnv$models[[i]], Money_f[i] * w[i])
+        }else{
+            setMoney(this$thisEnv$models[[i]], Money_f[i])
+        }
+    }
+    perform(this)
+    return(invisible(NULL))
+}
 
 
