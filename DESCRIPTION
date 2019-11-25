@@ -13,7 +13,8 @@ Version: 1.3.15
 Authors@R: person("Vitaly", "Shishkov", ,"vitalic.s@financialracers.com", c("aut", "cre"))
 Depends: R (>= 3.2.3),
 	xts,
-	magrittr
+	magrittr, 
+        TTR
 License: GPL-2 | file LICENSE
 SystemRequirements:  
 	libssh-dev (>=0.7.3-2),
@@ -37,7 +38,6 @@ Imports:
     rlang
 Suggests:
 	testthat,
-        knitr,
-        TTR
+        knitr
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
