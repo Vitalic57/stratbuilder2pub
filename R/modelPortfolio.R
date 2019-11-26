@@ -241,7 +241,6 @@ setWeight.modelPortfolio <- function(this, w = NULL, money_function = NULL){
             setMoney(this$thisEnv$models[[i]], Money_f[i])
         }
     }
-    perform(this)
     return(invisible(NULL))
 }
 
