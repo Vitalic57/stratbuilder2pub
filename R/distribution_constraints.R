@@ -57,13 +57,29 @@ addDistribution.modelStrategy <- function(this,
                                           variable,
                                           label
 ){
-  #print('here')
-  e <- this$thisEnv
+  if(!is.list(variable)){
+    stop("Variable should be a list")
+  }
   if(missing(paramset.label)){
     paramset.label <- 1
   }
+  e <- this$thisEnv
   if(missing(label)){
     label <- paste0('distribution', length(e$paramsets[[paramset.label]][['distributions']]) + 1)
+  }else{
+    label <- make.names(label)
+  }
+  if(length(variable) > 1){
+    for(i in seq_along(variable)){
+      addDistribution(this,
+                      paramset.label=paramset.label,
+                      component.type=component.type,
+                      component.label=component.label,
+                      variable = list(variable[[i]]) %>% set_names(names(variable)[i]),
+                      label = paste(label, names(variable)[i], sep = '.')
+      )
+      return(invisible(NULL))
+    }
   }
   component.type <- switch(component.type,
                            rule = ,
