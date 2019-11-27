@@ -184,7 +184,7 @@ addRule <- function(this,
 
 
 addRule.modelStrategy <- function(this, 
-                                  condition, 
+                                  condition = TRUE, 
                                   as, 
                                   args = list(),
                                   type = 'enter', 
@@ -200,79 +200,94 @@ addRule.modelStrategy <- function(this,
                                   by_money = TRUE,
                                   ...
 ){
-    if(all(c('enter','exit') != type)){
-        stop('wrong type! It must be enter or exit')
+  if(all(c('enter','exit') != type)){
+    stop('wrong type! It must be enter or exit')
+  }
+  if(!side %in% c(1, -1)){
+    stop('wrong side! It must be 1 or -1')
+  }
+  e <- this$thisEnv
+  if(missing(as)){
+    as <- paste0('rule_', length(e$rules) + 1)
+  }
+  as <- gsub('\\.','_',as)
+  if(missing(oco) && type == 'enter'){
+    oco <- as
+  }
+  
+  if(as %in% names(e$rules)){
+    if('pm' %in% e$rules[[as]]){
+      this$thisEnv$positionManagers[[e$rules[[as]][['pm']]]] <- NULL
     }
-    if(!side %in% c(1, -1)){
-      stop('wrong side! It must be 1 or -1')
+  }
+  if(type == 'enter'){
+    if(oco == 'all'){
+      stop("Oco can't be equal to all when type is enter")
     }
-    e <- this$thisEnv
-    if(missing(as)){
-        as <- paste0('rule_', length(e$rules) + 1)
+    e$rules[[as]] <- list(condition = substitute(condition),
+                          as = as,
+                          args = args,
+                          type = type,
+                          side = side,
+                          oco = oco,
+                          osFun = osFun,
+                          osFun_args = osFun_args,
+                          pathwise = pathwise
+    )
+    if(!missing(money_const)){
+      e$rules[[as]][['money_const']] <- rlang::enexpr(money_const)
     }
-    as <- gsub('\\.','_',as)
-    if(missing(oco) && type == 'enter'){
-        oco <- as
+    if(!missing(betas_const)){
+      e$rules[[as]][['betas_const']] <- rlang::enexpr(betas_const)
+      e$rules[[as]][['by_money']] <- by_money
+    }
+    if(!missing(betas_const) && !missing(money) && missing(betas)){
+      pm_name <- paste0('pm', length(getPM(this)))
+      e$rules[[as]][['pm']] <- pm_name
+      reb_q <- rlang::call2("list", cond = rlang::expr(rule_enter == !!as))
+      reb_q[['money']] <- rlang::enexpr(money)
+      e$rules[[as]][['money_const']] <- 0
+      reb_q[['betas']] <- quote({beta_rule_last})
+      reb_q[['by_money']] <- by_money
+      addPM(this,
+            oco = oco,
+            as = pm_name,
+            rebalance = !!reb_q,
+            rule_name = as
+      )
+    }
+    if(!missing(money) || !missing(betas)){
+      pm_name <- paste0('pm', length(getPM(this)))
+      e$rules[[as]][['pm']] <- pm_name
+      reb_q <- rlang::call2("list", cond = rlang::expr(rule_enter == !!as))
+      if(!missing(money)){
+        reb_q[['money']] <- rlang::enexpr(money)
+        if(missing(money_const)){
+          e$rules[[as]][['money_const']] <- 0
+        }
+      }
+      if(!missing(betas)){
+        reb_q[['betas']] <- rlang::enexpr(betas)
+        reb_q[['by_money']] <- by_money
+      }
+      addPM(this,
+            oco = oco,
+            as = pm_name,
+            rebalance = !!reb_q,
+            rule_name = as
+      )
     }
     
-    if(as %in% names(e$rules)){
-        if('pm' %in% e$rules[[as]]){
-            this$thisEnv$positionManagers[[e$rules[[as]][['pm']]]] <- NULL
-        }
-    }
-    if(type == 'enter'){
-        if(oco == 'all'){
-            stop("Oco can't be equal to all when type is enter")
-        }
-        e$rules[[as]] <- list(condition = substitute(condition),
-                              as = as,
-                              args = args,
-                              type = type,
-                              side = side,
-                              oco = oco,
-                              osFun = osFun,
-                              osFun_args = osFun_args,
-                              pathwise = pathwise
-        )
-        if(!missing(money_const)){
-            e$rules[[as]][['money_const']] <- rlang::enexpr(money_const)
-        }
-        if(!missing(betas_const)){
-            e$rules[[as]][['betas_const']] <- rlang::enexpr(betas_const)
-            e$rules[[as]][['by_money']] <- by_money
-        }
-        if(!missing(money) || !missing(betas)){
-            pm_name <- paste0('pm', length(getPM(this)))
-            e$rules[[as]][['pm']] <- pm_name
-            reb_q <- rlang::call2("list", cond = rlang::expr(rule_enter == !!as))
-            if(!missing(money)){
-                reb_q[['money']] <- rlang::enexpr(money)
-                if(missing(money_const)){
-                    e$rules[[as]][['money_const']] <- 0
-                }
-            }
-            if(!missing(betas)){
-                reb_q[['betas']] <- rlang::enexpr(betas)
-                reb_q[['by_money']] <- by_money
-            }
-            addPM(this,
-                  oco = oco,
-                  as = pm_name,
-                  rebalance = !!reb_q,
-                  rule_name = as
-            )
-        }
-        
-    }else if(type  == 'exit'){
-        e$rules[[as]] <- list(condition = substitute(condition),
-                              as = as,
-                              args = args,
-                              type = type,
-                              side = side,
-                              oco = oco,
-                              pathwise = pathwise
-        )
-    }
+  }else if(type  == 'exit'){
+    e$rules[[as]] <- list(condition = substitute(condition),
+                          as = as,
+                          args = args,
+                          type = type,
+                          side = side,
+                          oco = oco,
+                          pathwise = pathwise
+    )
+  }
 }
 
 

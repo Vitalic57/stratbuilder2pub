@@ -11,6 +11,9 @@
 #' @return numeric multiplier( how much minimal position to buy)
 #' @export
 proportionOs <- function(beta, money, proportion, price, ...){
+  if(all(beta == 0)){
+    return(0)
+  }
   money_proportion <- money * proportion
   price_position <- sum(price * abs(beta))
   return(floor(money_proportion/price_position))
@@ -28,6 +31,9 @@ proportionOs <- function(beta, money, proportion, price, ...){
 #' @return numeric
 #' @export
 sameMoneyOs <- function(beta, amount, price, ...){
+  if(all(beta == 0)){
+    return(0)
+  }
   price_position <- sum(price * abs(beta))
   return(floor(amount/price_position))
 }
