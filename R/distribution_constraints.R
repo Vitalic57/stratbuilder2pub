@@ -196,6 +196,9 @@ addDistribution.modelStrategy <- function(this,
   if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label) || length(e$paramsets) == 0){
     e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
+  if(missing(label)){
+    label <- paste0('distribution', length(e$paramsets[[paramset.label]][['distributions']]) + 1)
+  }
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
 }
 

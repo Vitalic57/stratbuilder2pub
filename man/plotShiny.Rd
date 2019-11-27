@@ -32,6 +32,4 @@ plotShiny(this, ...)
 }
 \description{
 Plot interactive distribution params
-
-Plot interactive distribution params
 }
