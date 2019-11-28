@@ -1,5 +1,4 @@
 library(stratbuilder2pub) # this downloads package for building models
-library(TTR) # this package contains functions for creating indicators from technical analysis
 
 # Example of usage for one asset
 # Strategy goes long if asset is less then its moving average with 100 window and goes short else
@@ -44,7 +43,6 @@ setUserData(this, list(dataset = 'Russia', # There is only one dataset for now
                        # to get available datasets enter getDatasets()
                        time = 13)) # if period equals to day and dataset have intraday data, 
 # then you can specify time when you strategy will be traded
-
 performServer(this) # run this function to do backtest. Results will be saved in you remote acc
 
 getReportStrategy(this) 
