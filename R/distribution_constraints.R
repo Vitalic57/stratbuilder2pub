@@ -64,6 +64,10 @@ addDistribution.modelStrategy <- function(this,
     paramset.label <- 1
   }
   e <- this$thisEnv
+  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label) || length(e$paramsets) == 0){
+    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
+  }
+  
   if(missing(label)){
     label <- paste0('distribution', length(e$paramsets[[paramset.label]][['distributions']]) + 1)
   }else{
@@ -71,15 +75,17 @@ addDistribution.modelStrategy <- function(this,
   }
   if(length(variable) > 1){
     for(i in seq_along(variable)){
-      addDistribution(this,
-                      paramset.label=paramset.label,
-                      component.type=component.type,
-                      component.label=component.label,
-                      variable = list(variable[[i]]) %>% set_names(names(variable)[i]),
-                      label = paste(label, names(variable)[i], sep = '.')
+      cl <- call('addDistribution', 
+                 this = this,
+                 paramset.label=paramset.label,
+                 component.type=component.type,
+                 component.label=component.label,
+                 label = paste(label, names(variable)[i], sep = '.'),
+                 variable = rlang::call2('list',  !!names(variable)[i] := substitute(variable)[[i + 1]])
       )
-      return(invisible(NULL))
+      eval(cl)
     }
+    return(invisible(NULL))
   }
   component.type <- switch(component.type,
                            rule = ,
@@ -192,9 +198,6 @@ addDistribution.modelStrategy <- function(this,
       l <- list(component.type = component.type,
                 component.label = component.label,
                 variable = variable)
-  }
-  if(!(paramset.label %in% names(e$paramsets)) && !is.numeric(paramset.label) || length(e$paramsets) == 0){
-    e$paramsets[[paramset.label]] <- list(constraints = list(), distributions = list())
   }
   e$paramsets[[paramset.label]][['distributions']][[label]] <- l
 }
