@@ -23,7 +23,6 @@ modelStrategy <- function(){
   user_add_data <- list()
   betaData <- 'data_raw'
   spreadData <- 'data_raw'
-  beta_fun <- function(...){return(1)}
   saveData <- NULL
   money <- 10^7
   toleranceBeta <- 0.1
@@ -59,6 +58,7 @@ modelStrategy <- function(){
 
   ## Define the value of the list within the current environment.
   assign('this',me,envir=thisEnv)
+  setBetasByMoney(me, TRUE)
   return(me)
 }
 
