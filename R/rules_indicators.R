@@ -262,9 +262,9 @@ addRule.modelStrategy <- function(this,
       reb_q <- rlang::call2("list", cond = rlang::expr(rule_enter == !!as))
       if(!missing(money)){
         reb_q[['money']] <- rlang::enexpr(money)
-        if(missing(money_const)){
-          e$rules[[as]][['money_const']] <- 0
-        }
+      }
+      if(missing(money_const)){
+        e$rules[[as]][['money_const']] <- 0
       }
       if(!missing(betas)){
         reb_q[['betas']] <- rlang::enexpr(betas)
