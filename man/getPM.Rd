@@ -7,7 +7,7 @@
 \usage{
 getPM(this, recalc, ...)
 
-\method{getPM}{modelStrategy}(this, recalc = FALSE, ...)
+\method{getPM}{modelStrategy}(this)
 }
 \arguments{
 \item{this}{modelStrategy}

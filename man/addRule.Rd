@@ -10,7 +10,7 @@ addRule(this, condition, as, args = list(), type, side, oco = "base",
   pathwise = FALSE, money, money_const, betas, betas_const, by_money = TRUE,
   ...)
 
-\method{addRule}{modelStrategy}(this, condition, as, args = list(),
+\method{addRule}{modelStrategy}(this, condition = TRUE, as, args = list(),
   type = "enter", side = 1, oco, osFun = sameMoneyOs,
   osFun_args = alist(amount = getMoney(this)), pathwise = FALSE, money,
   money_const, betas, betas_const, by_money = TRUE, ...)
