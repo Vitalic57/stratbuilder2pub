@@ -66,6 +66,22 @@ modelStrategy <- function(){
 .settings <- new.env()
 .settings[['reload']] <- TRUE
 
+
+#' @export
+c.modelStrategy <- function(x, ...){
+  dots <- list(...)
+  res <- list(x)
+  for(m in dots){
+    if(class(m) %in% c('modelStrategy', 'modelPortfolio')){
+      res <- c(res, list(m))
+    }else if(class(m) == 'list'){
+      res <- c(res, m)
+    }
+  }
+  return(res)
+}
+
+
 #' Change some settings
 #'
 #' @param ... parameters

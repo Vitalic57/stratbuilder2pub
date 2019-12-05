@@ -980,35 +980,44 @@ plotParamset.modelStrategy <- function(this, ...){
 #' @rdname plotPnL
 #' @method plotPnL list
 plotPnL.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
-    args <- list(...)
-    args['leg'] <- 'sum'
-    df <- lapply(this, function(x){
-        do.call('plotPnL', args = c(list("this" = x, "return_type" = 'data'), args))
-        #plotPnL(x, return_type = 'data', ...)
-    }) %>%  
-        Reduce('cbind', .) %>%
-        {
-            if(!is.null(names(this))){
-                set_colnames(., names(this))
-            }else{
-                set_colnames(., paste0('Strategy', seq_len(length(this)))) 
-            }
-        }
-    dates <- index(df)
-    df <- data.frame(coredata(df)) %>%
-        dplyr::mutate(date = dates)
-    newdf <- reshape2::melt(df, 'date')
-    
-    p <- ggplot(newdf,aes_string(x="date", y="value", color = "variable") ) +
-        geom_line() + theme_bw() + 
-        ggtitle("PnL money by date")
-    if(!legend){
-        p <- p + theme(legend.position="none")
+  args <- list(...)
+  args['leg'] <- 'sum'
+  nms <- {
+    if(!is.null(names(this))){
+      names(this)
+    }else{
+      paste0('Strategy', seq_len(length(this)))
     }
-    if(interactive_plot){
-        return(plotly::ggplotly(p))
+  }
+  good_ind <- rep(TRUE, length(nms))
+  df <- lapply(seq_along(this), function(i){
+    tryCatch({
+      do.call('plotPnL', args = c(list(this = this[[i]], return_type = 'data'), args))
+    }, error = function(e){
+      good_ind[i] <<- FALSE
+      NULL
+    })
+  }) %>%  
+  {
+    .[sapply(., is.null)] <- NULL
+    .
+  } %>%
+    Reduce('cbind', .) %>%
+    {
+      set_colnames(., nms[good_ind])
     }
-    return(p)
+  dates <- index(df)
+  df <- data.frame(coredata(df)) %>%
+    dplyr::mutate(date = dates)
+  newdf <- reshape2::melt(df, 'date')
+  
+  p <- ggplot(newdf,aes(x=date, y=value, color = variable) ) +
+    geom_line() + theme_bw() + 
+    ggtitle("PnL money by date")
+  if(!legend){
+    p <- p + theme(legend.position="none")
+  }
+  return(p)
 }
 
 
@@ -1017,9 +1026,26 @@ plotPnL.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
 #' @rdname plotDrawdowns
 #' @method plotDrawdowns list
 plotDrawdowns.list <- function(this, legend = TRUE, interactive_plot=FALSE, ...){
+  nms <- {
+    if(!is.null(names(this))){
+      names(this)
+    }else{
+      paste0('Strategy', seq_len(length(this)))
+    }
+  }
+  good_ind <- rep(TRUE, length(nms))
     df <- lapply(this, function(x){
+      tryCatch({
         plotDrawdowns(x, return_type = 'data', ...)
-    }) %>%
+      }, error = function(e){
+        good_ind[i] <<- FALSE
+        NULL
+      })
+    }) %>%  
+    {
+      .[sapply(., is.null)] <- NULL
+      .
+    } %>%
         Reduce('cbind', .) %>%
         {
             if(!is.null(names(this))){
