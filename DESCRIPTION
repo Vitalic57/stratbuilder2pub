@@ -9,7 +9,7 @@ Description: Toolkit for building your own trading model.
  Perform your model. 
  Check out base statistics and plot PnL, Drawdowns, Returns for every month.
  Define parameters of model and calculate models with them.  
-Version: 1.4.0
+Version: 1.4.1
 Authors@R: person("Vitaly", "Shishkov", ,"vitalic.s@financialracers.com", c("aut", "cre"))
 Depends: R (>= 3.2.3),
 	xts,

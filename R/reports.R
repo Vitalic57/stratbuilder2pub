@@ -317,7 +317,7 @@ getBacktestResults.list <- function(this, ...){
 #' @rdname getBacktestResults
 #' @method getBacktestResults modelPortfolio
 getBacktestResults.modelPortfolio <- function(this, ...){
-  getBacktestResults.list(this$thisEnv$models, ...)
+  getBacktestResults.modelStrategy(this, ...)
 }
 
 

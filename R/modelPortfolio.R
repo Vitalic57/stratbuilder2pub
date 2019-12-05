@@ -16,31 +16,31 @@
 #' @export
 #'
 modelPortfolio <- function(..., w=NULL, money_function = NULL, copy = TRUE){
-    thisEnv <- environment()
-    models <- list(...)
-    if(length(models) == 1 && is.list(models[[1]]) && length(models[[1]]) > 1){
-        models <- models[[1]]
+  thisEnv <- environment()
+  models <- list(...)
+  if(length(models) == 1 && is.list(models[[1]]) && length(models[[1]]) > 1){
+    models <- models[[1]]
+  }
+  if(is.null(names(models))){
+    names(models) <- paste0('x', seq_len(length(models)))
+  }else{
+    if(any(names(models) == '')){
+      ind <- which(names(models) == '')
+      names(models)[ind] <- paste0('x', ind)
     }
-    if(is.null(names(models))){
-        names(models) <- paste0('x', seq_len(length(models)))
-    }else{
-        if(any(names(models) == '')){
-            ind <- which(names(models) == '')
-            names(models)[ind] <- paste0('x', ind)
-        }
-    }
-    backtests <- list()
-    Money <- as.numeric(sapply(models, function(x){x$thisEnv$money}))
-    if(copy){
-        models <- lapply(models, function(x){cloneStrategy(x)})
-    }
-    me <- list(thisEnv = thisEnv)
-    ## Set the name for the class
-    class(me) <- c("modelPortfolio")
-    ## Define the value of the list within the current environment.
-    assign('this', me, envir=thisEnv)
-    setWeight(me, w = w, money_function = money_function)
-    return(me)
+  }
+  backtests <- list()
+  paramsets <- list()
+  if(copy){
+    models <- lapply(models, function(x){cloneStrategy(x)})
+  }
+  me <- list(thisEnv = thisEnv)
+  ## Set the name for the class
+  class(me) <- c("modelPortfolio")
+  ## Define the value of the list within the current environment.
+  assign('this', me, envir=thisEnv)
+  setWeight(me, w = w, money_function = money_function)
+  return(me)
 }
 
 
@@ -117,7 +117,7 @@ getMoney.modelPortfolio <- function(this){
 #' @rdname addDistribution
 #' @method addDistribution modelPortfolio
 addDistribution.modelPortfolio <- function(this, ...){
-  addDistribution.list(this$thisEnv$models, ...)
+  addDistribution.modelStrategy(this, ...)
 }
 
 
@@ -130,7 +130,7 @@ addDistribution.modelPortfolio <- function(this, ...){
 #' @rdname addDistributionConstraint
 #' @method addDistributionConstraint modelPortfolio
 addDistributionConstraint.modelPortfolio <- function(this, ...){
-  addDistributionConstraint.list(this$thisEnv$models, ...)
+  addDistributionConstraint.modelStrategy(this, ...)
 }
 
 
@@ -141,7 +141,7 @@ addDistributionConstraint.modelPortfolio <- function(this, ...){
 #' @rdname deleteParamset
 #' @method deleteParamset modelPortfolio
 deleteParamset.modelPortfolio <- function(this, ...){
-  deleteParamset.list(this$thisEnv$models, ...)
+  deleteParamset.modelStrategy(this, ...)
 }
 
 
@@ -162,13 +162,23 @@ aggregate_prepared_models <- function(this, ...){
 #' @rdname plotPnL
 #' @method plotPnL modelPortfolio
 plotPnL.modelPortfolio <- function(this, ...){
-    dots <- list(...)
-    if('legend' %in% names(dots)){
-        dots[['legend']] <- NULL
+  dots <- list(...)
+  if('legend' %in% names(dots)){
+    dots[['legend']] <- NULL
+  }
+  dots[['this']] <- this
+  aggregate_prepared_models(this, ...)
+  if(is.character(legs)){
+    if(legs == 'all'){
+      do.call("plotPnL.modelStrategy", args=dots)
+    }else if(legs == 'sep'){
+      dots[['this']] <- this$thisEnv$models
+      do.call("plotPnL.list", args=dots)
     }
-    dots[['this']] <- this
-    aggregate_prepared_models(this, ...)
-    do.call("plotPnL.modelStrategy", args=dots)
+  }else if(is.numeric(legs)){
+    dots[['this']] <- this$thisEnv$models[legs]
+    do.call("plotPnL.list", args=dots)
+  }
 }
 
 
@@ -221,27 +231,63 @@ setWeight <- function(this, ...){
 #' @rdname setWeight
 #' @method setWeight modelPortfolio
 setWeight.modelPortfolio <- function(this, w = NULL, money_function = NULL){
-    length_model <- length(this$thisEnv$models)
-    if (is.null(money_function)){
-        Money_f <-this$thisEnv$Money
+  length_model <- length(this$thisEnv$models)
+  money_vec <- sapply(this$thisEnv$models, getMoney)
+  if (is.null(money_function)){
+    Money_f <- money_vec
+  }else{
+    if (is.numeric(money_function)){
+      Money_f <- numeric(length_model) + money_function
     }else{
-        if (is.numeric(money_function)){
-            Money_f <- numeric(length_model) + money_function
-        }else{
-            Money_f <- money_function(this$thisEnv$Money)
-            if (length(Money_f) == 1){
-                Money_f <- Money_f + numeric(length_model)
-            }
-        }
+      Money_f <- money_function(money_vec)
+      if (length(Money_f) == 1){
+        Money_f <- Money_f + numeric(length_model)
+      }
     }
-    for (i in 1:length_model){
-        if (!is.null(w)){ 
-            setMoney(this$thisEnv$models[[i]], Money_f[i] * w[i])
-        }else{
-            setMoney(this$thisEnv$models[[i]], Money_f[i])
-        }
+  }
+  for (i in 1:length_model){
+    if (!is.null(w)){ 
+      setMoney(this$thisEnv$models[[i]], Money_f[i] * w[i])
+    }else{
+      setMoney(this$thisEnv$models[[i]], Money_f[i])
     }
-    return(invisible(NULL))
+  }
+  this$thisEnv$money <- sum(sapply(this$thisEnv$models, getMoney))
+  return(invisible(NULL))
+}
+
+
+#' @export
+c.modelPortfolio <- function(x, ...){
+  dots <- list(...)
+  res <- list(x)
+  for(m in dots){
+    if(class(m) %in% c('modelStrategy', 'modelPortfolio')){
+      res <- c(res, list(m))
+    }else if(class(m) == 'list'){
+      res <- c(res, m)
+    }
+  }
+  return(res)
+}
+
+
+#' Set amount of money to modelPortfolio object. 
+#' 
+#' It will spread that value across models inside it with old proportion.
+#'
+#' @export
+#' @param this modelStrategy
+#' @param x numeric type, new amount of money in strategy
+#' @rdname setMoney
+#' @method setMoney modelPortfolio
+setMoney.modelPortfolio <- function(this, x){
+  old_money <- this$thisEnv$money
+  this$thisEnv$money <- x
+  sapply(this$thisEnv$models, function(model){
+    setMoney(model, getMoney(model) / old_money * x)
+  })
+  return(invisible(NULL))
 }
 
 
