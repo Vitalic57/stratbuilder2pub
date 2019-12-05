@@ -135,6 +135,9 @@ performServer.modelStrategy <- function(this,
   if ('paramset.index' %in% names(this$thisEnv$user_args)){
     this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['paramset.index'], use.names=FALSE)
   }
+  if ('index' %in% names(this$thisEnv$user_args)){
+    this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['index'], use.names=FALSE)
+  }
   if('paramset.index' %in% names(this$thisEnv$user_args) && !'paramset.label' %in% names(this$thisEnv$user_args)){
     this$thisEnv$user_args[['paramset.label']] <- names(this$thisEnv$paramsets)[1]
   }
@@ -204,6 +207,9 @@ performServer.list <- function(this, session, verbose=FALSE, ...){
   e[['user_args']] <- c(list(...), list(action = 'perform'))
   if ('paramset.index' %in% names(this$thisEnv$user_args)){
     this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['paramset.index'], use.names=FALSE)
+  }
+  if ('index' %in% names(this$thisEnv$user_args)){
+    this$thisEnv$user_args[['paramset.index']] <- unlist(this$thisEnv$user_args['index'], use.names=FALSE)
   }
   if('paramset.index' %in% names(e[['user_args']]) && !'paramset.label' %in% names(e[['user_args']])){
     tryCatch({
