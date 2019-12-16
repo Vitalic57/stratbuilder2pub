@@ -163,7 +163,6 @@ performServer.modelStrategy <- function(this,
 
 }
 
-
 #' Delete backtest data from model
 #'
 #' @param this model
