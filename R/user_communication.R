@@ -364,6 +364,7 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
   vec_cond <- logical(0)
   vec_names <- c(strategy = 'report.RDS')
   vec_cond['strategy'] <-  TRUE
+  pwd <- capture.output(ssh::ssh_exec_wait(session, 'pwd'))[1]
   tryCatch({
       Sys.sleep(0.5)
       
@@ -373,13 +374,13 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
       }
   
       while(TRUE){
-        x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+        x <- capture.output(ssh::ssh_exec_wait(session, paste0('ls ', pwd, '/last_results')))
         res <- any(vec_names[vec_cond] %in% x)
         Sys.sleep(1)
         if(verbose && Sys.time() - t > 10){
           cat('simulation in progress\n')
           cat('current data in last results:')
-          cat(capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results')))
+          cat(capture.output(ssh::ssh_exec_wait(session, paste0('ls ', pwd, '/last_results'))))
           cat('\n')
           t <- Sys.time()
         }
@@ -389,7 +390,7 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
       }
     },
     finally = {
-      x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+      x <- capture.output(ssh::ssh_exec_wait(session, paste0('ls ', pwd, '/last_results')))
       res <- any(vec_names[vec_cond] %in% x)
       if(!res){
         interruptSimulation(session, verbose = FALSE)
@@ -402,7 +403,7 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
     cat('Results have been gotten\n')
   }
   # available results
-  x <- capture.output(ssh::ssh_exec_wait(session, 'ls ~/last_results'))
+  x <- capture.output(ssh::ssh_exec_wait(session, paste0('ls ', pwd, '/last_results')))
   vec_avail <- vec_names[vec_cond] %in% x
   names(vec_avail) <- names(vec_names[vec_cond])
   
@@ -427,7 +428,7 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
       if(verbose){
         print(paste0('try to download: ', paste0('last_results/', vec_names[x])))
       }
-      ssh::scp_download(session, paste0('~/last_results/', vec_names[x]), files_path, verbose = FALSE)
+      ssh::scp_download(session, paste0(pwd, '/last_results/', vec_names[x]), files_path, verbose = FALSE)
       if(verbose){
         print('downloaded')
       }
@@ -446,7 +447,7 @@ get_results <- function(last_model, session, reports=NULL, verbose=FALSE){
   }
   
   if(res == 'OK'){
-    ssh::scp_download(session, paste0('~/last_results/model.RData'), files_path, verbose = FALSE)
+    ssh::scp_download(session, paste0(pwd, '/last_results/model.RData'), files_path, verbose = FALSE)
     Sys.sleep(1)
     model <- suppressWarnings(readRDS(file.path(files_path, 'model.RData')))
     if(class(last_model)[1] == 'modelStrategy' && class(model)[1] == 'list'){
