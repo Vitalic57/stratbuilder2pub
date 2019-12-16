@@ -7,7 +7,7 @@
 \alias{plotPnL.list}
 \title{Plot change of pnl through backtest period}
 \usage{
-\method{plotPnL}{modelPortfolio}(this, ...)
+\method{plotPnL}{modelPortfolio}(this, legs = "all", ...)
 
 plotPnL(this, ...)
 

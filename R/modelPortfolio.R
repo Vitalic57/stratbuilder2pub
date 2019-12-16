@@ -161,7 +161,7 @@ aggregate_prepared_models <- function(this, ...){
 #' @export
 #' @rdname plotPnL
 #' @method plotPnL modelPortfolio
-plotPnL.modelPortfolio <- function(this, ...){
+plotPnL.modelPortfolio <- function(this, legs = 'all', ...){
   dots <- list(...)
   if('legend' %in% names(dots)){
     dots[['legend']] <- NULL
